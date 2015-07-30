@@ -11,15 +11,15 @@ BeeCloud Android SDK (Open Source)
 ## 安装
 1. 添加依赖
 
->1. 对于通过添加`model`的方式（适用于`gradle`，推荐直接使用`Android Studio`）
+>1. 对于通过添加`model`的方式（适用于`gradle`，推荐直接使用`Android Studio`）<br/>
 引入`sdk model`，在`project`的`settings.gradle`中`include ':sdk'`，并在需要支付的`model`（比如本项目中的`demo`） `build.gradle`中添加依赖`compile project(':sdk')`。
 
->2. 对于需要以`jar`方式引入的情况
-添加第三方的支付类，在`beecloud-android\sdk\libs`目录下
-`gson-2.2.4.jar`为必须引入的jar，
-微信支付需要引入`libammsdk.jar`，
-支付宝需要引入`alipaysdk.jar`、`alipayutdid.jar`、`alipaysecsdk.jar`，
-银联需要引入`UPPayAssistEx.jar`、`UPPayPluginEx.jar`
+>2. 对于需要以`jar`方式引入的情况<br/>
+添加第三方的支付类，在`beecloud-android\sdk\libs`目录下<br/>
+`gson-2.2.4.jar`为必须引入的jar，<br/>
+微信支付需要引入`libammsdk.jar`，<br/>
+支付宝需要引入`alipaysdk.jar`、`alipayutdid.jar`、`alipaysecsdk.jar`，<br/>
+银联需要引入`UPPayAssistEx.jar`、`UPPayPluginEx.jar`<br/>
 最后添加`beecloud android sdk`：`beecloud-android\sdk\beecloud.jar`
 
 2.对于银联支付需要将银联插件`beecloud-android\demo\src\main\assets\UPPayPluginEx.apk`引入你的工程`assets`目录下
@@ -92,9 +92,9 @@ BCPay.initWechatPay(ShoppingCartActivity.this, "wxf1aa465362b4c8f1");
 
 **原型：** 
  
-通过`BCPay`的实例，以`reqWXPaymentAsync`方法发起微信支付请求。 
-通过`BCPay`的实例，以`reqAliPaymentAsync`方法发起支付宝支付请求。
-通过`BCPay`的实例，以`reqUnionPaymentAsync`方法发起银联支付请求。
+通过`BCPay`的实例，以`reqWXPaymentAsync`方法发起微信支付请求。 <br/>
+通过`BCPay`的实例，以`reqAliPaymentAsync`方法发起支付宝支付请求。<br/>
+通过`BCPay`的实例，以`reqUnionPaymentAsync`方法发起银联支付请求。<br/>
 
 参数依次为
 > billTitle       商品描述, UTF8编码格式, 32个字节内<br/>
