@@ -73,7 +73,6 @@ BCPay.initWechatPay(ShoppingCartActivity.this, "wxf1aa465362b4c8f1");
     android:screenOrientation="behind"
     android:windowSoftInputMode="adjustResize|stateHidden" />
 ```
-<br/>
 > 对于银联，需要添加
 ```java
 <activity
@@ -100,7 +99,8 @@ BCPay.initWechatPay(ShoppingCartActivity.this, "wxf1aa465362b4c8f1");
 > billTitle       商品描述, UTF8编码格式, 32个字节内<br/>
 > billTotalFee    支付金额，以分为单位，必须是整数格式<br/>
 > billNum         商户自定义订单号<br/>
-> optional        为扩展参数，可以传入任意数量的key/value对来补充对业务逻辑> callback        支付完成后的回调函数
+> optional        为扩展参数，可以传入任意数量的key/value对来补充对业务逻辑<br/>
+> callback        支付完成后的回调入口
 
 **调用：（以微信为例）**
 
