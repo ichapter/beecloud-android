@@ -10,6 +10,7 @@ BeeCloud Android SDK (Open Source)
 
 ## 安装
 1. 添加依赖
+
 >1. 对于通过添加`model`的方式（适用于`gradle`，推荐直接使用`Android Studio`）
 引入`sdk model`，在`project`的`settings.gradle`中`include ':sdk'`，并在需要支付的`model`（比如本项目中的`demo`） `build.gradle`中添加依赖`compile project(':sdk')`。
 
@@ -35,6 +36,7 @@ BeeCloud Android SDK (Open Source)
 ```java
 BeeCloud.setAppIdAndSecret("c5d1cba1-5e3f-4ba0-941d-9b0a371fe719", "39a7a518-9ac8-4a9e-87bc-7885f33cf18c");
 ```
+<br/>
 >2. 如果用到微信支付，在用到微信支付的Activity的onCreate函数里调用以下函数,第二个参数需要换成你自己的微信AppID，例如
 ```java
 BCPay.initWechatPay(ShoppingCartActivity.this, "wxf1aa465362b4c8f1");
@@ -48,19 +50,21 @@ BCPay.initWechatPay(ShoppingCartActivity.this, "wxf1aa465362b4c8f1");
 ```
 
 ### 3. 在`AndroidManifest.xml`中注册`activity`
->1. 对于微信支付，需要添加
+
+> 对于微信支付，需要添加
 ```java
 <activity
     android:name="cn.beecloud.BCWechatPaymentActivity"
     android:launchMode="singleTop"
     android:theme="@android:style/Theme.Translucent.NoTitleBar" />
-
+```
+```java
 <activity-alias
     android:name=".wxapi.WXPayEntryActivity"
     android:exported="true"
     android:targetActivity="cn.beecloud.BCWechatPaymentActivity" />
 ```
->2. 对于支付宝，需要添加
+> 对于支付宝，需要添加
 ```java
 <activity
     android:name="com.alipay.sdk.app.H5PayActivity"
@@ -69,7 +73,8 @@ BCPay.initWechatPay(ShoppingCartActivity.this, "wxf1aa465362b4c8f1");
     android:screenOrientation="behind"
     android:windowSoftInputMode="adjustResize|stateHidden" />
 ```
->3. 对于银联，需要添加
+<br/>
+> 对于银联，需要添加
 ```java
 <activity
     android:name="cn.beecloud.BCUnionPaymentActivity"
@@ -80,7 +85,6 @@ BCPay.initWechatPay(ShoppingCartActivity.this, "wxf1aa465362b4c8f1");
     android:theme="@android:style/Theme.Translucent.NoTitleBar"
     android:windowSoftInputMode="adjustResize" />
 ```
-
 
 ### 4.支付
 
@@ -93,9 +97,9 @@ BCPay.initWechatPay(ShoppingCartActivity.this, "wxf1aa465362b4c8f1");
 通过`BCPay`的实例，以`reqUnionPaymentAsync`方法发起银联支付请求。
 
 参数依次为
-> billTitle       商品描述, UTF8编码格式, 32个字节内
-> billTotalFee    支付金额，以分为单位，必须是整数格式
-> billNum         商户自定义订单号
+> billTitle       商品描述, UTF8编码格式, 32个字节内<br/>
+> billTotalFee    支付金额，以分为单位，必须是整数格式<br/>
+> billNum         商户自定义订单号<br/>
 > optional        为扩展参数，可以传入任意数量的key/value对来补充对业务逻辑> callback        支付完成后的回调函数
 
 **调用：（以微信为例）**
