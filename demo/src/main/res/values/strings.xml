@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">BeeCloudAndroidDemo</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+
+    <string name="header_title">选择支付方式：</string>
+    <string name="header_sample">BeeCloud Inc.</string>
+    <string name="footer_button_close">关闭</string>
+    <string name="footer_button_confirm">确定</string>
+    <string name="footer_sample">BeeCloud Inc.</string>
+    <string name="wechat_title">微信支付</string>
+    <string name="alipay_title">支付宝支付</string>
+    <string name="unionpay_title">银联支付</string>
+    <string name="pppay_title">PP钱包支付</string>
+    <string name="title_activity_bill_list">BillListActivity</string>
+</resources>
