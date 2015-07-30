@@ -19,7 +19,7 @@ BeeCloud Android SDK (Open Source)
 `gson-2.2.4.jar`为必须引入的jar，<br/>
 微信支付需要引入`libammsdk.jar`，<br/>
 支付宝需要引入`alipaysdk.jar`、`alipayutdid.jar`、`alipaysecsdk.jar`，<br/>
-银联需要引入`UPPayAssistEx.jar`、`UPPayPluginEx.jar`<br/>
+银联需要引入`UPPayAssistEx.jar`、`UPPayPluginEx.jar`，<br/>
 最后添加`beecloud android sdk`：`beecloud-android\sdk\beecloud.jar`
 
 2.对于银联支付需要将银联插件`beecloud-android\demo\src\main\assets\UPPayPluginEx.apk`引入你的工程`assets`目录下
