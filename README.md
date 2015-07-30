@@ -30,7 +30,8 @@
 ## 使用方法
 >具体使用请参考项目中的`demo`
 
-### 1.初始化支付参数，请参考`demo`中的`ShoppingCartActivity.java`
+### 1.初始化支付参数
+请参考`demo`中的`ShoppingCartActivity.java`
 >1. 在主activity的onCreate函数中初始化BeeCloud账户中的AppID和AppSecret，例如
 ```java
 BeeCloud.setAppIdAndSecret("c5d1cba1-5e3f-4ba0-941d-9b0a371fe719", "39a7a518-9ac8-4a9e-87bc-7885f33cf18c");
