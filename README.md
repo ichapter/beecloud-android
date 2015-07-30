@@ -115,7 +115,6 @@ BCCallback bcCallback = new BCCallback() {
         ShoppingCartActivity.this.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-
                 switch (bcPayResult.getResult()) {
                     case BCPayResult.RESULT_SUCCESS:
                         Toast.makeText(ShoppingCartActivity.this, "用户支付成功", Toast.LENGTH_LONG).show();
@@ -161,22 +160,16 @@ final BCCallback bcCallback = new BCCallback() {
     @Override
     public void done(BCResult bcResult) {
     	//根据需求处理结果数据
-
-        final BCQueryResult bcQueryResult = (BCQueryResult) bcResult;
+        final BCQueryResult bcQueryResult = (BCQueryResult)bcResult;
 
         //resultCode为0表示请求成功
         //count包含返回的订单个数
         if (bcQueryResult.getResultCode() == 0) {
-
-			//订单列表
-	        bills = bcQueryResult.getBills();
-
+            //订单列表
+            bills = bcQueryResult.getBills();
             Log.i(BillListActivity.TAG, "bill count: " + bcQueryResult.getCount());
-
         } else {
-
             bills = null;
-
             BillListActivity.this.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -186,7 +179,6 @@ final BCCallback bcCallback = new BCCallback() {
                             "; err detail: " + bcQueryResult.getErrDetail(), Toast.LENGTH_LONG).show();
                 }
             });
-
         }
     }
 };
