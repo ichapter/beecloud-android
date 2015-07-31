@@ -50,8 +50,6 @@ public class ShoppingCartActivity extends Activity {
 
     private ProgressDialog loadingDialog;
 
-    private HashMap<String, String> userInfo = new HashMap<String, String>();
-
     private String[] names = new String[]{
             "衣服", "裤子", "鞋子",
     };

@@ -20,7 +20,7 @@
         android:background="#007edf"
         android:text="结算"
         android:textColor="#ffffff"
-        android:textSize="20dp" />
+        android:textSize="20sp" />
 
     <Button
         android:id="@+id/btnQueryAndRefund"
@@ -32,6 +32,6 @@
         android:background="#007edf"
         android:text="查询"
         android:textColor="#ffffff"
-        android:textSize="20dp" />
+        android:textSize="20sp" />
 
 </RelativeLayout>
