@@ -5,6 +5,8 @@ BeeCloud Android SDK (Open Source)
 
 本SDK是根据[BeeCloud Rest API](https://github.com/beecloud/beecloud-rest-api) 开发的 Android SDK。可以作为调用BeeCloud Rest API的示例或者直接用于生产。
 
+### [Android-SDK Changelog](https://github.com/beecloud/beecloud-android/blob/master/changelog.txt)
+
 ## 流程
 ![pic](http://7xavqo.com1.z0.glb.clouddn.com/UML.png)
 
@@ -203,9 +205,9 @@ BCQuery.getInstance().queryBillsAsync(
 ```
 
 ## Demo
-考虑到个人的开发习惯，本项目提供了`Android Studio`和`Eclipse ADT`两种工程的`demo`，为了使demo顺利运行，请注意以下细节
+考虑到个人的开发习惯，本项目提供了`Android Studio`和`Eclipse ADT`两种工程的demo，为了使demo顺利运行，请注意以下细节
 >1. 对于使用`Android Studio`的开发人员，下载源码后可以将`demo_eclipse`移除，`Import Project`的时候选择`beecloud-android`，`sdk`为`demo`的依赖`model`，`gradle`会自动关联。
->2. 对于使用`Eclipse ADT`的开发人员，`Import Project`的时候选择`beecloud-android`下的`demo_eclipse`，该`demo`下面已经添加所有需要的`jar`。
+>2. 对于使用`Eclipse ADT`的开发人员，`Import Project`的时候选择`beecloud-android`下的`demo_eclipse`，该demo下面已经添加所有需要的`jar`。
 
 ## 测试
 TODO
