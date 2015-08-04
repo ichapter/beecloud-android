@@ -10,7 +10,6 @@ BeeCloud Android SDK (Open Source)
 
 ## 安装
 1. 添加依赖
-
 >1. 对于通过添加`model`的方式（适用于`gradle`，推荐直接使用`Android Studio`）<br/>
 引入`sdk model`，在`project`的`settings.gradle`中`include ':sdk'`，并在需要支付的`model`（比如本项目中的`demo`） `build.gradle`中添加依赖`compile project(':sdk')`。
 
