@@ -3,70 +3,97 @@
     android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    android:orientation="vertical"
     android:paddingBottom="@dimen/activity_vertical_margin" tools:context=".ShoppingCartActivity">
 
     <ListView
         android:id="@+id/lstViewShoppingCart"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="match_parent"
+        android:layout_marginBottom="200dp" />
 
-    <LinearLayout 
-        android:id="@+id/layoutPayBtns"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" 
-        android:layout_below="@id/lstViewShoppingCart">
-        
-	    <Button
-	        android:id="@+id/btnWXPay"
-	        android:layout_width="wrap_content"
-	        android:layout_height="50dp"
-	        android:layout_margin="10dp"
-	        android:gravity="center"
-	        android:layout_weight="1"
-	        android:background="#007edf"
-	        android:text="微信结算"
-	        android:textColor="#ffffff"
-	        android:textSize="15sp" />
-	    
-	    <Button
-	        android:id="@+id/btnAliPay"
-	        android:layout_width="wrap_content"
-	        android:layout_height="50dp"
-	        android:layout_margin="10dp"
-	        android:gravity="center"
-	        android:layout_weight="1"
-	        android:background="#007edf"
-	        android:text="支付宝结算"
-	        android:textColor="#ffffff"
-	        android:textSize="15sp" />
-	    
-	    <Button
-	        android:id="@+id/btnUNPay"
-	        android:layout_width="wrap_content"
-	        android:layout_height="50dp"
-	        android:layout_margin="10dp"
-	        android:gravity="center"
-	        android:layout_weight="1"
-	        android:background="#007edf"
-	        android:text="银联结算"
-	        android:textColor="#ffffff"
-	        android:textSize="15sp" />
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:orientation="vertical">
+
+        <LinearLayout
+	        android:layout_width="fill_parent"
+	        android:layout_height="wrap_content"
+	        android:orientation="horizontal">
 	        
-    </LinearLayout>
-    
+	        <Button
+	            android:id="@+id/btnWXPay"
+	            android:layout_width="wrap_content"
+	            android:layout_height="45dp"
+	            android:layout_weight="1"
+	            android:background="#007edf"
+	            android:text="微信结算"
+	            android:textColor="#ffffff"
+	            android:textSize="16sp" />
+	        
+	        <Button
+	            android:id="@+id/btnAliPay"
+	            android:layout_width="wrap_content"
+	            android:layout_height="45dp"
+	            android:layout_marginLeft="10dp"
+	            android:layout_weight="1"
+	            android:background="#007edf"
+	            android:text="支付宝结算"
+	            android:textColor="#ffffff"
+	            android:textSize="16sp" />
+	        
+	        <Button
+	            android:id="@+id/btnUNPay"
+	            android:layout_width="wrap_content"
+	            android:layout_height="45dp"
+	            android:layout_marginLeft="10dp"
+	            android:layout_weight="1"
+	            android:background="#007edf"
+	            android:text="银联结算"
+	            android:textColor="#ffffff"
+	            android:textSize="16sp" />
+	        
+        </LinearLayout>
 
-    <Button
-	        android:id="@+id/btnQueryAndRefund"
-	        android:layout_width="match_parent"
-	        android:layout_height="50dp"
-	        android:layout_marginLeft="10dp"
-	        android:layout_marginRight="10dp"
-	        android:background="#007edf"
-	        android:gravity="center"
-	        android:text="查询订单"
-	        android:textColor="#ffffff"
-	        android:textSize="20sp"
-	        android:layout_below="@id/layoutPayBtns" />
-    
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:orientation="horizontal"
+            android:layout_height="wrap_content">
+
+            <Button
+                android:id="@+id/btnQueryBills"
+                android:layout_height="45dp"
+                android:background="#007edf"
+                android:layout_weight="1"
+                android:text="查询支付订单"
+                android:textColor="#ffffff"
+                android:textSize="16sp"
+                android:layout_width="wrap_content" />
+
+            <Button
+                android:id="@+id/btnQueryRefunds"
+                android:layout_height="45dp"
+                android:layout_marginLeft="10dp"
+                android:background="#007edf"
+                android:layout_weight="1"
+                android:text="查询退款订单"
+                android:textColor="#ffffff"
+                android:textSize="16sp"
+                android:layout_width="wrap_content" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/btnRefundStatus"
+            android:layout_height="45dp"
+            android:background="#007edf"
+            android:text="查看退款状态更新"
+            android:textColor="#ffffff"
+            android:textSize="16sp"
+            android:layout_width="fill_parent" />
+
+    </LinearLayout>
+
 </RelativeLayout>

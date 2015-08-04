@@ -1,12 +1,10 @@
 # beecloud-android
 BeeCloud Android SDK (Open Source)
 
-![pass](https://img.shields.io/badge/Build-pass-green.svg) ![license](https://img.shields.io/badge/license-MIT-brightgreen.svg) ![version](https://img.shields.io/badge/version-v1.1.0-blue.svg)
+![pass](https://img.shields.io/badge/Build-pass-green.svg) ![license](https://img.shields.io/badge/license-MIT-brightgreen.svg) ![version](https://img.shields.io/badge/version-v1.2.0-blue.svg)
 
 本SDK是根据[BeeCloud Rest API](https://github.com/beecloud/beecloud-rest-api) 开发的 Android SDK。可以作为调用BeeCloud Rest API的示例或者直接用于生产。
-
 ### [Android-SDK Changelog](https://github.com/beecloud/beecloud-android/blob/master/changelog.txt)
-
 ## 流程
 ![pic](http://7xavqo.com1.z0.glb.clouddn.com/UML.png)
 
@@ -104,6 +102,7 @@ BCPay.initWechatPay(ShoppingCartActivity.this, "wxf1aa465362b4c8f1");
 > optional        为扩展参数，可以传入任意数量的key/value对来补充对业务逻辑<br/>
 > callback        支付完成后的回调入口
 
+在回调函数中将`BCResult`转化成`BCPayResult`之后做后续处理
 **调用：（以微信为例）**
 
 ```java
@@ -136,7 +135,7 @@ BCCallback bcCallback = new BCCallback() {
 
 //调用支付接口
 Map<String, String> mapOptional = new HashMap<>();
-String optionalKey = "测试key字段1";
+String optionalKey = "testkey1";    //对key暂时不支持中文
 String optionalValue = "测试value值1";
 
 mapOptional.put(optionalKey, optionalValue);
@@ -153,7 +152,7 @@ BCPay.getInstance(ShoppingCartActivity.this).reqWXPaymentAsync("微信支付测�
 
 **原型：**
 
-通过构造`BCQuery`的实例，使用`queryBillsAsync`方法发起支付查询，该方法仅`channel`为必填参数，指代何种支付方式
+通过构造`BCQuery`的实例，使用`queryBillsAsync`方法发起支付查询，该方法仅`channel`为必填参数，指代何种支付方式；在回调函数中将`BCResult`转化成`BCQueryOrderResult`之后做后续处理
 
 **调用：**
 
@@ -164,14 +163,14 @@ final BCCallback bcCallback = new BCCallback() {
     public void done(BCResult bcResult) {
     	//根据需求处理结果数据
 
-        final BCQueryResult bcQueryResult = (BCQueryResult) bcResult;
+        final BCQueryOrderResult bcQueryResult = (BCQueryOrderResult) bcResult;
 
         //resultCode为0表示请求成功
         //count包含返回的订单个数
         if (bcQueryResult.getResultCode() == 0) {
 
 			//订单列表
-	        bills = bcQueryResult.getBills();
+	        bills = bcQueryResult.getOrders();
 
             Log.i(BillListActivity.TAG, "bill count: " + bcQueryResult.getCount());
 
@@ -203,11 +202,47 @@ BCQuery.getInstance().queryBillsAsync(
     15,                                     //最低返回满足条件的15条数据
     bcCallback);
 ```
+* **查询退款订单**
 
+请查看`doc`中的`API`，支付类`BCQuery`，参照`demo`中`RefundOrdersActivity`
+
+**原型：**
+
+通过构造`BCQuery`的实例，使用`queryRefundsAsync`方法发起支付查询，该方法仅`channel`为必填参数，指代何种支付方式；在回调函数中将`BCResult`转化成`BCQueryOrderResult`之后做后续处理
+
+**调用：**
+同上，首先初始化回调入口BCCallback
+```java
+BCQuery.getInstance().queryRefundsAsync(
+    BCReqParams.BCChannelTypes.UN,          //渠道
+    null,                                   //订单号
+    null,                                   //商户退款流水号
+    startTime.getTime(),                    //退款订单生成时间
+    endTime.getTime(),                      //退款订单完成时间
+    1,                                      //忽略满足条件的前2条数据
+    15,                                     //只返回满足条件的15条数据
+    bcCallback);
+```
+* **查询订单退款状态**
+
+请查看`doc`中的`API`，支付类`BCQuery`，参照`demo`中`RefundStatusActivity`
+
+**原型：**
+
+通过构造`BCQuery`的实例，使用`queryRefundStatusAsync`方法发起支付查询，该方法所有参数都必填，`channel`指代何种支付方式，目前由于第三方API的限制仅支持微信；在回调函数中将`BCResult`转化成`BCQueryRefundStatusResult`之后做后续处理
+
+**调用：**
+同上，首先初始化回调入口BCCallback
+```java
+BCQuery.getInstance().queryRefundStatusAsync(
+    BCReqParams.BCChannelTypes.WX_APP,     //目前仅支持微信
+    "20150520refund001",                   //退款单号
+    bcCallback);                           //回调入口
+```
 ## Demo
-考虑到个人的开发习惯，本项目提供了`Android Studio`和`Eclipse ADT`两种工程的demo，为了使demo顺利运行，请注意以下细节
+考虑到个人的开发习惯，本项目提供了`Android Studio`和`Eclipse ADT`两种工程的`demo`，为了使demo顺利运行，请注意以下细节
 >1. 对于使用`Android Studio`的开发人员，下载源码后可以将`demo_eclipse`移除，`Import Project`的时候选择`beecloud-android`，`sdk`为`demo`的依赖`model`，`gradle`会自动关联。
->2. 对于使用`Eclipse ADT`的开发人员，`Import Project`的时候选择`beecloud-android`下的`demo_eclipse`，该demo下面已经添加所有需要的`jar`。
+>2. 对于使用`Eclipse ADT`的开发人员，`Import Project`的时候选择`beecloud-android`下的`demo_eclipse`，该`demo`下面已经添加所有需要的`jar`。
 
 ## 测试
 TODO

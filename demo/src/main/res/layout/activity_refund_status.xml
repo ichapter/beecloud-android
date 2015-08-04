@@ -1,0 +1,26 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:orientation="vertical"
+    tools:context="cn.beecloud.sdk_demo.RefundStatusActivity">
+
+    <TextView android:text="查看退款状态的更新状况，由于第三方支付的限制，目前仅支持微信"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <TextView android:text="此处以支付订单f9815bde-8746-42ae-8504-13a62c59，退款单号20150520refund001 为例"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"/>
+
+    <TextView
+        android:id="@+id/txtRefundStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:textColor="#FF0000"
+        android:layout_marginTop="50dp"/>
+</LinearLayout>

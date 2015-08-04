@@ -51,8 +51,14 @@ public class BCHttpClientUtil {
     //订单支付部分URL
     private static final String BILL_PAY_URL = "rest/bill";
 
-    //订单查询部分URL
+    //支付订单查询部分URL
     private static final String BILL_QUERY_URL = "rest/bills?para=";
+
+    //退款订单查询部分URL
+    private static final String REFUND_QUERY_URL = "rest/refunds?para=";
+
+    //退款订单查询部分URL
+    private static final String REFUND_STATUS_QUERY_URL = "rest/refund/status?para=";
 
     /**
      * 随机获取主机, 并加入API版本号
@@ -70,10 +76,24 @@ public class BCHttpClientUtil {
     }
 
     /**
-     * @return  查询订单URL
+     * @return  查询支付订单URL
      */
     public static String getBillQueryURL() {
         return getRandomHost() + BILL_QUERY_URL;
+    }
+
+    /**
+     * @return  查询退款订单URL
+     */
+    public static String getRefundQueryURL() {
+        return getRandomHost() + REFUND_QUERY_URL;
+    }
+
+    /**
+     * @return  查询退款订单状态URL
+     */
+    public static String getRefundStatusURL() {
+        return getRandomHost() + REFUND_STATUS_QUERY_URL;
     }
 
     /**
