@@ -8,8 +8,9 @@
 ![pic](http://7xavqo.com1.z0.glb.clouddn.com/UML.png)
 
 ## 安装
-1. 添加依赖
->1. 对于通过添加`model`的方式（适用于`gradle`，推荐直接使用`Android Studio`）<br/>
+1. 添加依赖<br/>
+
+>1. 对于通过添加`model`的方式（适用于`gradle`，推荐直接使用`Android Studio`）
 引入`sdk model`，在`project`的`settings.gradle`中`include ':sdk'`，并在需要支付的`model`（比如本项目中的`demo`） `build.gradle`中添加依赖`compile project(':sdk')`。
 
 >2. 对于需要以`jar`方式引入的情况<br/>
@@ -101,7 +102,7 @@ BCPay.initWechatPay(ShoppingCartActivity.this, "wxf1aa465362b4c8f1");
 > optional        为扩展参数，可以传入任意数量的key/value对来补充对业务逻辑<br/>
 > callback        支付完成后的回调入口
 
-在回调函数中将`BCResult`转化成`BCPayResult`之后做后续处理
+在回调函数中将`BCResult`转化成`BCPayResult`之后做后续处理<br/>
 **调用：（以微信为例）**
 
 ```java
@@ -203,7 +204,7 @@ BCQuery.getInstance().queryBillsAsync(
 
 通过构造`BCQuery`的实例，使用`queryRefundsAsync`方法发起支付查询，该方法仅`channel`为必填参数，指代何种支付方式；在回调函数中将`BCResult`转化成`BCQueryOrderResult`之后做后续处理
 
-**调用：**
+**调用：**<br/>
 同上，首先初始化回调入口BCCallback
 ```java
 BCQuery.getInstance().queryRefundsAsync(
@@ -224,7 +225,7 @@ BCQuery.getInstance().queryRefundsAsync(
 
 通过构造`BCQuery`的实例，使用`queryRefundStatusAsync`方法发起支付查询，该方法所有参数都必填，`channel`指代何种支付方式，目前由于第三方API的限制仅支持微信；在回调函数中将`BCResult`转化成`BCQueryRefundStatusResult`之后做后续处理
 
-**调用：**
+**调用：**<br/>
 同上，首先初始化回调入口BCCallback
 ```java
 BCQuery.getInstance().queryRefundStatusAsync(
