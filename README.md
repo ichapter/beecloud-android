@@ -1,5 +1,4 @@
-# beecloud-android
-BeeCloud Android SDK (Open Source)
+# BeeCloud Android SDK (Open Source)
 
 ![pass](https://img.shields.io/badge/Build-pass-green.svg) ![license](https://img.shields.io/badge/license-MIT-brightgreen.svg) ![version](https://img.shields.io/badge/version-v1.2.0-blue.svg)
 
@@ -30,7 +29,8 @@ BeeCloud Android SDK (Open Source)
 ## 使用方法
 >具体使用请参考项目中的`demo`
 
-### 1.初始化支付参数，请参考`demo`中的`ShoppingCartActivity.java`
+### 1.初始化支付参数
+请参考`demo`中的`ShoppingCartActivity.java`
 >1. 在主activity的onCreate函数中初始化BeeCloud账户中的AppID和AppSecret，例如
 ```java
 BeeCloud.setAppIdAndSecret("c5d1cba1-5e3f-4ba0-941d-9b0a371fe719", "39a7a518-9ac8-4a9e-87bc-7885f33cf18c");
@@ -115,7 +115,6 @@ BCCallback bcCallback = new BCCallback() {
         ShoppingCartActivity.this.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-
                 switch (bcPayResult.getResult()) {
                     case BCPayResult.RESULT_SUCCESS:
                         Toast.makeText(ShoppingCartActivity.this, "用户支付成功", Toast.LENGTH_LONG).show();
@@ -170,13 +169,9 @@ final BCCallback bcCallback = new BCCallback() {
 
 			//订单列表
 	        bills = bcQueryResult.getOrders();
-
             Log.i(BillListActivity.TAG, "bill count: " + bcQueryResult.getCount());
-
         } else {
-
             bills = null;
-
             BillListActivity.this.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -186,7 +181,6 @@ final BCCallback bcCallback = new BCCallback() {
                             "; err detail: " + bcQueryResult.getErrDetail(), Toast.LENGTH_LONG).show();
                 }
             });
-
         }
     }
 };
