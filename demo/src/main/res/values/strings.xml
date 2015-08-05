@@ -14,4 +14,6 @@
     <string name="unionpay_title">银联支付</string>
     <string name="pppay_title">PP钱包支付</string>
     <string name="title_activity_bill_list">BillListActivity</string>
+    <string name="title_activity_refund_orders">RefundOrdersActivity</string>
+    <string name="title_activity_refund_status">RefundStatusActivity</string>
 </resources>

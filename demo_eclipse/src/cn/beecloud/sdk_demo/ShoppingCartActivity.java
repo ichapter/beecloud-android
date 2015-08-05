@@ -43,7 +43,9 @@ public class ShoppingCartActivity extends Activity {
     Button btnAliPay;
     Button btnUNPay;
     
-    Button btnQueryAndRefund;
+    Button btnQueryBills;
+    Button btnQueryRefunds;
+    Button btnRefundStatus;
 
     private ProgressDialog loadingDialog;
 
@@ -66,7 +68,7 @@ public class ShoppingCartActivity extends Activity {
 
         // 推荐在主Activity里的onCreate函数中初始化BeeCloud
         BeeCloud.setAppIdAndSecret("c5d1cba1-5e3f-4ba0-941d-9b0a371fe719", "39a7a518-9ac8-4a9e-87bc-7885f33cf18c");
-        
+
         // 如果用到微信支付，比如在用到微信支付的Activity的onCreate函数里调用以下函数.
         // 第二个参数需要换成你自己的微信AppID.
         BCPay.initWechatPay(ShoppingCartActivity.this, "wxf1aa465362b4c8f1");
@@ -152,7 +154,7 @@ public class ShoppingCartActivity extends Activity {
         
         // 设置loading动画
         loadingDialog = new ProgressDialog(ShoppingCartActivity.this);
-        loadingDialog.setMessage("启动第三方支付，请稍后...");
+        loadingDialog.setMessage("启动第三方支付，请稍候...");
         loadingDialog.setIndeterminate(true);
         loadingDialog.setCancelable(true);
         
@@ -164,7 +166,7 @@ public class ShoppingCartActivity extends Activity {
             	loadingDialog.show();
             	
             	Map<String, String> mapOptional = new HashMap<>();
-                String optionalKey = "测试key字段1";
+                String optionalKey = "testkey1";
                 String optionalValue = "测试value值1";
 
                 mapOptional.put(optionalKey, optionalValue);
@@ -208,14 +210,33 @@ public class ShoppingCartActivity extends Activity {
             }
         });
 
-        btnQueryAndRefund = (Button) findViewById(R.id.btnQueryAndRefund);
-        btnQueryAndRefund.setOnClickListener(new View.OnClickListener() {
+        btnQueryBills = (Button) findViewById(R.id.btnQueryBills);
+        btnQueryBills.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(ShoppingCartActivity.this, BillListActivity.class);
                 startActivity(intent);
             }
         });
+
+        btnQueryRefunds = (Button) findViewById(R.id.btnQueryRefunds);
+        btnQueryRefunds.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(ShoppingCartActivity.this, RefundOrdersActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        btnRefundStatus = (Button) findViewById(R.id.btnRefundStatus);
+        btnRefundStatus.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(ShoppingCartActivity.this, RefundStatusActivity.class);
+                startActivity(intent);
+            }
+        });
+
 
         List<Map<String, Object>> listItems = new ArrayList<>();
         for (int i = 0; i < names.length; i++) {

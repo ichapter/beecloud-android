@@ -46,7 +46,9 @@ public class ShoppingCartActivity extends Activity {
 
     private static final String TAG = ShoppingCartActivity.class.getSimpleName();
     Button btnShopping;
-    Button btnQueryAndRefund;
+    Button btnQueryBills;
+    Button btnQueryRefunds;
+    Button btnRefundStatus;
 
     private ProgressDialog loadingDialog;
 
@@ -122,11 +124,29 @@ public class ShoppingCartActivity extends Activity {
             }
         });
 
-        btnQueryAndRefund = (Button) findViewById(R.id.btnQueryAndRefund);
-        btnQueryAndRefund.setOnClickListener(new View.OnClickListener() {
+        btnQueryBills = (Button) findViewById(R.id.btnQueryBills);
+        btnQueryBills.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(ShoppingCartActivity.this, BillListActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        btnQueryRefunds = (Button) findViewById(R.id.btnQueryRefunds);
+        btnQueryRefunds.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(ShoppingCartActivity.this, RefundOrdersActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        btnRefundStatus = (Button) findViewById(R.id.btnRefundStatus);
+        btnRefundStatus.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(ShoppingCartActivity.this, RefundStatusActivity.class);
                 startActivity(intent);
             }
         });
@@ -217,7 +237,7 @@ public class ShoppingCartActivity extends Activity {
                 // 如果调起支付太慢，可以在这里开启动画，表示正在loading
                 //以progressdialog为例
                 loadingDialog = new ProgressDialog(ShoppingCartActivity.this);
-                loadingDialog.setMessage("启动第三方支付，请稍后...");
+                loadingDialog.setMessage("启动第三方支付，请稍候...");
                 loadingDialog.setIndeterminate(true);
                 loadingDialog.setCancelable(true);
                 loadingDialog.show();
@@ -231,7 +251,7 @@ public class ShoppingCartActivity extends Activity {
 
                         mapOptional = new HashMap<>();
 
-                        mapOptional.put("测试key字段1", "测试value值1");
+                        mapOptional.put("testkey1", "测试value值1");
 
                         if (BCPay.isWXAppInstalledAndSupported() &&
                                 BCPay.isWXPaySupported()) {

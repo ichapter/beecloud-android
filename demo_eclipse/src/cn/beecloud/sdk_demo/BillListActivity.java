@@ -28,6 +28,7 @@ import cn.beecloud.BCQuery;
 import cn.beecloud.async.BCCallback;
 import cn.beecloud.async.BCResult;
 import cn.beecloud.entity.BCBill;
+import cn.beecloud.entity.BCQueryOrderResult;
 import cn.beecloud.entity.BCQueryResult;
 import cn.beecloud.entity.BCReqParams;
 
@@ -51,7 +52,7 @@ public class BillListActivity extends Activity {
         setContentView(R.layout.activity_bill_list);
 
         loadingDialog = new ProgressDialog(BillListActivity.this);
-        loadingDialog.setMessage("正在请求服务器, 请稍后...");
+        loadingDialog.setMessage("正在请求服务器, 请稍候...");
         loadingDialog.setIndeterminate(true);
         loadingDialog.setCancelable(true);
 
@@ -85,7 +86,7 @@ public class BillListActivity extends Activity {
                 //此处关闭loading界面
                 loadingDialog.dismiss();
 
-                final BCQueryResult bcQueryResult = (BCQueryResult) bcResult;
+                final BCQueryOrderResult bcQueryResult = (BCQueryOrderResult) bcResult;
 
                 //resultCode为0表示请求成功
                 //count包含返回的订单个数
@@ -109,7 +110,7 @@ public class BillListActivity extends Activity {
                 }
 
                 //订单列表
-                bills = bcQueryResult.getBills();
+                bills = bcQueryResult.getOrders();
 
                 Message msg = mHandler.obtainMessage();
                 msg.what = 1;

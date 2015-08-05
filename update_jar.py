@@ -20,5 +20,6 @@ print('copying...')
 
 import shutil
 shutil.copy('build/libs/beecloud.jar', '../demo_eclipse/libs')
+shutil.copy('build/libs/beecloud.jar', '.')
 
 print('done')

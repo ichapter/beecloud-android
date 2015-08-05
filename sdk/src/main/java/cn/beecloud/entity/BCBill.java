@@ -9,7 +9,7 @@ package cn.beecloud.entity;
 import java.util.Map;
 
 /**
- *  订单信息
+ *  支付订单信息
  */
 public class BCBill {
     //订单号
@@ -100,5 +100,38 @@ public class BCBill {
             bill.createdTime = ((Double)billMap.get("created_time")).longValue();
 
         return bill;
+    }
+
+    /**
+     * 将后台返回的Map转化为BCBill实例
+     * @param billMap   包含bill信息的map
+     * @param bill      用于初始化的BCBill
+     * @param refund    是否用于退款
+     */
+    protected static void transMapToBill(Map<String, Object> billMap, BCBill bill, boolean refund) {
+        if (bill == null)
+            return;
+
+        if (billMap.get("bill_no") != null)
+            bill.billNum = (String) billMap.get("bill_no");
+
+        if (billMap.get("total_fee") != null)
+            bill.totalFee = ((Double)billMap.get("total_fee")).intValue();
+
+        if (billMap.get("channel") != null)
+            bill.channel = (String) billMap.get("channel");
+
+        if (billMap.get("title") != null)
+            bill.title = (String) billMap.get("title");
+
+        if (!refund) {
+            if (billMap.get("spay_result") != null)
+                bill.payResult = (Boolean) billMap.get("spay_result");
+            else
+                bill.payResult = Boolean.FALSE;
+
+            if (billMap.get("created_time") != null)
+                bill.createdTime = ((Double) billMap.get("created_time")).longValue();
+        }
     }
 }

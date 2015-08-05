@@ -6,11 +6,6 @@
  */
 package cn.beecloud.entity;
 
-import com.google.gson.Gson;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import cn.beecloud.async.BCResult;
@@ -20,7 +15,7 @@ import cn.beecloud.async.BCResult;
  *
  * @see cn.beecloud.async.BCResult
  */
-public class BCQueryResult implements BCResult {
+public abstract class BCQueryResult implements BCResult {
     /**
      * APP内部错误编号
      */
@@ -31,19 +26,13 @@ public class BCQueryResult implements BCResult {
     public static final String APP_INNER_FAIL = "APP_INNER_FAIL";
 
     //返回码, 0为正常
-    private Integer resultCode;
+    protected Integer resultCode;
 
     //返回信息, OK为正常
-    private String resultMsg;
+    protected String resultMsg;
 
     //具体错误信息
-    private String errDetail;
-
-    //实际返回订单结果数量
-    private Integer count;
-
-    //订单列表
-    private List<BCBill> bills;
+    protected String errDetail;
 
     /**
      * @return  0表示请求成功, 其他为错误编号
@@ -67,21 +56,6 @@ public class BCQueryResult implements BCResult {
     }
 
     /**
-     * @return  实际返回订单结果数量
-     */
-    public Integer getCount() {
-        return count;
-    }
-
-    /**
-     * @return  订单列表
-     * @see     BCBill
-     */
-    public List<BCBill> getBills() {
-        return bills;
-    }
-
-    /**
      * 无参构造
      */
     public BCQueryResult(){}
@@ -91,16 +65,24 @@ public class BCQueryResult implements BCResult {
      * @param resultCode    返回码
      * @param resultMsg     返回信息
      * @param errDetail     具体错误信息
-     * @param count         实际返回订单结果数量
-     * @param bills         订单列表
      */
-    public BCQueryResult(Integer resultCode, String resultMsg, String errDetail,
-                         Integer count, List<BCBill> bills) {
+    public BCQueryResult(Integer resultCode, String resultMsg, String errDetail) {
         this.resultCode = resultCode;
         this.resultMsg = resultMsg;
         this.errDetail = errDetail;
-        this.count = count;
-        this.bills = bills;
+    }
+
+    /**
+     * 将json串转化为BCQueryResult实例
+     * @param responseMap   包含result信息的map
+     * @param bcQueryResult BCQueryResult实例
+     */
+    protected static void transJsonToResultObject(Map<String, Object> responseMap, BCQueryResult bcQueryResult){
+
+        bcQueryResult.resultCode = ((Double)responseMap.get("result_code")).intValue();
+        bcQueryResult.resultMsg = String.valueOf(responseMap.get("result_msg"));
+        bcQueryResult.errDetail = String.valueOf(responseMap.get("err_detail"));
+
     }
 
     /**
@@ -108,28 +90,5 @@ public class BCQueryResult implements BCResult {
      * @param jsonStr   json串
      * @return          BCQueryResult实例
      */
-    public static BCQueryResult transJsonToResultObject(String jsonStr){
-        Gson gson = new Gson();
-        Map<String, Object> responseMap = gson.fromJson(jsonStr, HashMap.class);
-
-        BCQueryResult bcQueryResult = new BCQueryResult();
-        bcQueryResult.resultCode = ((Double)responseMap.get("result_code")).intValue();
-        bcQueryResult.resultMsg = (String) responseMap.get("result_msg");
-        bcQueryResult.errDetail = (String) responseMap.get("err_detail");
-
-        if (responseMap.get("count") != null)
-            bcQueryResult.count = ((Double)responseMap.get("count")).intValue();
-
-        if (responseMap.get("bills") != null) {
-            List<Map<String, Object>> billsMap = (List<Map<String, Object>>) responseMap.get("bills");
-
-            bcQueryResult.bills = new ArrayList<BCBill>();
-
-            for (Map<String, Object> bill : billsMap){
-                bcQueryResult.bills.add(BCBill.transMapToBill(bill));
-            }
-        }
-
-        return bcQueryResult;
-    }
+    public abstract BCQueryResult transJsonToResultObject(String jsonStr);
 }

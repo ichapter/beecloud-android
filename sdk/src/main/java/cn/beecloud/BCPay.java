@@ -197,7 +197,7 @@ public class BCPay {
     /**
      * 支付调用总接口
      *
-     * @param channelType     支付类型
+     * @param channelType     支付类型  对于支付手机APP端目前只支持WX_APP, ALI_APP, UN_APP
      *                        @see cn.beecloud.entity.BCReqParams.BCChannelTypes
      * @param billTitle       商品描述, UTF8编码格式, 32个字节内
      * @param billTotalFee    支付金额，以分为单位，必须是整数格式

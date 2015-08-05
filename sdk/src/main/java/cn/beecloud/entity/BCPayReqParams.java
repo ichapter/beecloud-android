@@ -48,7 +48,7 @@ public class BCPayReqParams extends BCReqParams {
      * @throws BCException  父类构造有可能抛出异常
      */
     public BCPayReqParams(String channel) throws BCException {
-        super(channel);
+        super(channel,Boolean.TRUE);
     }
 
     /**

@@ -16,7 +16,7 @@ import java.util.Map;
 import cn.beecloud.BCException;
 
 /**
- * 查询订单参数类
+ * 查询订单(支付|退款)参数类
  * 继承于BCReqParams
  * @see cn.beecloud.entity.BCReqParams
  */
@@ -30,7 +30,17 @@ public class BCQueryReqParams extends BCReqParams {
     public String billNum;
 
     /**
-     * 订单生成的时间
+     * 商户退款单号
+     * 发起退款时填写的退款单号
+     * 仅在退款查询时候有效
+     * 查询退款状态时为必填, 其它可以为null
+     */
+    public String refundNum;
+
+    /**
+     * 订单生成的时间,
+     * 对于支付查询, 此处表示支付订单的生成时间;
+     * 对于退款查询, 此处表示退款订单的生成时间
      * 毫秒时间戳, 13位
      * 可以为null
      */
@@ -38,6 +48,8 @@ public class BCQueryReqParams extends BCReqParams {
 
     /**
      * 订单结束时间
+     * 对于支付查询, 此处表示支付订单的结束时间;
+     * 对于退款查询, 此处表示退款订单的结束时间
      * 毫秒时间戳, 13位
      * 可以为null
      */
@@ -63,7 +75,7 @@ public class BCQueryReqParams extends BCReqParams {
      * @throws BCException  父类构造有可能抛出异常
      */
     public BCQueryReqParams(String channel) throws BCException {
-        super(channel);
+        super(channel, Boolean.FALSE);
     }
 
     /**
@@ -80,6 +92,9 @@ public class BCQueryReqParams extends BCReqParams {
 
         if (billNum != null)
             params.put("bill_no", billNum);
+
+        if (refundNum != null)
+            params.put("refund_no", refundNum);
 
         if (startTime != null)
             params.put("start_time", startTime);
