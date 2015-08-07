@@ -167,10 +167,10 @@ BCPay.getInstance(ShoppingCartActivity.this).reqWXPaymentAsync("微信支付测�
 请求生成支付宝内嵌支付二维码的特有参数
 > returnUrl       支付成功后的同步跳转页面, 必填
 > qrPayMode       支付宝内嵌二维码类型
->>>null则支付宝生成默认类型, 不建议
-   "0": 订单码-简约前置模式, 对应 iframe 宽度不能小于 600px, 高度不能小于 300px
-   "1": 订单码-前置模式, 对应 iframe 宽度不能小于 300px, 高度不能小于 600px
-   "3": 订单码-迷你前置模式, 对应 iframe 宽度不能小于 75px, 高度不能小于 75px
+>>>null则支付宝生成默认类型, 不建议<br/>
+   "0": 订单码-简约前置模式, 对应 iframe 宽度不能小于 600px, 高度不能小于 300px<br/>
+   "1": 订单码-前置模式, 对应 iframe 宽度不能小于 300px, 高度不能小于 600px<br/>
+   "3": 订单码-迷你前置模式, 对应 iframe 宽度不能小于 75px, 高度不能小于 75px<br/>
 
 在回调函数中将`BCResult`转化成`BCQRCodeResult`之后做后续处理<br/>
 **调用：（以微信为例）**
