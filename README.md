@@ -165,7 +165,7 @@ BCPay.getInstance(ShoppingCartActivity.this).reqWXPaymentAsync("微信支付测�
 > qrCodeWidth     如果生成二维码(genQRCode为true), QRCode的宽度(以px为单位), null则使用默认参数360px
 
 请求生成支付宝内嵌支付二维码的特有参数
-> returnUrl       支付成功后的同步跳转页面, 必填
+> returnUrl       支付成功后的同步跳转页面, 必填<br/>
 > qrPayMode       支付宝内嵌二维码类型
 >>>null则支付宝生成默认类型, 不建议<br/>
    "0": 订单码-简约前置模式, 对应 iframe 宽度不能小于 600px, 高度不能小于 300px<br/>
