@@ -11,6 +11,11 @@ android {
         versionCode 1
         versionName "1.0"
     }
+    compileOptions {
+        encoding "UTF-8"
+        sourceCompatibility JavaVersion.VERSION_1_6
+        targetCompatibility JavaVersion.VERSION_1_6
+    }
     buildTypes {
         release {
             minifyEnabled false

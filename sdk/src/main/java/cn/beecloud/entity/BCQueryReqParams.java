@@ -74,8 +74,8 @@ public class BCQueryReqParams extends BCReqParams {
      * @param channel       支付渠道类型
      * @throws BCException  父类构造有可能抛出异常
      */
-    public BCQueryReqParams(String channel) throws BCException {
-        super(channel, Boolean.FALSE);
+    public BCQueryReqParams(BCChannelTypes channel) throws BCException {
+        super(channel, ReqType.QUERY);
     }
 
     /**

@@ -1,5 +1,14 @@
+/**
+ * RefundOrdersAdapter.java
+ * <p/>
+ * Created by xuanzhui on 2015/8/3.
+ * Copyright (c) 2015 BeeCloud. All rights reserved.
+ */
 package cn.beecloud.sdk_demo;
 
+/**
+ * 用于展示退款订单
+ */
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.os.Bundle;

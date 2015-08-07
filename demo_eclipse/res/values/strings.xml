@@ -7,4 +7,6 @@
     <string name="title_activity_bill_list">BillListActivity</string>
     <string name="title_activity_refund_orders">RefundOrdersActivity</string>
     <string name="title_activity_refund_status">RefundStatusActivity</string>
+    <string name="title_activity_gen_qrcode">GenQRCodeActivity</string>
+    <string name="title_activity_aliqrcode">ALIQRCodeActivity</string>
 </resources>

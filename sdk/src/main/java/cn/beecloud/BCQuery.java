@@ -17,7 +17,7 @@ import cn.beecloud.async.BCCallback;
 import cn.beecloud.entity.BCQueryOrderResult;
 import cn.beecloud.entity.BCQueryRefundStatusResult;
 import cn.beecloud.entity.BCQueryReqParams;
-import cn.beecloud.entity.BCQueryResult;
+import cn.beecloud.entity.BCRestfulCommonResult;
 import cn.beecloud.entity.BCReqParams;
 
 /**
@@ -50,14 +50,14 @@ public class BCQuery {
      * @param channel       支付渠道类型
      * @param operation     发起的操作类型
      * @param billNum       发起支付时填写的订单号, 可为null
-     * @param  refundNum    退款的单号, 可为null
+     * @param refundNum     退款的单号, 可为null
      * @param startTime     订单生成时间, 毫秒时间戳, 13位, 可为null
      * @param endTime       订单完成时间, 毫秒时间戳, 13位, 可为null
      * @param skip          忽略的记录个数, 默认为0, 设置为10表示忽略满足条件的前10条数据, 可为null
      * @param limit         本次抓取的记录数, 默认为10, [10, 50]之间, 设置为10表示只返回满足条件的10条数据, 可为null
      * @param callback      回调函数
      */
-    protected void queryOrdersAsync(final String channel, final Integer operation,
+    protected void queryOrdersAsync(final BCReqParams.BCChannelTypes channel, final Integer operation,
                                     final String billNum, final String refundNum,
                                     final Long startTime, final Long endTime,
                                     final Integer skip, final Integer limit, final BCCallback callback) {
@@ -73,8 +73,8 @@ public class BCQuery {
                  try {
                      bcQueryReqParams = new BCQueryReqParams(channel);
                  } catch (BCException e) {
-                     callback.done(new BCQueryOrderResult(BCQueryResult.APP_INNER_FAIL_NUM,
-                             BCQueryResult.APP_INNER_FAIL, e.getMessage(), 0, null));
+                     callback.done(new BCQueryOrderResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
+                             BCRestfulCommonResult.APP_INNER_FAIL, e.getMessage(), 0, null));
                  }
 
                  //common
@@ -97,7 +97,7 @@ public class BCQuery {
                     bcQueryReqParams.transToEncodedJsonString());
 
                  if (null == response) {
-                     callback.done(new BCQueryOrderResult(BCQueryResult.APP_INNER_FAIL_NUM, BCQueryResult.APP_INNER_FAIL,
+                     callback.done(new BCQueryOrderResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM, BCRestfulCommonResult.APP_INNER_FAIL,
                              "Network Error",0, null));
                      return;
                  }
@@ -109,11 +109,11 @@ public class BCQuery {
                          callback.done(new BCQueryOrderResult().transJsonToResultObject(ret));
 
                      } catch (IOException e) {
-                         callback.done(new BCQueryOrderResult(BCQueryResult.APP_INNER_FAIL_NUM, BCQueryResult.APP_INNER_FAIL,
+                         callback.done(new BCQueryOrderResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM, BCRestfulCommonResult.APP_INNER_FAIL,
                                  "Invalid Response",0, null));
                      }
                  } else {
-                     callback.done(new BCQueryOrderResult(BCQueryResult.APP_INNER_FAIL_NUM, BCQueryResult.APP_INNER_FAIL,
+                     callback.done(new BCQueryOrderResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM, BCRestfulCommonResult.APP_INNER_FAIL,
                              "Network Error",0, null));
                  }
              }
@@ -131,7 +131,7 @@ public class BCQuery {
      * @param limit         本次抓取的记录数, 默认为10, [10, 50]之间, 设置为10表示只返回满足条件的10条数据, 可为null
      * @param callback      回调函数
      */
-    public void queryBillsAsync(final String channel, final String billNum,
+    public void queryBillsAsync(final BCReqParams.BCChannelTypes channel, final String billNum,
                                 final Long startTime, final Long endTime,
                                 final Integer skip, final Integer limit, final BCCallback callback){
         queryOrdersAsync(channel, BCQuery.QUERY_BILL, billNum, null, startTime, endTime, skip, limit, callback);
@@ -142,7 +142,7 @@ public class BCQuery {
      * @param channel       支付渠道
      * @param callback      回调接口
      */
-    public void queryBillsAsync(final String channel, final BCCallback callback){
+    public void queryBillsAsync(final BCReqParams.BCChannelTypes channel, final BCCallback callback){
         queryBillsAsync(channel, null, null, null, null, null, callback);
     }
 
@@ -152,7 +152,7 @@ public class BCQuery {
      * @param billNum       订单号
      * @param callback      回调接口
      */
-    public void queryBillsAsync(final String channel, final String billNum, final BCCallback callback){
+    public void queryBillsAsync(final BCReqParams.BCChannelTypes channel, final String billNum, final BCCallback callback){
         queryBillsAsync(channel, billNum, null, null, null, null, callback);
     }
 
@@ -167,7 +167,7 @@ public class BCQuery {
      * @param limit         本次抓取的记录数, 默认为10, [10, 50]之间, 设置为10表示只返回满足条件的10条数据, 可为null
      * @param callback      回调函数
      */
-    public void queryRefundsAsync(final String channel, final String billNum, final String refundNum,
+    public void queryRefundsAsync(final BCReqParams.BCChannelTypes channel, final String billNum, final String refundNum,
                                 final Long startTime, final Long endTime,
                                 final Integer skip, final Integer limit, final BCCallback callback){
         queryOrdersAsync(channel, BCQuery.QUERY_REFUND, billNum, refundNum, startTime, endTime, skip, limit, callback);
@@ -178,7 +178,7 @@ public class BCQuery {
      * @param channel       支付渠道
      * @param callback      回调接口
      */
-    public void queryRefundsAsync(final String channel, final BCCallback callback){
+    public void queryRefundsAsync(final BCReqParams.BCChannelTypes channel, final BCCallback callback){
         queryRefundsAsync(channel, null, null, null, null, null, null, callback);
     }
 
@@ -189,7 +189,7 @@ public class BCQuery {
      * @param refundNum     退款单号, 可为null
      * @param callback      回调接口
      */
-    public void queryRefundsAsync(final String channel, final String billNum,
+    public void queryRefundsAsync(final BCReqParams.BCChannelTypes channel, final String billNum,
                                   final String refundNum, final BCCallback callback){
         queryRefundsAsync(channel, billNum, refundNum, null, null, null, null, callback);
     }
@@ -200,7 +200,7 @@ public class BCQuery {
      * @param refundNum     退款单号
      * @param callback      回调入口
      */
-    public void queryRefundStatusAsync(final String channel, final String refundNum,
+    public void queryRefundStatusAsync(final BCReqParams.BCChannelTypes channel, final String refundNum,
                                        final BCCallback callback){
         if (callback == null) {
             Log.w(TAG, "请初始化callback");
@@ -211,19 +211,19 @@ public class BCQuery {
             @Override
             public void run() {
                 if (refundNum == null)
-                    callback.done(new BCQueryRefundStatusResult(BCQueryResult.APP_INNER_FAIL_NUM,
-                            BCQueryResult.APP_INNER_FAIL, "refundNum不能为null", null));
+                    callback.done(new BCQueryRefundStatusResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
+                            BCRestfulCommonResult.APP_INNER_FAIL, "refundNum不能为null", null));
 
                 if (!channel.equals(BCReqParams.BCChannelTypes.WX_APP))
-                    callback.done(new BCQueryRefundStatusResult(BCQueryResult.APP_INNER_FAIL_NUM,
-                            BCQueryResult.APP_INNER_FAIL, "目前只支持微信退款状态查询", null));
+                    callback.done(new BCQueryRefundStatusResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
+                            BCRestfulCommonResult.APP_INNER_FAIL, "目前只支持微信退款状态查询", null));
 
                 BCQueryReqParams bcQueryReqParams = null;
                 try {
                     bcQueryReqParams = new BCQueryReqParams(channel);
                 } catch (BCException e) {
-                    callback.done(new BCQueryRefundStatusResult(BCQueryResult.APP_INNER_FAIL_NUM,
-                            BCQueryResult.APP_INNER_FAIL, e.getMessage(), null));
+                    callback.done(new BCQueryRefundStatusResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
+                            BCRestfulCommonResult.APP_INNER_FAIL, e.getMessage(), null));
                 }
 
                 bcQueryReqParams.refundNum = refundNum;
@@ -236,7 +236,7 @@ public class BCQuery {
                         bcQueryReqParams.transToEncodedJsonString());
 
                 if (null == response) {
-                    callback.done(new BCQueryRefundStatusResult(BCQueryResult.APP_INNER_FAIL_NUM, BCQueryResult.APP_INNER_FAIL,
+                    callback.done(new BCQueryRefundStatusResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM, BCRestfulCommonResult.APP_INNER_FAIL,
                             "Network Error", null));
                     return;
                 }
@@ -248,11 +248,11 @@ public class BCQuery {
                         callback.done(new BCQueryRefundStatusResult().transJsonToResultObject(ret));
 
                     } catch (IOException e) {
-                        callback.done(new BCQueryRefundStatusResult(BCQueryResult.APP_INNER_FAIL_NUM, BCQueryResult.APP_INNER_FAIL,
+                        callback.done(new BCQueryRefundStatusResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM, BCRestfulCommonResult.APP_INNER_FAIL,
                                 "Invalid Response", null));
                     }
                 } else {
-                    callback.done(new BCQueryRefundStatusResult(BCQueryResult.APP_INNER_FAIL_NUM, BCQueryResult.APP_INNER_FAIL,
+                    callback.done(new BCQueryRefundStatusResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM, BCRestfulCommonResult.APP_INNER_FAIL,
                             "Network Error", null));
                 }
             }

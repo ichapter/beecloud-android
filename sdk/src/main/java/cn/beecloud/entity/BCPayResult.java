@@ -11,6 +11,7 @@ import cn.beecloud.async.BCResult;
 /**
  * 支付结果返回类
  *
+ * 不直接继承BCRestfulCommonResult, 因为需要对服务端和app端返回的结果封装
  * 包含支付结果
  * 错误分类, 支付成功或用户取消时非有效字段
  * 详细信息

@@ -51,6 +51,9 @@ public class BCHttpClientUtil {
     //订单支付部分URL
     private static final String BILL_PAY_URL = "rest/bill";
 
+    //获取扫码信息
+    private static final String QRCODE_REQ_URL = "rest/bill";
+
     //支付订单查询部分URL
     private static final String BILL_QUERY_URL = "rest/bills?para=";
 
@@ -69,10 +72,17 @@ public class BCHttpClientUtil {
     }
 
     /**
-     * @return  支付订单URL
+     * @return  支付请求URL
      */
     public static String getBillPayURL() {
         return getRandomHost() + BILL_PAY_URL;
+    }
+
+    /**
+     * @return  获取扫码信息URL
+     */
+    public static String getQRCodeReqURL() {
+        return getRandomHost() + QRCODE_REQ_URL;
     }
 
     /**

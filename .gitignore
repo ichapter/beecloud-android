@@ -7,3 +7,4 @@
 demo_eclipse/bin/*
 
 demo_eclipse/gen/cn/beecloud/sdk_demo/BuildConfig.java
+demo_eclipse/gen/cn/beecloud/sdk_demo/R.java

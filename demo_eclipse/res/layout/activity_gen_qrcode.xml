@@ -1,0 +1,55 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:orientation="vertical"
+    tools:context="cn.beecloud.sdk_demo.GenQRCodeActivity">
+
+    <Button
+        android:id="@+id/btnReqWXQRCode"
+        android:layout_height="45dp"
+        android:background="#007edf"
+        android:text="生成微信支付二维码"
+        android:textColor="#ffffff"
+        android:textSize="20sp"
+        android:layout_width="match_parent" />
+
+
+    <ImageView
+        android:id="@+id/wxQRImg"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:adjustViewBounds="true"/>
+
+    <Button
+        android:id="@+id/btnReqALIQRCode"
+        android:layout_height="45dp"
+        android:layout_marginTop="10dp"
+        android:background="#007edf"
+        android:text="支付宝内嵌二维码支付"
+        android:textColor="#ffffff"
+        android:textSize="20sp"
+        android:layout_width="match_parent" />
+
+    <!-- 支付宝线下二维码支付开发中
+    <Button
+        android:id="@+id/btnReqALIOfflineQRCode"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:background="#007edf"
+        android:text="支付宝线下二维码支付"
+        android:textColor="#ffffff"
+        android:textSize="20sp"
+        android:layout_width="wrap_content" />
+
+    <ImageView
+        android:id="@+id/aliOfflineQRImg"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:adjustViewBounds="true"/>
+        -->
+</LinearLayout>

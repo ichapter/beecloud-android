@@ -1,6 +1,6 @@
 ## BeeCloud Android SDK (Open Source)
 
-![pass](https://img.shields.io/badge/Build-pass-green.svg) ![license](https://img.shields.io/badge/license-MIT-brightgreen.svg) ![version](https://img.shields.io/badge/version-v1.2.0-blue.svg)
+![pass](https://img.shields.io/badge/Build-pass-green.svg) ![license](https://img.shields.io/badge/license-MIT-brightgreen.svg) ![version](https://img.shields.io/badge/version-v1.3.0-blue.svg)
 
 本SDK是根据[BeeCloud Rest API](https://github.com/beecloud/beecloud-rest-api) 开发的 Android SDK。可以作为调用BeeCloud Rest API的示例或者直接用于生产。
 ### [Android-SDK Changelog](https://github.com/beecloud/beecloud-android/blob/master/changelog.txt)
@@ -16,6 +16,7 @@
 >2. 对于需要以`jar`方式引入的情况<br/>
 添加第三方的支付类，在`beecloud-android\sdk\libs`目录下<br/>
 `gson-2.2.4.jar`为必须引入的jar，<br/>
+`zxing-3.2.0.jar`为生成二维码必须引入的jar，<br/>
 微信支付需要引入`libammsdk.jar`，<br/>
 支付宝需要引入`alipaysdk.jar`、`alipayutdid.jar`、`alipaysecsdk.jar`，<br/>
 银联需要引入`UPPayAssistEx.jar`、`UPPayPluginEx.jar`，<br/>
@@ -97,7 +98,7 @@ BCPay.initWechatPay(ShoppingCartActivity.this, "wxf1aa465362b4c8f1");
 
 参数依次为
 > billTitle       商品描述, UTF8编码格式, 32个字节内<br/>
-> billTotalFee    支付金额，以分为单位，必须是整数格式<br/>
+> billTotalFee    支付金额，以分为单位，必须是正整数<br/>
 > billNum         商户自定义订单号<br/>
 > optional        为扩展参数，可以传入任意数量的key/value对来补充对业务逻辑<br/>
 > callback        支付完成后的回调入口
@@ -140,10 +141,77 @@ String optionalValue = "测试value值1";
 mapOptional.put(optionalKey, optionalValue);
 
 //订单标题, 订单金额(分), 订单号, 扩展参数(可以null), 支付完成后回调入口
-BCPay.getInstance(ShoppingCartActivity.this).reqWXPaymentAsync("微信支付测试", "1", UUID.randomUUID().toString().replace("-", ""), mapOptional, bcCallback);
+BCPay.getInstance(ShoppingCartActivity.this).reqWXPaymentAsync("微信支付测试", 1, UUID.randomUUID().toString().replace("-", ""), mapOptional, bcCallback);
+```
+### 5.生成支付二维码
+请查看`doc`中的`API`，支付类`BCPay`，参照`demo`中`GenQRCodeActivity`
+
+**原型：** 
+ 
+通过`BCPay`的实例，以`reqWXQRCodeAsync`方法请求生成微信支付二维码。 <br/>
+通过`BCPay`的实例，以`reqAliQRCodeAsync`方法请求生成支付宝内嵌支付二维码。<br/>
+
+公用参数依次为
+> billTitle       商品描述, UTF8编码格式, 32个字节内<br/>
+> billTotalFee    支付金额，以分为单位，必须是正整数<br/>
+> billNum         商户自定义订单号<br/>
+> optional        为扩展参数，可以传入任意数量的key/value对来补充对业务逻辑<br/>
+> callback        支付完成后的回调入口
+
+请求生成微信支付二维码的特有参数
+> genQRCode       是否生成QRCode Bitmap
+>>如果为false，请自行根据getQrCodeRawContent返回的URL，使用BCPay.generateBitmap方法生成支付二维码，你也可以使用自己熟悉的二维码生成工具
+
+> qrCodeWidth     如果生成二维码(genQRCode为true), QRCode的宽度(以px为单位), null则使用默认参数360px
+
+请求生成支付宝内嵌支付二维码的特有参数
+> returnUrl       支付成功后的同步跳转页面, 必填<br/>
+> qrPayMode       支付宝内嵌二维码类型
+>>>null则支付宝生成默认类型, 不建议<br/>
+   "0": 订单码-简约前置模式, 对应 iframe 宽度不能小于 600px, 高度不能小于 300px<br/>
+   "1": 订单码-前置模式, 对应 iframe 宽度不能小于 300px, 高度不能小于 600px<br/>
+   "3": 订单码-迷你前置模式, 对应 iframe 宽度不能小于 75px, 高度不能小于 75px<br/>
+
+在回调函数中将`BCResult`转化成`BCQRCodeResult`之后做后续处理<br/>
+**调用：（以微信为例）**
+```java
+BCPay.getInstance(GenQRCodeActivity.this).reqWXQRCodeAsync("微信二维码支付测试",                     //商品描述
+    1,                      //订单金额
+    UUID.randomUUID().toString().replace("-", ""),  //订单流水号
+    mapOptional,            //扩展参数，可以null
+    true,                   //是否生成二维码的bitmap,
+                            //如果为false，请自行根据getQrCodeRawContent返回的结果
+                            //使用BCPay.generateBitmap方法生成支付二维码
+                            //你也可以使用自己熟悉的二维码生成工具
+    300,                   //二维码的尺寸, 以px为单位, 如果为null则默认为360
+    new BCCallback() {     //回调入口
+        @Override
+        public void done(BCResult bcResult) {
+
+            final BCQRCodeResult bcqrCodeResult = (BCQRCodeResult) bcResult;
+
+            //resultCode为0表示请求成功
+            if (bcqrCodeResult.getResultCode() == 0) {
+                wxQRBitmap = bcqrCodeResult.getQrCodeBitmap();
+                Log.w(Tag, "weixin qrcode url: " + bcqrCodeResult.getQrCodeRawContent());
+
+            } else {
+
+                GenQRCodeActivity.this.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(GenQRCodeActivity.this, "err code:" + bcqrCodeResult.getResultCode() +
+                                "; err msg: " + bcqrCodeResult.getResultMsg() +
+                                "; err detail: " + bcqrCodeResult.getErrDetail(), Toast.LENGTH_LONG).show();
+                    }
+                });
+
+            }
+        }
+    });
 ```
 
-### 5.查询
+### 6.查询
 
 * **查询支付订单**
 

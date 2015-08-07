@@ -43,12 +43,38 @@ public class BCPayReqParams extends BCReqParams {
     public Map<String, String> optional;
 
     /**
+     * 支付宝内嵌二维码类型
+     * 注: 二维码类型含义
+     * "0": 订单码-简约前置模式, 对应 iframe 宽度不能小于 600px, 高度不能小于 300px
+     * "1": 订单码-前置模式, 对应 iframe 宽度不能小于 300px, 高度不能小于 600px
+     * "3": 订单码-迷你前置模式, 对应 iframe 宽度不能小于 75px, 高度不能小于 75px
+     */
+    public String qrPayMode;
+
+    /**
+     * 支付宝内嵌二维码支付(ALI_QRCODE)的必填参数
+     * 同步返回页面
+     * 支付渠道处理完请求后,当前页面自动跳转到商户网站里指定页面的http路径
+     */
+    public String returnUrl;
+
+    /**
      * 构造函数
      * @param channel       支付渠道类型
      * @throws BCException  父类构造有可能抛出异常
      */
-    public BCPayReqParams(String channel) throws BCException {
-        super(channel,Boolean.TRUE);
+    public BCPayReqParams(BCChannelTypes channel) throws BCException {
+        super(channel, ReqType.PAY);
+    }
+
+    /**
+     * 构造函数
+     * @param channel       支付渠道类型
+     * @param reqType       请求类型
+     * @throws BCException  父类构造有可能抛出异常
+     */
+    public BCPayReqParams(BCChannelTypes channel, ReqType reqType) throws BCException {
+        super(channel, reqType);
     }
 
     /**
@@ -68,6 +94,12 @@ public class BCPayReqParams extends BCReqParams {
 
         if (optional !=null && optional.size() != 0)
             params.put("optional", optional);
+
+        if (qrPayMode != null)
+            params.put("qr_pay_mode", qrPayMode);
+
+        if (returnUrl != null)
+            params.put("return_url", returnUrl);
 
         return params;
     }
