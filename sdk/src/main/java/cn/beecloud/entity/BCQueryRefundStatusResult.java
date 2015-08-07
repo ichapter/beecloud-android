@@ -13,9 +13,9 @@ import java.util.Map;
 
 /**
  * 用于查询退款状态
- * @see cn.beecloud.entity.BCQueryResult
+ * @see BCRestfulCommonResult
  */
-public class BCQueryRefundStatusResult extends BCQueryResult{
+public class BCQueryRefundStatusResult extends BCRestfulCommonResult {
 
     private String refundStatus;
 
@@ -40,17 +40,17 @@ public class BCQueryRefundStatusResult extends BCQueryResult{
     }
 
     /**
-     * 将json串转化为BCQueryResult实例
+     * 将json串转化为BCQueryRefundStatusResult实例
      * @param jsonStr   json串
-     * @return          BCQueryResult实例
+     * @return          BCQueryRefundStatusResult实例
      */
     @Override
-    public BCQueryResult transJsonToResultObject(String jsonStr) {
+    public BCRestfulCommonResult transJsonToResultObject(String jsonStr) {
         Gson gson = new Gson();
         Map<String, Object> responseMap = gson.fromJson(jsonStr, HashMap.class);
 
         BCQueryRefundStatusResult bcQueryRefundStatusResult = new BCQueryRefundStatusResult();
-        BCQueryResult.transJsonToResultObject(responseMap, bcQueryRefundStatusResult);
+        BCRestfulCommonResult.transJsonToResultObject(responseMap, bcQueryRefundStatusResult);
 
         if (responseMap.get("refund_status") != null)
             bcQueryRefundStatusResult.refundStatus = (String) responseMap.get("refund_status");

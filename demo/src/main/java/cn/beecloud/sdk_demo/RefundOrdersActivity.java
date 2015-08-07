@@ -1,3 +1,9 @@
+/**
+ * RefundOrdersActivity.java
+ *
+ * Created by xuanzhui on 2015/8/5.
+ * Copyright (c) 2015 BeeCloud. All rights reserved.
+ */
 package cn.beecloud.sdk_demo;
 
 import android.app.Activity;
@@ -26,6 +32,9 @@ import cn.beecloud.entity.BCBill;
 import cn.beecloud.entity.BCQueryOrderResult;
 import cn.beecloud.entity.BCReqParams;
 
+/**
+ * 用于展示退款订单查询
+ */
 public class RefundOrdersActivity extends Activity {
 
     public static final String TAG = "RefundOrdersActivity";
@@ -175,7 +184,7 @@ public class RefundOrdersActivity extends Activity {
                         null,                                   //商户退款流水号
                         startTime.getTime(),                    //退款订单生成时间
                         endTime.getTime(),                      //退款订单完成时间
-                        1,                                      //忽略满足条件的前2条数据
+                        1,                                      //忽略满足条件的前1条数据
                         15,                                      //只返回满足条件的15条数据
                         bcCallback);
             }

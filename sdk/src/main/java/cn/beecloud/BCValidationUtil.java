@@ -43,4 +43,15 @@ public class BCValidationUtil {
 
         return res;
     }
+
+    /**
+     * 判断字符串是否为url
+     * @param str
+     */
+    public static boolean isStringValidURL(String str) {
+        return isValidString(str) &&
+                (str.toLowerCase().startsWith("http://") ||
+                        str.toLowerCase().startsWith("https://"));
+    }
+
 }

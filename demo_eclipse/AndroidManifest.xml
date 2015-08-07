@@ -71,6 +71,15 @@
             android:name=".RefundStatusActivity"
             android:label="@string/title_activity_refund_status" >
         </activity>
+        
+        <activity
+            android:name=".GenQRCodeActivity"
+            android:label="@string/title_activity_gen_qrcode" >
+        </activity>
+        <activity
+            android:name=".ALIQRCodeActivity"
+            android:label="@string/title_activity_aliqrcode" >
+        </activity>
     </application>
 
 </manifest>

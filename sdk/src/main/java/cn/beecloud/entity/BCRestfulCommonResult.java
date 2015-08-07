@@ -1,5 +1,5 @@
 /**
- * BCQueryResult.java
+ * BCRestfulCommonResult.java
  *
  * Created by xuanzhui on 2015/7/29.
  * Copyright (c) 2015 BeeCloud. All rights reserved.
@@ -11,11 +11,11 @@ import java.util.Map;
 import cn.beecloud.async.BCResult;
 
 /**
- * 查询结果返回类
+ * 服务端返回的通用结果信息
  *
  * @see cn.beecloud.async.BCResult
  */
-public abstract class BCQueryResult implements BCResult {
+public abstract class BCRestfulCommonResult implements BCResult {
     /**
      * APP内部错误编号
      */
@@ -58,7 +58,7 @@ public abstract class BCQueryResult implements BCResult {
     /**
      * 无参构造
      */
-    public BCQueryResult(){}
+    public BCRestfulCommonResult(){}
 
     /**
      * 构造函数
@@ -66,7 +66,7 @@ public abstract class BCQueryResult implements BCResult {
      * @param resultMsg     返回信息
      * @param errDetail     具体错误信息
      */
-    public BCQueryResult(Integer resultCode, String resultMsg, String errDetail) {
+    public BCRestfulCommonResult(Integer resultCode, String resultMsg, String errDetail) {
         this.resultCode = resultCode;
         this.resultMsg = resultMsg;
         this.errDetail = errDetail;
@@ -75,13 +75,13 @@ public abstract class BCQueryResult implements BCResult {
     /**
      * 将json串转化为BCQueryResult实例
      * @param responseMap   包含result信息的map
-     * @param bcQueryResult BCQueryResult实例
+     * @param bcRestfulCommonResult BCQueryResult实例
      */
-    protected static void transJsonToResultObject(Map<String, Object> responseMap, BCQueryResult bcQueryResult){
+    protected static void transJsonToResultObject(Map<String, Object> responseMap, BCRestfulCommonResult bcRestfulCommonResult){
 
-        bcQueryResult.resultCode = ((Double)responseMap.get("result_code")).intValue();
-        bcQueryResult.resultMsg = String.valueOf(responseMap.get("result_msg"));
-        bcQueryResult.errDetail = String.valueOf(responseMap.get("err_detail"));
+        bcRestfulCommonResult.resultCode = ((Double)responseMap.get("result_code")).intValue();
+        bcRestfulCommonResult.resultMsg = String.valueOf(responseMap.get("result_msg"));
+        bcRestfulCommonResult.errDetail = String.valueOf(responseMap.get("err_detail"));
 
     }
 
@@ -90,5 +90,5 @@ public abstract class BCQueryResult implements BCResult {
      * @param jsonStr   json串
      * @return          BCQueryResult实例
      */
-    public abstract BCQueryResult transJsonToResultObject(String jsonStr);
+    public abstract BCRestfulCommonResult transJsonToResultObject(String jsonStr);
 }

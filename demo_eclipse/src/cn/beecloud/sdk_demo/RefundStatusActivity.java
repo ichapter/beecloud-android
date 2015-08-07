@@ -1,3 +1,9 @@
+/**
+ * RefundStatusActivity.java
+ * <p/>
+ * Created by xuanzhui on 2015/8/3.
+ * Copyright (c) 2015 BeeCloud. All rights reserved.
+ */
 package cn.beecloud.sdk_demo;
 
 import android.app.Activity;
@@ -16,6 +22,9 @@ import cn.beecloud.async.BCResult;
 import cn.beecloud.entity.BCQueryRefundStatusResult;
 import cn.beecloud.entity.BCReqParams;
 
+/**
+ * 用于展示退款状态
+ */
 public class RefundStatusActivity extends Activity {
     public static final String TAG = "BillListActivity";
 

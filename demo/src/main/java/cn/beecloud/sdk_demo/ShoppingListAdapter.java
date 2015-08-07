@@ -61,7 +61,7 @@ public class ShoppingListAdapter extends BaseAdapter {
         Map<String, Object> map = mDatas.get(position);
         viewHolder.txtViewName.setText(map.get("name").toString());
         viewHolder.txtViewDesc.setText(map.get("desc").toString());
-        viewHolder.imageView.setImageResource((int) map.get("icon"));
+        viewHolder.imageView.setImageResource((Integer) map.get("icon"));
         return convertView;
     }
 

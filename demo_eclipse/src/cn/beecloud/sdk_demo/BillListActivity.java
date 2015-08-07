@@ -29,7 +29,6 @@ import cn.beecloud.async.BCCallback;
 import cn.beecloud.async.BCResult;
 import cn.beecloud.entity.BCBill;
 import cn.beecloud.entity.BCQueryOrderResult;
-import cn.beecloud.entity.BCQueryResult;
 import cn.beecloud.entity.BCReqParams;
 
 public class BillListActivity extends Activity {

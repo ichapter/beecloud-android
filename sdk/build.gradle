@@ -15,8 +15,8 @@ android {
     }
     compileOptions {
         encoding "UTF-8"
-        sourceCompatibility JavaVersion.VERSION_1_7
-        targetCompatibility JavaVersion.VERSION_1_7
+        sourceCompatibility JavaVersion.VERSION_1_6
+        targetCompatibility JavaVersion.VERSION_1_6
     }
     buildTypes {
         release {
@@ -33,7 +33,7 @@ dependencies {
     //must gson
     libs/gson-2.2.4.jar
 
-    //wechat
+    //wechat，已经包含微信支付和分享，不要重复引入jar
     libs/libammsdk.jar
 
     //ali
@@ -44,6 +44,9 @@ dependencies {
     //union pay
     libs/UPPayAssistEx.jar
     libs/UPPayPluginEx.jar
+
+    //QRCode
+    libs/zxing-3.2.0.jar
     */
 }
 

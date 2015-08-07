@@ -45,7 +45,8 @@ import cn.beecloud.entity.BCPayResult;
 public class ShoppingCartActivity extends Activity {
 
     private static final String TAG = ShoppingCartActivity.class.getSimpleName();
-    Button btnShopping;
+    Button btnPay;
+    Button btnReqQRCode;
     Button btnQueryBills;
     Button btnQueryRefunds;
     Button btnRefundStatus;
@@ -73,7 +74,7 @@ public class ShoppingCartActivity extends Activity {
 
         // 如果用到微信支付，在用到微信支付的Activity的onCreate函数里调用以下函数.
         // 第二个参数需要换成你自己的微信AppID.
-        BCPay.initWechatPay(ShoppingCartActivity.this, "wxf1aa465362b4c8f1");
+        BCPay.initWechatPay(ShoppingCartActivity.this, "wx19433a59b15fe84d");
 
         // Defines a Handler object that's attached to the UI thread.
         // 通过Handler.Callback()可消除内存泄漏警告
@@ -116,11 +117,20 @@ public class ShoppingCartActivity extends Activity {
             }
         });
 
-        btnShopping = (Button) findViewById(R.id.btnPay);
-        btnShopping.setOnClickListener(new View.OnClickListener() {
+        btnPay = (Button) findViewById(R.id.btnPay);
+        btnPay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 showDialogPlus(Gravity.BOTTOM);
+            }
+        });
+
+        btnReqQRCode = (Button) findViewById(R.id.btnReqQRCode);
+        btnReqQRCode.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(ShoppingCartActivity.this, GenQRCodeActivity.class);
+                startActivity(intent);
             }
         });
 
@@ -151,9 +161,9 @@ public class ShoppingCartActivity extends Activity {
             }
         });
 
-        List<Map<String, Object>> listItems = new ArrayList<>();
+        List<Map<String, Object>> listItems = new ArrayList<Map<String, Object>>();
         for (int i = 0; i < names.length; i++) {
-            Map<String, Object> listItem = new HashMap<>();
+            Map<String, Object> listItem = new HashMap<String, Object>();
             listItem.put("icon", imageIds[i]);
             listItem.put("name", names[i]);
             listItem.put("desc", descs[i]);
@@ -208,26 +218,26 @@ public class ShoppingCartActivity extends Activity {
                             @Override
                             public void run() {
 
-                                switch (bcPayResult.getResult()) {
-                                    case BCPayResult.RESULT_SUCCESS:
-                                        Toast.makeText(ShoppingCartActivity.this, "用户支付成功", Toast.LENGTH_LONG).show();
-                                        break;
-                                    case BCPayResult.RESULT_CANCEL:
-                                        Toast.makeText(ShoppingCartActivity.this, "用户取消支付", Toast.LENGTH_LONG).show();
-                                        break;
-                                    case BCPayResult.RESULT_FAIL:
-                                        Toast.makeText(ShoppingCartActivity.this, "支付失败, 原因: " + bcPayResult.getErrMsg()
+                                String result = bcPayResult.getResult();
+
+                                if (result.equals(BCPayResult.RESULT_SUCCESS))
+                                    Toast.makeText(ShoppingCartActivity.this, "用户支付成功", Toast.LENGTH_LONG).show();
+                                else if (result.equals(BCPayResult.RESULT_CANCEL))
+                                    Toast.makeText(ShoppingCartActivity.this, "用户取消支付", Toast.LENGTH_LONG).show();
+                                else if(result.equals(BCPayResult.RESULT_FAIL)) {
+                                    Toast.makeText(ShoppingCartActivity.this, "支付失败, 原因: " + bcPayResult.getErrMsg()
                                                 + ", " + bcPayResult.getDetailInfo(), Toast.LENGTH_LONG).show();
 
-                                        if (bcPayResult.getErrMsg().equals(BCPayResult.FAIL_PLUGIN_NOT_INSTALLED) ||
-                                                bcPayResult.getErrMsg().equals(BCPayResult.FAIL_PLUGIN_NEED_UPGRADE)) {
-                                            //银联需要重新安装控件
-                                            Message msg = mHandler.obtainMessage();
-                                            msg.what = 3;
-                                            mHandler.sendMessage(msg);
-                                        }
-
-                                        break;
+                                    if (bcPayResult.getErrMsg().equals(BCPayResult.FAIL_PLUGIN_NOT_INSTALLED) ||
+                                            bcPayResult.getErrMsg().equals(BCPayResult.FAIL_PLUGIN_NEED_UPGRADE)) {
+                                        //银联需要重新安装控件
+                                        Message msg = mHandler.obtainMessage();
+                                        msg.what = 3;
+                                        mHandler.sendMessage(msg);
+                                    }
+                                }
+                                else{
+                                    Toast.makeText(ShoppingCartActivity.this, "invalid return", Toast.LENGTH_LONG).show();
                                 }
                             }
                         });
@@ -244,38 +254,35 @@ public class ShoppingCartActivity extends Activity {
 
                 Map<String, String> mapOptional;
 
-                switch (clickItem) {
+                if (clickItem.equals("微信支付")) {
                     //对于微信支付, 手机内存太小会有OutOfResourcesException造成的卡顿, 以致无法完成支付
                     //这个是微信自身存在的问题
-                    case "微信支付":
+                    mapOptional = new HashMap<String, String>();
 
-                        mapOptional = new HashMap<>();
+                    mapOptional.put("testkey1", "测试value值1");   //map的key暂时不支持中文
 
-                        mapOptional.put("testkey1", "测试value值1");
-
-                        if (BCPay.isWXAppInstalledAndSupported() &&
-                                BCPay.isWXPaySupported()) {
-                            //订单标题, 订单金额(分), 订单号, 扩展参数(可以null), 支付完成后回调入口
-                            BCPay.getInstance(ShoppingCartActivity.this).reqWXPaymentAsync("微信支付测试", "1",
-                                    UUID.randomUUID().toString().replace("-", ""), mapOptional, bcCallback);
-                        }
-                        break;
-                    case "支付宝支付":
-                        mapOptional = new HashMap<>();
-                        mapOptional.put("paymentid", "");
-                        mapOptional.put("consumptioncode", "consumptionCode");
-                        mapOptional.put("money", "2");
-
-                        BCPay.getInstance(ShoppingCartActivity.this).reqAliPaymentAsync("支付宝支付测试", "1",
+                    if (BCPay.isWXAppInstalledAndSupported() &&
+                            BCPay.isWXPaySupported()) {
+                        //订单标题, 订单金额(分), 订单号, 扩展参数(可以null), 支付完成后回调入口
+                        BCPay.getInstance(ShoppingCartActivity.this).reqWXPaymentAsync("微信支付测试", 1,
                                 UUID.randomUUID().toString().replace("-", ""), mapOptional, bcCallback);
+                    }
+                }
+                else if (clickItem.equals("支付宝支付")) {
+                    mapOptional = new HashMap<String, String>();
+                    mapOptional.put("paymentid", "");
+                    mapOptional.put("consumptioncode", "consumptionCode");
+                    mapOptional.put("money", "2");
 
-                        break;
-                    case "银联支付":
+                    BCPay.getInstance(ShoppingCartActivity.this).reqAliPaymentAsync("支付宝支付测试", 1,
+                            UUID.randomUUID().toString().replace("-", ""), mapOptional, bcCallback);
 
-                        BCPay.getInstance(ShoppingCartActivity.this).reqUnionPaymentAsync("银联支付测试", "1",
-                                UUID.randomUUID().toString().replace("-", ""), null, bcCallback);
+                }
+                else if (clickItem.equals("银联支付")){
 
-                        break;
+                    BCPay.getInstance(ShoppingCartActivity.this).reqUnionPaymentAsync("银联支付测试", 1,
+                            UUID.randomUUID().toString().replace("-", ""), null, bcCallback);
+
                 }
             }
         };

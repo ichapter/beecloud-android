@@ -31,7 +31,9 @@ import cn.beecloud.entity.BCBill;
 import cn.beecloud.entity.BCQueryOrderResult;
 import cn.beecloud.entity.BCReqParams;
 
-
+/**
+ * 用于展示订单查询
+ */
 public class BillListActivity extends Activity {
     public static final String TAG = "BillListActivity";
 

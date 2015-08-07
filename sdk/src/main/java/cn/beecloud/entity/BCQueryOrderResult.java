@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class BCQueryOrderResult extends BCQueryResult {
+public class BCQueryOrderResult extends BCRestfulCommonResult {
     //实际返回订单结果数量
     private Integer count;
 
@@ -56,18 +56,18 @@ public class BCQueryOrderResult extends BCQueryResult {
     }
 
     /**
-     * 将json串转化为BCQueryResult实例
+     * 将json串转化为BCQueryOrderResult实例
      * @param jsonStr   json串
-     * @return          BCQueryResult实例
+     * @return          BCQueryOrderResult实例
      */
     @Override
-    public BCQueryResult transJsonToResultObject(String jsonStr){
+    public BCRestfulCommonResult transJsonToResultObject(String jsonStr){
         Gson gson = new Gson();
         Map<String, Object> responseMap = gson.fromJson(jsonStr, HashMap.class);
 
         BCQueryOrderResult bcQueryResult = new BCQueryOrderResult();
 
-        BCQueryResult.transJsonToResultObject(responseMap, bcQueryResult);
+        BCRestfulCommonResult.transJsonToResultObject(responseMap, bcQueryResult);
 
         if (responseMap.get("count") != null)
             bcQueryResult.count = ((Double)responseMap.get("count")).intValue();
