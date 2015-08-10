@@ -117,6 +117,7 @@ BCCallback bcCallback = new BCCallback() {
         ShoppingCartActivity.this.runOnUiThread(new Runnable() {
             @Override
             public void run() {
+            	//对于JRE6的用户请参考demo中使用if else判断
                 switch (bcPayResult.getResult()) {
                     case BCPayResult.RESULT_SUCCESS:
                         Toast.makeText(ShoppingCartActivity.this, "用户支付成功", Toast.LENGTH_LONG).show();
