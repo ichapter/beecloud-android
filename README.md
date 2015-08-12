@@ -3,7 +3,7 @@
 ![pass](https://img.shields.io/badge/Build-pass-green.svg) ![license](https://img.shields.io/badge/license-MIT-brightgreen.svg) ![version](https://img.shields.io/badge/version-v1.3.0-blue.svg)
 
 本SDK是根据[BeeCloud Rest API](https://github.com/beecloud/beecloud-rest-api) 开发的 Android SDK。可以作为调用BeeCloud Rest API的示例或者直接用于生产。
-### [Android-SDK Changelog](https://github.com/beecloud/beecloud-android/blob/master/changelog.txt)
+
 ## 流程
 ![pic](http://7xavqo.com1.z0.glb.clouddn.com/UML.png)
 
@@ -337,7 +337,7 @@ Pull Request要求
 
 ## 联系我们
 - 如果有什么问题，可以到QQ群-**321545822**`BeeCloud开发者大联盟`提问
-- 更详细的文档，见源代码的注释以及[官方文档](https://beecloud.cn/doc/android.php)
+- 更详细的文档，见源代码的注释以及[官方文档](https://beecloud.cn/doc/?index=2)
 - 如果发现了bug，欢迎提交[issue](https://github.com/beecloud/beecloud-android/issues)
 - 如果有新的需求，欢迎提交[issue](https://github.com/beecloud/beecloud-android/issues)
 
