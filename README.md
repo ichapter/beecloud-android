@@ -282,7 +282,7 @@ BCQuery.getInstance().queryRefundsAsync(
     null,                                   //商户退款流水号
     startTime.getTime(),                    //退款订单生成时间
     endTime.getTime(),                      //退款订单完成时间
-    1,                                      //忽略满足条件的前2条数据
+    1,                                      //忽略满足条件的前1条数据
     15,                                     //只返回满足条件的15条数据
     bcCallback);
 ```
@@ -311,8 +311,12 @@ BCQuery.getInstance().queryRefundStatusAsync(
 TODO
 
 ## 常见问题
-- 关于weekhook的接收  
-文档请阅读 [webhook](https://github.com/beecloud/beecloud-webhook)
+* 微信支付返回`一般错误`，可能的原因：签名错误、未注册APPID、项目设置APPID不正确、注册的APPID与设置的不匹配、其他异常等，请按如下方法依次排查<br/>
+
+>1. 项目包名与在微信申请的开发包名是否一致
+>2. 订单流水号是否包含横杠`-`，如果有请去除
+>3. 请尝试清除微信缓存，或者删除微信重新安装再试
+>4. 项目签名与微信平台设置的签名是否一致，请到微信官网下载[签名工具](https://open.weixin.qq.com/zh_CN/htmledition/res/dev/download/sdk/Gen_Signature_Android.apk)校验
 
 ## 代码贡献
 我们非常欢迎大家来贡献代码，我们会向贡献者致以最诚挚的敬意。
