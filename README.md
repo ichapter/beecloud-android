@@ -3,7 +3,6 @@
 ![pass](https://img.shields.io/badge/Build-pass-green.svg) ![license](https://img.shields.io/badge/license-MIT-brightgreen.svg) ![version](https://img.shields.io/badge/version-v1.3.0-blue.svg)
 
 本SDK是根据[BeeCloud Rest API](https://github.com/beecloud/beecloud-rest-api) 开发的 Android SDK。可以作为调用BeeCloud Rest API的示例或者直接用于生产。
-### [Android-SDK Changelog](https://github.com/beecloud/beecloud-android/blob/master/changelog.txt)
 ## 流程
 ![pic](http://7xavqo.com1.z0.glb.clouddn.com/UML.png)
 
@@ -311,8 +310,12 @@ BCQuery.getInstance().queryRefundStatusAsync(
 TODO
 
 ## 常见问题
-- 关于weekhook的接收  
-文档请阅读 [webhook](https://github.com/beecloud/beecloud-webhook)
+* 微信支付返回`一般错误`，可能的原因：签名错误、未注册APPID、项目设置APPID不正确、注册的APPID与设置的不匹配、其他异常等，请按如下方法依次排查<br/>
+
+>1. 项目包名与在微信申请的开发包名是否一致
+>2. 订单流水号是否包含横杠`-`，如果有请去除
+>3. 请尝试清除微信缓存，或者删除微信重新安装再试
+>4. 项目签名与微信平台设置的签名是否一致，请到微信官网下载[签名工具](https://open.weixin.qq.com/zh_CN/htmledition/res/dev/download/sdk/Gen_Signature_Android.apk)校验
 
 ## 代码贡献
 我们非常欢迎大家来贡献代码，我们会向贡献者致以最诚挚的敬意。
@@ -337,7 +340,7 @@ Pull Request要求
 
 ## 联系我们
 - 如果有什么问题，可以到QQ群-**321545822**`BeeCloud开发者大联盟`提问
-- 更详细的文档，见源代码的注释以及[官方文档](https://beecloud.cn/doc/android.php)
+- 更详细的文档，见源代码的注释以及[官方文档](https://beecloud.cn/doc/?index=2)
 - 如果发现了bug，欢迎提交[issue](https://github.com/beecloud/beecloud-android/issues)
 - 如果有新的需求，欢迎提交[issue](https://github.com/beecloud/beecloud-android/issues)
 
