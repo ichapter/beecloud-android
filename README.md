@@ -1,8 +1,9 @@
 ## BeeCloud Android SDK (Open Source)
 
-![pass](https://img.shields.io/badge/Build-pass-green.svg) ![license](https://img.shields.io/badge/license-MIT-brightgreen.svg) ![version](https://img.shields.io/badge/version-v1.3.0-blue.svg)
+![pass](https://img.shields.io/badge/Build-pass-green.svg) ![license](https://img.shields.io/badge/license-MIT-brightgreen.svg) ![version](https://img.shields.io/badge/version-v1.4.0-blue.svg)
 
 本SDK是根据[BeeCloud Rest API](https://github.com/beecloud/beecloud-rest-api) 开发的 Android SDK。可以作为调用BeeCloud Rest API的示例或者直接用于生产。
+
 ## 流程
 ![pic](http://7xavqo.com1.z0.glb.clouddn.com/UML.png)
 
@@ -96,7 +97,7 @@ BCPay.initWechatPay(ShoppingCartActivity.this, "wxf1aa465362b4c8f1");
 通过`BCPay`的实例，以`reqUnionPaymentAsync`方法发起银联支付请求。<br/>
 
 参数依次为
-> billTitle       商品描述, UTF8编码格式, 32个字节内<br/>
+> billTitle       商品描述, 32个字节内, 汉字以2个字节计<br/>
 > billTotalFee    支付金额，以分为单位，必须是正整数<br/>
 > billNum         商户自定义订单号<br/>
 > optional        为扩展参数，可以传入任意数量的key/value对来补充对业务逻辑<br/>
@@ -140,8 +141,13 @@ String optionalValue = "测试value值1";
 
 mapOptional.put(optionalKey, optionalValue);
 
-//订单标题, 订单金额(分), 订单号, 扩展参数(可以null), 支付完成后回调入口
-BCPay.getInstance(ShoppingCartActivity.this).reqWXPaymentAsync("微信支付测试", 1, UUID.randomUUID().toString().replace("-", ""), mapOptional, bcCallback);
+//发起支付
+BCPay.getInstance(ShoppingCartActivity.this).reqWXPaymentAsync(
+    "微信支付测试",               //订单标题
+    1,                           //订单金额(分)
+    UUID.randomUUID().toString().replace("-", ""),  //订单流水号
+    mapOptional,            //扩展参数(可以null)
+    bcCallback);            //支付完成后回调入口
 ```
 ### 5.生成支付二维码
 请查看`doc`中的`API`，支付类`BCPay`，参照`demo`中`GenQRCodeActivity`
@@ -150,15 +156,16 @@ BCPay.getInstance(ShoppingCartActivity.this).reqWXPaymentAsync("微信支付测�
  
 通过`BCPay`的实例，以`reqWXQRCodeAsync`方法请求生成微信支付二维码。 <br/>
 通过`BCPay`的实例，以`reqAliQRCodeAsync`方法请求生成支付宝内嵌支付二维码。<br/>
+通过`BCPay`的实例，以`reqAliOfflineQRCodeAsync`方法请求生成支付宝线下支付二维码。<br/>
 
 公用参数依次为
-> billTitle       商品描述, UTF8编码格式, 32个字节内<br/>
+> billTitle       商品描述, 32个字节内, 汉字以2个字节计<br/>
 > billTotalFee    支付金额，以分为单位，必须是正整数<br/>
 > billNum         商户自定义订单号<br/>
 > optional        为扩展参数，可以传入任意数量的key/value对来补充对业务逻辑<br/>
 > callback        支付完成后的回调入口
 
-请求生成微信支付二维码的特有参数
+请求生成微信支付二维码和支付宝线下支付二维码的特有参数
 > genQRCode       是否生成QRCode Bitmap
 >>如果为false，请自行根据getQrCodeRawContent返回的URL，使用BCPay.generateBitmap方法生成支付二维码，你也可以使用自己熟悉的二维码生成工具
 
@@ -219,7 +226,7 @@ BCPay.getInstance(GenQRCodeActivity.this).reqWXQRCodeAsync("微信二维码支�
 
 **原型：**
 
-通过构造`BCQuery`的实例，使用`queryBillsAsync`方法发起支付查询，该方法仅`channel`为必填参数，指代何种支付方式；在回调函数中将`BCResult`转化成`BCQueryOrderResult`之后做后续处理
+通过构造`BCQuery`的实例，使用`queryBillsAsync`方法发起支付查询，`channel`指代何种支付方式，为`BCReqParams.BCChannelTypes.ALL`时则查询所有的支付渠道订单；在回调函数中将`BCResult`转化成`BCQueryBillOrderResult`之后做后续处理
 
 **调用：**
 
@@ -230,14 +237,14 @@ final BCCallback bcCallback = new BCCallback() {
     public void done(BCResult bcResult) {
     	//根据需求处理结果数据
 
-        final BCQueryOrderResult bcQueryResult = (BCQueryOrderResult) bcResult;
+        final BCQueryBillOrderResult bcQueryResult = (BCQueryBillOrderResult) bcResult;
 
         //resultCode为0表示请求成功
         //count包含返回的订单个数
         if (bcQueryResult.getResultCode() == 0) {
 
 			//订单列表
-	        bills = bcQueryResult.getOrders();
+	        bills = bcQueryResult.getBills();
             Log.i(BillListActivity.TAG, "bill count: " + bcQueryResult.getCount());
         } else {
             bills = null;
@@ -270,7 +277,7 @@ BCQuery.getInstance().queryBillsAsync(
 
 **原型：**
 
-通过构造`BCQuery`的实例，使用`queryRefundsAsync`方法发起支付查询，该方法仅`channel`为必填参数，指代何种支付方式；在回调函数中将`BCResult`转化成`BCQueryOrderResult`之后做后续处理
+通过构造`BCQuery`的实例，使用`queryRefundsAsync`方法发起退款查询，`channel`指代何种支付方式，为`BCReqParams.BCChannelTypes.ALL`时则查询所有的支付渠道退款订单；在回调函数中将`BCResult`转化成`BCQueryRefundOrderResult`之后做后续处理
 
 **调用：**<br/>
 同上，首先初始化回调入口BCCallback
@@ -281,7 +288,7 @@ BCQuery.getInstance().queryRefundsAsync(
     null,                                   //商户退款流水号
     startTime.getTime(),                    //退款订单生成时间
     endTime.getTime(),                      //退款订单完成时间
-    1,                                      //忽略满足条件的前2条数据
+    1,                                      //忽略满足条件的前1条数据
     15,                                     //只返回满足条件的15条数据
     bcCallback);
 ```
@@ -297,7 +304,7 @@ BCQuery.getInstance().queryRefundsAsync(
 同上，首先初始化回调入口BCCallback
 ```java
 BCQuery.getInstance().queryRefundStatusAsync(
-    BCReqParams.BCChannelTypes.WX_APP,     //目前仅支持微信
+    BCReqParams.BCChannelTypes.WX,     //目前仅支持微信
     "20150520refund001",                   //退款单号
     bcCallback);                           //回调入口
 ```

@@ -39,98 +39,92 @@ public class BCReqParams {
     /**
      * 请求类型
      */
-    public enum ReqType{PAY, QUERY, QRCODE};
+    public enum ReqType{PAY, QUERY, QRCODE}
 
     /**
      * 渠道支付类型
      */
     public enum BCChannelTypes {
         /**
+         * 所有渠道
+         * 仅用于查询订单
+         */
+        ALL,
+
+        /**
          * 微信所有渠道
          * 仅用于查询订单
          */
-        WX("WX"),
+        WX,
 
         /**
          * 微信公众号二维码支付
          * 用于生成扫码和查询订单
          */
-        WX_NATIVE("WX_NATIVE"),
+        WX_NATIVE,
 
         /**
          * 微信公众号支付
          * 仅用于查询订单
          */
-        WX_JSAPI("WX_JSAPI"),
+        WX_JSAPI,
 
         /**
          * 微信手机原生APP支付
          */
-        WX_APP("WX_APP"),
+        WX_APP,
 
         /**
          * 支付宝所有渠道
          * 仅用于查询订单
          */
-        ALI("ALI"),
+        ALI,
 
         /**
          * 支付宝手机原生APP支付
          */
-        ALI_APP("ALI_APP"),
+        ALI_APP,
 
         /**
          * 支付宝PC网页支付
          * 仅用于查询订单
          */
-        ALI_WEB("ALI_WEB"),
+        ALI_WEB,
 
         /**
          * 支付宝内嵌二维码支付
          * 用于生成扫码和查询订单
          */
-        ALI_QRCODE("ALI_QRCODE"),
+        ALI_QRCODE,
 
         /**
          * 支付宝线下二维码支付
          * 用于线下实体店扫码和查询订单
          */
-        ALI_OFFLINE_QRCODE("ALI_OFFLINE_QRCODE"),
+        ALI_OFFLINE_QRCODE,
 
         /**
          * 支付宝移动网页支付
          * 仅用于查询订单
          */
-        ALI_WAP("ALI_WAP"),
+        ALI_WAP,
 
         /**
          * 银联所有渠道
          * 仅用于查询订单
          */
-        UN("UN"),
+        UN,
 
         /**
          * 银联手机原生APP支付
          */
-        UN_APP("UN_APP"),
+        UN_APP,
 
         /**
          * 银联PC网页支付
          * 仅用于查询订单
          */
-        UN_WEB("UN_WEB");
-
-
-        private String type;
-
-        private BCChannelTypes(String type){
-            this.type = type;
-        }
-
-        @Override
-        public String toString() {
-            return this.type;
-        }
+        UN_WEB;
 
         /**
          * 判断是否为有效的app端支付渠道类型
@@ -139,9 +133,9 @@ public class BCReqParams {
          * @return true表示有效
          */
         public static boolean isValidAPPPaymentChannelType(BCChannelTypes channel) {
-            return channel.equals(WX_APP) ||
-                    channel.equals(ALI_APP) ||
-                    channel.equals(UN_APP);
+            return channel == WX_APP ||
+                    channel == ALI_APP ||
+                    channel == UN_APP;
         }
 
         /**
@@ -151,9 +145,9 @@ public class BCReqParams {
          * @return true表示有效
          */
         public static boolean isValidQRCodeReqChannelType(BCChannelTypes channel) {
-            return channel.equals(WX_NATIVE) ||
-                    channel.equals(ALI_QRCODE) ||
-                    channel.equals(ALI_OFFLINE_QRCODE);
+            return channel == WX_NATIVE ||
+                    channel == ALI_QRCODE ||
+                    channel == ALI_OFFLINE_QRCODE;
         }
 
         /**
@@ -161,31 +155,31 @@ public class BCReqParams {
          * @return 实际的渠道支付名
          */
         public static String getTranslatedChannelName(String channel) {
-            if (channel.equals(WX.toString()))
+            if (channel.equals(WX.name()))
                 return "微信所有渠道";
-            else if (channel.equals(WX_NATIVE.toString()))
+            else if (channel.equals(WX_NATIVE.name()))
                 return "微信公众号二维码支付";
-            else if (channel.equals(WX_JSAPI.toString()))
+            else if (channel.equals(WX_JSAPI.name()))
                 return "微信公众号支付";
-            else if (channel.equals(WX_APP.toString()))
+            else if (channel.equals(WX_APP.name()))
                 return "微信手机原生APP支付";
-            else if (channel.equals(ALI.toString()))
+            else if (channel.equals(ALI.name()))
                 return "支付宝所有渠道";
-            else if (channel.equals(ALI_APP.toString()))
+            else if (channel.equals(ALI_APP.name()))
                 return "支付宝手机原生APP支付";
-            else if (channel.equals(ALI_WEB.toString()))
+            else if (channel.equals(ALI_WEB.name()))
                 return "支付宝PC网页支付";
-            else if (channel.equals(ALI_QRCODE.toString()))
+            else if (channel.equals(ALI_QRCODE.name()))
                 return "支付宝内嵌二维码支付";
-            else if (channel.equals(ALI_OFFLINE_QRCODE.toString()))
+            else if (channel.equals(ALI_OFFLINE_QRCODE.name()))
                 return "支付宝线下二维码支付";
-            else if (channel.equals(ALI_WAP.toString()))
+            else if (channel.equals(ALI_WAP.name()))
                 return "支付宝移动网页支付";
-            else if (channel.equals(UN.toString()))
+            else if (channel.equals(UN.name()))
                 return "银联所有渠道";
-            else if (channel.equals(UN_APP.toString()))
+            else if (channel.equals(UN_APP.name()))
                 return "银联手机原生APP支付";
-            else if (channel.equals(UN_WEB.toString()))
+            else if (channel.equals(UN_WEB.name()))
                 return "银联PC网页支付";
             else
                 return "非法的支付类型";
@@ -222,14 +216,13 @@ public class BCReqParams {
      * @param reqType   请求类型
      */
     public BCReqParams(BCChannelTypes channel, ReqType reqType) throws BCException{
-        if (channel == null)
-            throw new BCException("非法channel");
 
-        if (reqType == ReqType.PAY && !BCChannelTypes.isValidAPPPaymentChannelType(channel))
+        if (reqType == ReqType.PAY && (channel == null ||
+                !BCChannelTypes.isValidAPPPaymentChannelType(channel)))
             throw new BCException("非法APP支付渠道");
 
         if (reqType == ReqType.QRCODE && !BCChannelTypes.isValidQRCodeReqChannelType(channel))
-            throw new BCException("非法生成二维码请求支付渠道");
+            throw new BCException("非法二维码请求支付渠道");
 
         BCCache mCache = BCCache.getInstance();
 

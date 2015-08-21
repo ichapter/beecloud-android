@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">BCADTDemo</string>
+    <string name="app_name">BeeCloudAndroidDemo</string>
 
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
@@ -9,4 +9,5 @@
     <string name="title_activity_refund_status">RefundStatusActivity</string>
     <string name="title_activity_gen_qrcode">GenQRCodeActivity</string>
     <string name="title_activity_aliqrcode">ALIQRCodeActivity</string>
+    <string name="title_activity_orders_entry">OrdersEntryActivity</string>
 </resources>

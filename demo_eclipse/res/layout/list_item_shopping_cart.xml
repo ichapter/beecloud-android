@@ -27,7 +27,7 @@
             android:layout_height="wrap_content"
             android:paddingBottom="5dp"
             android:text="CONTENT"
-            android:textSize="18dp" />
+            android:textSize="18sp" />
 
         <TextView
             android:id="@+id/txtViewDesc"
@@ -35,7 +35,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/txtViewName"
             android:text="DESC"
-            android:textSize="14dp" />
+            android:textSize="14sp" />
     </RelativeLayout>
 
     <TextView

@@ -26,7 +26,7 @@ import javax.net.ssl.X509TrustManager;
  * 用于BCHttpClientUtil wrapClient
  * @see BCHttpClientUtil
  */
-public class BCSSLSocketFactory extends SSLSocketFactory {
+class BCSSLSocketFactory extends SSLSocketFactory {
 
     final SSLContext sslContext = SSLContext.getInstance("TLS");
 
