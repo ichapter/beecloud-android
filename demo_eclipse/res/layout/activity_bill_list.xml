@@ -1,51 +1,60 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
     android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     android:paddingBottom="@dimen/activity_vertical_margin"
-    tools:context="cn.beecloud.sdk_demo.BillListActivity">
+    android:orientation="vertical"
+    tools:context="cn.beecloud.demo.BillListActivity">
 
     <Button
         android:id="@+id/btnWeChatOrder"
-        android:layout_width="wrap_content"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
         android:background="#007edf"
         android:textColor="#ffffff"
         android:textSize="16sp"
         android:text="微信订单查询"
-        android:padding="6dp"/>
+        android:padding="5dp"/>
 
 
     <Button
         android:id="@+id/btnAliPayOrder"
-        android:layout_width="wrap_content"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/btnWeChatOrder"
         android:background="#007edf"
         android:textColor="#ffffff"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="5dp"
         android:textSize="16sp"
         android:text="支付宝订单查询"
-        android:padding="6dp"/>
+        android:padding="5dp"/>
 
     <Button
         android:id="@+id/btnUNPayOrder"
-        android:layout_width="wrap_content"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/btnAliPayOrder"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="5dp"
         android:background="#007edf"
         android:textColor="#ffffff"
         android:textSize="16sp"
         android:text="银联订单查询"
-        android:padding="6dp"/>
+        android:padding="5dp"/>
 
+    <Button
+        android:id="@+id/btnAllPayOrder"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:background="#007edf"
+        android:textColor="#ffffff"
+        android:textSize="16sp"
+        android:text="所有渠道支付订单查询"
+        android:padding="5dp"/>
 
     <ListView
         android:id="@+id/listViewOrder"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/btnUNPayOrder"
-        android:layout_marginTop="20dp"></ListView>
-</RelativeLayout>
+        android:layout_marginTop="20dp"/>
+</LinearLayout>

@@ -4,52 +4,66 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     android:paddingBottom="@dimen/activity_vertical_margin"
-    android:orientation="vertical"
-    tools:context="cn.beecloud.sdk_demo.GenQRCodeActivity">
+    tools:context="cn.beecloud.demo.GenQRCodeActivity">
 
-    <Button
-        android:id="@+id/btnReqWXQRCode"
-        android:layout_height="wrap_content"
-        android:background="#007edf"
-        android:text="生成微信支付二维码"
-        android:textColor="#ffffff"
-        android:textSize="20sp"
-        android:layout_width="fill_parent" />
+    <ScrollView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:orientation="vertical">
+
+            <Button
+                android:id="@+id/btnReqWXQRCode"
+                android:padding="5dp"
+                android:layout_height="wrap_content"
+                android:background="#007edf"
+                android:text="生成微信支付二维码"
+                android:textColor="#ffffff"
+                android:textSize="20sp"
+                android:layout_width="fill_parent" />
 
 
-    <ImageView
-        android:id="@+id/wxQRImg"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:adjustViewBounds="true"/>
+            <ImageView
+                android:id="@+id/wxQRImg"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:adjustViewBounds="true"/>
 
-    <Button
-        android:id="@+id/btnReqALIQRCode"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:background="#007edf"
-        android:text="支付宝内嵌二维码支付"
-        android:textColor="#ffffff"
-        android:textSize="20sp"
-        android:layout_width="fill_parent" />
+            <Button
+                android:id="@+id/btnReqALIQRCode"
+                android:padding="5dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:background="#007edf"
+                android:text="支付宝内嵌二维码支付"
+                android:textColor="#ffffff"
+                android:textSize="20sp"
+                android:layout_width="fill_parent" />
 
-    <!-- 支付宝线下二维码支付开发中
-    <Button
-        android:id="@+id/btnReqALIOfflineQRCode"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:background="#007edf"
-        android:text="支付宝线下二维码支付"
-        android:textColor="#ffffff"
-        android:textSize="20sp"
-        android:layout_width="wrap_content" />
+            <Button
+                android:id="@+id/btnReqALIOfflineQRCode"
+                android:padding="5dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:background="#007edf"
+                android:text="支付宝线下二维码支付"
+                android:textColor="#ffffff"
+                android:textSize="20sp"
+                android:layout_width="fill_parent" />
 
-    <ImageView
-        android:id="@+id/aliOfflineQRImg"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:adjustViewBounds="true"/>
-        -->
+            <ImageView
+                android:id="@+id/aliOfflineQRImg"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:adjustViewBounds="true"/>
+
+        </LinearLayout>
+
+    </ScrollView>
+
 </LinearLayout>

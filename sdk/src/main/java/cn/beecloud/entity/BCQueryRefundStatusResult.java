@@ -1,15 +1,13 @@
 /**
  * BCQueryRefundStatusResult.java
- * <p/>
+ *
  * Created by xuanzhui on 2015/8/3.
  * Copyright (c) 2015 BeeCloud. All rights reserved.
  */
 package cn.beecloud.entity;
 
 import com.google.gson.Gson;
-
-import java.util.HashMap;
-import java.util.Map;
+import com.google.gson.reflect.TypeToken;
 
 /**
  * 用于查询退款状态
@@ -17,13 +15,18 @@ import java.util.Map;
  */
 public class BCQueryRefundStatusResult extends BCRestfulCommonResult {
 
-    private String refundStatus;
+    /**
+     * 以下命名需要和restful API匹配
+     * 以便于Gson反序列化
+     * 请忽略命名规则
+     */
+    private String refund_status;
 
     /**
      * 退款状态
      */
     public String getRefundStatus() {
-        return refundStatus;
+        return refund_status;
     }
 
     public BCQueryRefundStatusResult(){}
@@ -36,7 +39,7 @@ public class BCQueryRefundStatusResult extends BCRestfulCommonResult {
      */
     public BCQueryRefundStatusResult(Integer resultCode, String resultMsg, String errDetail, String refundStatus) {
         super(resultCode, resultMsg, errDetail);
-        this.refundStatus = refundStatus;
+        this.refund_status = refundStatus;
     }
 
     /**
@@ -44,18 +47,10 @@ public class BCQueryRefundStatusResult extends BCRestfulCommonResult {
      * @param jsonStr   json串
      * @return          BCQueryRefundStatusResult实例
      */
-    @Override
-    public BCRestfulCommonResult transJsonToResultObject(String jsonStr) {
+    public BCQueryRefundStatusResult transJsonToResultObject(String jsonStr) {
         Gson gson = new Gson();
-        Map<String, Object> responseMap = gson.fromJson(jsonStr, HashMap.class);
 
-        BCQueryRefundStatusResult bcQueryRefundStatusResult = new BCQueryRefundStatusResult();
-        BCRestfulCommonResult.transJsonToResultObject(responseMap, bcQueryRefundStatusResult);
-
-        if (responseMap.get("refund_status") != null)
-            bcQueryRefundStatusResult.refundStatus = (String) responseMap.get("refund_status");
-
-        return bcQueryRefundStatusResult;
+        return gson.fromJson(jsonStr, new TypeToken<BCQueryRefundStatusResult>() {}.getType());
     }
 
     /**

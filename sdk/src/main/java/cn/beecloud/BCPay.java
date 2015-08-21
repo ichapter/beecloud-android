@@ -16,6 +16,7 @@ import android.util.Log;
 
 import com.alipay.sdk.app.PayTask;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.EncodeHintType;
 import com.google.zxing.MultiFormatWriter;
@@ -30,8 +31,8 @@ import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -147,35 +148,10 @@ public class BCPay {
     }
 
     /**
-     * 判断微信客户端是否安装
-     * @return true表示已安装
-     */
-    public static boolean isWXAppInstalled() {
-        boolean isWXAppInstalled = false;
-        if (wxAPI != null) {
-            isWXAppInstalled = wxAPI.isWXAppInstalled();
-        }
-        return isWXAppInstalled;
-    }
-
-    /**
-     * 判断微信客户端是否被支持
-     * @return true表示支持
-     */
-    public static boolean isWXAppSupported() {
-
-        boolean isWXAppSupportAPI = false;
-        if (wxAPI != null) {
-            isWXAppSupportAPI = wxAPI.isWXAppSupportAPI();
-        }
-        return isWXAppSupportAPI;
-    }
-
-    /**
      * 校验bill参数
      * 设置公用参数
      *
-     * @param billTitle       商品描述, UTF8编码格式, 32个字节内
+     * @param billTitle       商品描述, 32个字节内, 汉字以2个字节计
      * @param billTotalFee    支付金额，以分为单位，必须是正整数
      * @param billNum         商户自定义订单号
      * @param parameters      用于存储公用信息
@@ -186,10 +162,12 @@ public class BCPay {
                                            final String billNum, final Map<String, String> optional,
                                            BCPayReqParams parameters) {
 
-        if (!BCValidationUtil.isValidString(billTitle) ||
-                !BCValidationUtil.isValidString(billNum)) {
-            return "parameters: 不合法的参数";
+        if (!BCValidationUtil.isValidBillTitleLength(billTitle)) {
+            return "parameters: 不合法的参数-订单标题长度不合法, 32个字节内, 汉字以2个字节计";
         }
+
+        if (!BCValidationUtil.isValidString(billNum))
+            return "parameters: 不合法的参数-订单号";
 
         if (billTotalFee < 0) {
             return "parameters: billTotalFee " + billTotalFee +
@@ -209,7 +187,7 @@ public class BCPay {
      *
      * @param channelType     支付类型  对于支付手机APP端目前只支持WX_APP, ALI_APP, UN_APP
      *                        @see cn.beecloud.entity.BCReqParams.BCChannelTypes
-     * @param billTitle       商品描述, UTF8编码格式, 32个字节内
+     * @param billTitle       商品描述, 32个字节内, 汉字以2个字节计
      * @param billTotalFee    支付金额，以分为单位，必须是正整数
      * @param billNum         商户自定义订单号
      * @param optional        为扩展参数，可以传入任意数量的key/value对来补充对业务逻辑的需求
@@ -232,7 +210,7 @@ public class BCPay {
             public void run() {
 
                 //校验并准备公用参数
-                BCPayReqParams parameters = null;
+                BCPayReqParams parameters;
                 try {
                     parameters = new BCPayReqParams(channelType);
                 } catch (BCException e) {
@@ -263,8 +241,11 @@ public class BCPay {
                     try {
                         ret = EntityUtils.toString(response.getEntity(), "UTF-8");
 
+                        //反序列化json串
                         Gson res = new Gson();
-                        Map<String, Object> responseMap = res.fromJson(ret, HashMap.class);
+
+                        Type type = new TypeToken<Map<String,Object>>() {}.getType();
+                        Map<String, Object> responseMap = res.fromJson(ret, type);
 
                         //判断后台返回结果
                         Double resultCode = (Double) responseMap.get("result_code");
@@ -391,11 +372,10 @@ public class BCPay {
 
     /**
      * 微信支付调用接口
-     * 初始化billTitle,billTotalFee,billOutTradeNo后调用此接口发起微信支付，并跳转到微信。
      * 如果您申请的是新版本(V3)的微信支付，请使用此接口发起微信支付.
      * 您在BeeCloud控制台需要填写“微信Partner ID”、“微信Partner KEY”、“微信APP ID”.
      *
-     * @param billTitle       商品描述, UTF8编码格式, 32个字节内
+     * @param billTitle       商品描述, 32个字节内, 汉字以2个字节计
      * @param billTotalFee    支付金额，以分为单位，必须是正整数
      * @param billNum         商户自定义订单号
      * @param optional        为扩展参数，可以传入任意数量的key/value对来补充对业务逻辑的需求
@@ -411,7 +391,7 @@ public class BCPay {
     /**
      * 支付宝支付
      *
-     * @param billTitle       商品描述, UTF8编码格式, 32个字节内
+     * @param billTitle       商品描述, 32个字节内, 汉字以2个字节计
      * @param billTotalFee    支付金额，以分为单位，必须是正整数
      * @param billNum         商户自定义订单号
      * @param optional        为扩展参数，可以传入任意数量的key/value对来补充对业务逻辑的需求
@@ -425,9 +405,9 @@ public class BCPay {
     }
 
     /**
-     * 银联在线支付，结果在onActivityResult中间获取
+     * 银联在线支付
      *
-     * @param billTitle       商品描述, UTF8编码格式, 32个字节内
+     * @param billTitle       商品描述, 32个字节内, 汉字以2个字节计
      * @param billTotalFee    支付金额，以分为单位，必须是正整数
      * @param billNum         商户自定义订单号
      * @param optional        为扩展参数，可以传入任意数量的key/value对来补充对业务逻辑的需求
@@ -489,7 +469,7 @@ public class BCPay {
      *
      * @param channelType     生成扫码的类型  对于支付手机APP端目前只支持WX_NATIVE, ALI_QRCODE, ALI_OFFLINE_QRCODE
      *                        @see cn.beecloud.entity.BCReqParams.BCChannelTypes
-     * @param billTitle       商品描述, UTF8编码格式, 32个字节内
+     * @param billTitle       商品描述, 32个字节内, 汉字以2个字节计
      * @param billTotalFee    支付金额，以分为单位，必须是正整数
      * @param billNum         商户自定义订单号
      * @param optional        为扩展参数，可以传入任意数量的key/value对来补充对业务逻辑的需求
@@ -517,7 +497,7 @@ public class BCPay {
             public void run() {
 
                 //校验并准备公用参数
-                BCPayReqParams parameters = null;
+                BCPayReqParams parameters;
                 try {
                     parameters = new BCPayReqParams(channelType, BCReqParams.ReqType.QRCODE);
                 } catch (BCException e) {
@@ -563,8 +543,11 @@ public class BCPay {
                     try {
                         ret = EntityUtils.toString(response.getEntity(), "UTF-8");
 
+                        //反序列化json
                         Gson res = new Gson();
-                        Map<String, Object> responseMap = res.fromJson(ret, HashMap.class);
+
+                        Type type = new TypeToken<Map<String,Object>>() {}.getType();
+                        Map<String, Object> responseMap = res.fromJson(ret, type);
 
                         //判断后台返回结果
                         Integer resultCode = ((Double) responseMap.get("result_code")).intValue();
@@ -573,7 +556,7 @@ public class BCPay {
                             String content = null;
                             Bitmap qrBitmap = null;
                             String aliQRCodeHtml = null;
-                            int imgSize = BCQRCodeResult.DEFAULT_QRCODE_WIDTH;;
+                            int imgSize = BCQRCodeResult.DEFAULT_QRCODE_WIDTH;
 
                             //针对不同的支付渠道获取不同的参数
                             switch (channelType){
@@ -646,7 +629,7 @@ public class BCPay {
     /**
      * 生成微信支付二维码
      *
-     * @param billTitle       商品描述, UTF8编码格式, 32个字节内
+     * @param billTitle       商品描述, 32个字节内, 汉字以2个字节计
      * @param billTotalFee    支付金额，以分为单位，必须是正整数
      * @param billNum         商户自定义订单号
      * @param optional        为扩展参数，可以传入任意数量的key/value对来补充对业务逻辑的需求
@@ -665,7 +648,7 @@ public class BCPay {
     /**
      * 生成支付宝内嵌支付二维码
      *
-     * @param billTitle       商品描述, UTF8编码格式, 32个字节内
+     * @param billTitle       商品描述, 32个字节内, 汉字以2个字节计
      * @param billTotalFee    支付金额，以分为单位，必须是正整数
      * @param billNum         商户自定义订单号
      * @param optional        为扩展参数，可以传入任意数量的key/value对来补充对业务逻辑的需求
@@ -683,22 +666,22 @@ public class BCPay {
                 billNum, optional, false, null, qrPayMode, returnUrl, callback);
     }
 
-    /** 暂不开放!!!
+    /**
      * 生成支付宝线下支付二维码
      *
-     * @param billTitle       商品描述, UTF8编码格式, 32个字节内
+     * @param billTitle       商品描述, 32个字节内, 汉字以2个字节计
      * @param billTotalFee    支付金额，以分为单位，必须是正整数
      * @param billNum         商户自定义订单号
      * @param optional        为扩展参数，可以传入任意数量的key/value对来补充对业务逻辑的需求
      * @param genQRCode       是否生成QRCode Bitmap
      * @param qrCodeWidth     如果生成, QRCode的宽度, null则使用默认参数
      * @param callback        支付完成后的回调函数
-
+    */
     public void reqAliOfflineQRCodeAsync(final String billTitle, final Integer billTotalFee,
                                  final String billNum, final Map<String, String> optional,
                                  final Boolean genQRCode, final Integer qrCodeWidth,
                                  final BCCallback callback) {
         reqQRCodeAsync(BCReqParams.BCChannelTypes.ALI_OFFLINE_QRCODE, billTitle, billTotalFee,
                 billNum, optional, genQRCode, qrCodeWidth, null, null, callback);
-    }*/
+    }
 }

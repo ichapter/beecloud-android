@@ -87,7 +87,7 @@ public class BCPayReqParams extends BCReqParams {
         params.put("app_id", getAppId());
         params.put("timestamp", getTimestamp());
         params.put("app_sign", getAppSign());
-        params.put("channel", channel);
+        params.put("channel", channel.name());
         params.put("total_fee", totalFee);
         params.put("bill_no", billNum);
         params.put("title", title);

@@ -73,7 +73,7 @@ public class BCWechatPaymentActivity extends Activity implements IWXAPIEventHand
     @Override
     public void onResp(BaseResp baseResp) {
 
-        Log.i(TAG, "onPayFinish, result code = " + baseResp.errCode);
+        //Log.i(TAG, "onPayFinish, result code = " + baseResp.errCode);
 
         String result = BCPayResult.RESULT_FAIL;
         String errMag = BCPayResult.FAIL_ERR_FROM_CHANNEL;

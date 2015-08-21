@@ -4,49 +4,60 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     android:paddingBottom="@dimen/activity_vertical_margin"
-    tools:context="cn.beecloud.sdk_demo.RefundOrdersActivity">
+    tools:context="cn.beecloud.demo.RefundOrdersActivity">
 
     <Button
         android:id="@+id/btnWeChatRefundOrder"
-        android:layout_width="wrap_content"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:background="#007edf"
         android:textColor="#ffffff"
         android:textSize="16sp"
         android:text="微信退款订单查询"
-        android:padding="6dp"/>
+        android:padding="5dp"/>
 
 
     <Button
         android:id="@+id/btnAliPayRefundOrder"
-        android:layout_width="wrap_content"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/btnWeChatRefundOrder"
         android:background="#007edf"
         android:textColor="#ffffff"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="5dp"
         android:textSize="16sp"
         android:text="支付宝退款订单查询"
-        android:padding="6dp"/>
+        android:padding="5dp"/>
 
     <Button
         android:id="@+id/btnUNPayRefundOrder"
-        android:layout_width="wrap_content"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/btnAliPayRefundOrder"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="5dp"
         android:background="#007edf"
         android:textColor="#ffffff"
         android:textSize="16sp"
         android:text="银联退款订单查询"
-        android:padding="6dp"/>
+        android:padding="5dp"/>
 
+    <Button
+        android:id="@+id/btnAllPayRefundOrder"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/btnUNPayRefundOrder"
+        android:layout_marginTop="5dp"
+        android:background="#007edf"
+        android:textColor="#ffffff"
+        android:textSize="16sp"
+        android:text="所有渠道退款订单查询"
+        android:padding="5dp"/>
 
     <ListView
         android:id="@+id/listViewRefundOrder"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/btnUNPayRefundOrder"
+        android:layout_below="@id/btnAllPayRefundOrder"
         android:layout_marginTop="20dp"/>
 
 </RelativeLayout>
