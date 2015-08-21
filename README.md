@@ -1,8 +1,9 @@
-# BeeCloud Android SDK (Open Source)
+## BeeCloud Android SDK (Open Source)
 
 ![pass](https://img.shields.io/badge/Build-pass-green.svg) ![license](https://img.shields.io/badge/license-MIT-brightgreen.svg) ![version](https://img.shields.io/badge/version-v1.4.0-blue.svg)
 
 本SDK是根据[BeeCloud Rest API](https://github.com/beecloud/beecloud-rest-api) 开发的 Android SDK。可以作为调用BeeCloud Rest API的示例或者直接用于生产。
+
 ## 流程
 ![pic](http://7xavqo.com1.z0.glb.clouddn.com/UML.png)
 
@@ -225,7 +226,7 @@ BCPay.getInstance(GenQRCodeActivity.this).reqWXQRCodeAsync("微信二维码支�
 
 **原型：**
 
-通过构造`BCQuery`的实例，使用`queryBillsAsync`方法发起支付查询，该方法仅`channel`为必填参数，指代何种支付方式；在回调函数中将`BCResult`转化成`BCQueryOrderResult`之后做后续处理
+通过构造`BCQuery`的实例，使用`queryBillsAsync`方法发起支付查询，`channel`指代何种支付方式，为BCReqParams.BCChannelTypes.ALL时则查询所有的支付渠道订单；在回调函数中将`BCResult`转化成`BCQueryBillOrderResult`之后做后续处理
 
 **调用：**
 
@@ -236,14 +237,14 @@ final BCCallback bcCallback = new BCCallback() {
     public void done(BCResult bcResult) {
     	//根据需求处理结果数据
 
-        final BCQueryOrderResult bcQueryResult = (BCQueryOrderResult) bcResult;
+        final BCQueryBillOrderResult bcQueryResult = (BCQueryBillOrderResult) bcResult;
 
         //resultCode为0表示请求成功
         //count包含返回的订单个数
         if (bcQueryResult.getResultCode() == 0) {
 
 			//订单列表
-	        bills = bcQueryResult.getOrders();
+	        bills = bcQueryResult.getBills();
             Log.i(BillListActivity.TAG, "bill count: " + bcQueryResult.getCount());
         } else {
             bills = null;
@@ -276,7 +277,7 @@ BCQuery.getInstance().queryBillsAsync(
 
 **原型：**
 
-通过构造`BCQuery`的实例，使用`queryRefundsAsync`方法发起支付查询，该方法仅`channel`为必填参数，指代何种支付方式；在回调函数中将`BCResult`转化成`BCQueryOrderResult`之后做后续处理
+通过构造`BCQuery`的实例，使用`queryRefundsAsync`方法发起退款查询，`channel`指代何种支付方式，为BCReqParams.BCChannelTypes.ALL时则查询所有的支付渠道退款订单；在回调函数中将`BCResult`转化成`BCQueryRefundOrderResult`之后做后续处理
 
 **调用：**<br/>
 同上，首先初始化回调入口BCCallback
@@ -287,7 +288,7 @@ BCQuery.getInstance().queryRefundsAsync(
     null,                                   //商户退款流水号
     startTime.getTime(),                    //退款订单生成时间
     endTime.getTime(),                      //退款订单完成时间
-    1,                                      //忽略满足条件的前2条数据
+    1,                                      //忽略满足条件的前1条数据
     15,                                     //只返回满足条件的15条数据
     bcCallback);
 ```
