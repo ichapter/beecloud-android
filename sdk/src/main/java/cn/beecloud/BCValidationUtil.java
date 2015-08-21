@@ -6,21 +6,32 @@
  */
 package cn.beecloud;
 
+import java.io.UnsupportedEncodingException;
+
 /**
  * 校验类
  */
-public class BCValidationUtil {
+class BCValidationUtil {
 
     /**
      * 判断string是否为空
+     * @param str 被校验字符串
      */
     public static boolean isValidString(String str) {
         return str != null && str.length() != 0;
     }
 
     /**
+     * 判断string是否只包含数字和字母, 且长度8-32
+     */
+    public static boolean isValidBillNum(String str) {
+        return str != null && str.length() >= 8
+                && str.length() <= 32 && str.matches("[A-Za-z0-9]+");
+    }
+
+    /**
      * 判断字符串是否为有效的正整数
-     * @param str
+     * @param str 被校验字符串
      */
     public static boolean isStringValidPositiveInt(String str) {
         boolean res = false;
@@ -46,7 +57,7 @@ public class BCValidationUtil {
 
     /**
      * 判断字符串是否为url
-     * @param str
+     * @param str 被校验字符串
      */
     public static boolean isStringValidURL(String str) {
         return isValidString(str) &&
@@ -54,4 +65,26 @@ public class BCValidationUtil {
                         str.toLowerCase().startsWith("https://"));
     }
 
+    /**
+     * 判断订单长度是否在有效长度以内, 汉字以2个字节计, 总长度最大为32
+     * @param str   订单标题
+     * @return      true代表长度有效
+     */
+    public static boolean isValidBillTitleLength(String str) {
+        if (!isValidString(str))
+            return false;
+
+        boolean res = false;
+
+        try {
+            byte[] bytes = str.getBytes("GBK");
+
+            if (bytes.length <= 32)
+                res = true;
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+
+        return res;
+    }
 }

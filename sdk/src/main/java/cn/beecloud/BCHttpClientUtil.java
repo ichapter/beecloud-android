@@ -36,7 +36,7 @@ import java.util.Random;
 /**
  * 网络请求工具类
  */
-public class BCHttpClientUtil {
+class BCHttpClientUtil {
 
     //主机地址
     private static final String[] BEECLOUD_HOSTS = {"https://apibj.beecloud.cn",
@@ -48,11 +48,8 @@ public class BCHttpClientUtil {
     //Rest API版本号
     private static final String HOST_API_VERSION = "/1/";
 
-    //订单支付部分URL
+    //订单支付部分URL 和 获取扫码信息
     private static final String BILL_PAY_URL = "rest/bill";
-
-    //获取扫码信息
-    private static final String QRCODE_REQ_URL = "rest/bill";
 
     //支付订单查询部分URL
     private static final String BILL_QUERY_URL = "rest/bills?para=";
@@ -82,7 +79,7 @@ public class BCHttpClientUtil {
      * @return  获取扫码信息URL
      */
     public static String getQRCodeReqURL() {
-        return getRandomHost() + QRCODE_REQ_URL;
+        return getRandomHost() + BILL_PAY_URL;
     }
 
     /**

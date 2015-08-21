@@ -115,14 +115,4 @@ public class BCQRCodeResult extends BCRestfulCommonResult {
         return aliQRCodeHtml;
     }
 
-    /**
-     * 将json串转化为BCQRCodeResult实例
-     *
-     * @param jsonStr json串
-     * @return BCQRCodeResult实例
-     */
-    @Override
-    public BCRestfulCommonResult transJsonToResultObject(String jsonStr) {
-        return null;
-    }
 }

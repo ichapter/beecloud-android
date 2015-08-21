@@ -37,7 +37,7 @@ public class BCPayResult implements BCResult {
     public static final String RESULT_CANCEL = "CANCEL";
 
     /**
-     * 表示支付失败
+     * 表示支付失败或者状态未知
      */
     public static final String RESULT_FAIL = "FAIL";
 

@@ -9,6 +9,7 @@ package cn.beecloud;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.unionpay.UPPayAssistEx;
 
@@ -43,9 +44,7 @@ public class BCUnionPaymentActivity extends Activity {
                          (retPay==-1)? BCPayResult.FAIL_PLUGIN_NOT_INSTALLED:BCPayResult.FAIL_PLUGIN_NEED_UPGRADE,
                          "银联插件问题, 需重新安装或升级"));
                 } else {
-                    instance.payCallback.done(new BCPayResult(BCPayResult.RESULT_FAIL,
-                            BCPayResult.FAIL_EXCEPTION,
-                            "BCPay instance or payCallback NPE"));
+                    Log.e("BCUnionPaymentActivity", "BCPay instance or payCallback NPE");
                 }
 
                 this.finish();
@@ -69,18 +68,24 @@ public class BCUnionPaymentActivity extends Activity {
          * 支付控件返回字符串:success、fail、cancel 分别代表支付成功，支付失败，支付取消
          */
         String str = data.getExtras().getString("pay_result");
-        if (str.equalsIgnoreCase("success")) {
-            result = BCPayResult.RESULT_SUCCESS;
-            errMsg = BCPayResult.RESULT_SUCCESS;
-            detailInfo += "支付成功！";
-        } else if (str.equalsIgnoreCase("fail")) {
+        if (str == null) {
             result = BCPayResult.RESULT_FAIL;
-            errMsg = BCPayResult.RESULT_FAIL;
-            detailInfo += "支付失败！";
-        } else if (str.equalsIgnoreCase("cancel")) {
-            result = BCPayResult.RESULT_CANCEL;
-            errMsg = BCPayResult.RESULT_CANCEL;
-            detailInfo += "用户取消了支付";
+            errMsg = BCPayResult.FAIL_ERR_FROM_CHANNEL;
+            detailInfo += "invalid pay_result";
+        } else {
+            if (str.equalsIgnoreCase("success")) {
+                result = BCPayResult.RESULT_SUCCESS;
+                errMsg = BCPayResult.RESULT_SUCCESS;
+                detailInfo += "支付成功！";
+            } else if (str.equalsIgnoreCase("fail")) {
+                result = BCPayResult.RESULT_FAIL;
+                errMsg = BCPayResult.RESULT_FAIL;
+                detailInfo += "支付失败！";
+            } else if (str.equalsIgnoreCase("cancel")) {
+                result = BCPayResult.RESULT_CANCEL;
+                errMsg = BCPayResult.RESULT_CANCEL;
+                detailInfo += "用户取消了支付";
+            }
         }
 
         BCPay instance = BCPay.getInstance(BCUnionPaymentActivity.this);

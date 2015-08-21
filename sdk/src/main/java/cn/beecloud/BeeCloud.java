@@ -14,7 +14,7 @@ public class BeeCloud {
     /**
      * BeeCloud Android SDK 版本
      */
-    public static final String BEECLOUD_ANDROID_SDK_VERSION = "1.3";
+    public static final String BEECLOUD_ANDROID_SDK_VERSION = "1.4";
 
     /**
      * 设置AppId和AppSecret(从BeeCloud网站的控制台获得), 并进行一系列异步的初始化

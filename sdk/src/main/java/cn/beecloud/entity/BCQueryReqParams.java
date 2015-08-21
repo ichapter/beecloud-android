@@ -70,6 +70,12 @@ public class BCQueryReqParams extends BCReqParams {
     public Integer limit;
 
     /**
+     * 线下扫码订单修改的方法
+     * 目前仅用于支付宝线下扫码订单状态查询, 更新
+     */
+    public String offlineMethod;
+
+    /**
      * 构造函数
      * @param channel       支付渠道类型
      * @throws BCException  父类构造有可能抛出异常
@@ -79,19 +85,26 @@ public class BCQueryReqParams extends BCReqParams {
     }
 
     /**
-     * 将成员变量(包含父类成员)转化成{"key_a":1,"key_b":"value_b"}格式json字符串
-     * 并通过URL encode转码
-     * @return 转码后的json串
+     * 将实例转化成符合后台请求的键值对
+     * 用于以json方式post请求
      */
-    public String transToEncodedJsonString() {
+    public Map<String, Object> transToQueryReqMapParams() {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("app_id", getAppId());
         params.put("timestamp", getTimestamp());
         params.put("app_sign", getAppSign());
-        params.put("channel", channel);
 
-        if (billNum != null)
-            params.put("bill_no", billNum);
+        //全渠道查询不需要传给服务端channel
+        if (channel != BCChannelTypes.ALL)
+            params.put("channel", channel.name());
+
+        //针对支付宝线下扫码的特殊处理
+        if (offlineMethod != null)
+            params.put("method", offlineMethod);
+        else {  //普通查询offlineMethod是null
+            if (billNum != null)
+                params.put("bill_no", billNum);
+        }
 
         if (refundNum != null)
             params.put("refund_no", refundNum);
@@ -108,8 +121,18 @@ public class BCQueryReqParams extends BCReqParams {
         if (limit != null)
             params.put("limit", limit);
 
+        return params;
+    }
+
+    /**
+     * 将成员变量(包含父类成员)转化成{"key_a":1,"key_b":"value_b"}格式json字符串
+     * 并通过URL encode转码
+     * @return 转码后的json串
+     */
+    public String transToEncodedJsonString() {
+
         Gson gson = new Gson();
-        String paramStr = gson.toJson(params);
+        String paramStr = gson.toJson(this.transToQueryReqMapParams());
 
         try {
             paramStr = URLEncoder.encode(paramStr, "UTF-8");
