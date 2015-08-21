@@ -226,7 +226,7 @@ BCPay.getInstance(GenQRCodeActivity.this).reqWXQRCodeAsync("微信二维码支�
 
 **原型：**
 
-通过构造`BCQuery`的实例，使用`queryBillsAsync`方法发起支付查询，`channel`指代何种支付方式，为BCReqParams.BCChannelTypes.ALL时则查询所有的支付渠道订单；在回调函数中将`BCResult`转化成`BCQueryBillOrderResult`之后做后续处理
+通过构造`BCQuery`的实例，使用`queryBillsAsync`方法发起支付查询，`channel`指代何种支付方式，为`BCReqParams.BCChannelTypes.ALL`时则查询所有的支付渠道订单；在回调函数中将`BCResult`转化成`BCQueryBillOrderResult`之后做后续处理
 
 **调用：**
 
@@ -277,7 +277,7 @@ BCQuery.getInstance().queryBillsAsync(
 
 **原型：**
 
-通过构造`BCQuery`的实例，使用`queryRefundsAsync`方法发起退款查询，`channel`指代何种支付方式，为BCReqParams.BCChannelTypes.ALL时则查询所有的支付渠道退款订单；在回调函数中将`BCResult`转化成`BCQueryRefundOrderResult`之后做后续处理
+通过构造`BCQuery`的实例，使用`queryRefundsAsync`方法发起退款查询，`channel`指代何种支付方式，为`BCReqParams.BCChannelTypes.ALL`时则查询所有的支付渠道退款订单；在回调函数中将`BCResult`转化成`BCQueryRefundOrderResult`之后做后续处理
 
 **调用：**<br/>
 同上，首先初始化回调入口BCCallback
