@@ -159,7 +159,7 @@ BCPay.getInstance(ShoppingCartActivity.this).reqWXPaymentAsync(
 通过`BCPay`的实例，以`reqAliOfflineQRCodeAsync`方法请求生成支付宝线下支付二维码。<br/>
 
 公用参数依次为
-> billTitle       商品描述, UTF8编码格式, 32个字节内<br/>
+> billTitle       商品描述, 32个字节内, 汉字以2个字节计<br/>
 > billTotalFee    支付金额，以分为单位，必须是正整数<br/>
 > billNum         商户自定义订单号<br/>
 > optional        为扩展参数，可以传入任意数量的key/value对来补充对业务逻辑<br/>
@@ -304,7 +304,7 @@ BCQuery.getInstance().queryRefundsAsync(
 同上，首先初始化回调入口BCCallback
 ```java
 BCQuery.getInstance().queryRefundStatusAsync(
-    BCReqParams.BCChannelTypes.WX_APP,     //目前仅支持微信
+    BCReqParams.BCChannelTypes.WX,     //目前仅支持微信
     "20150520refund001",                   //退款单号
     bcCallback);                           //回调入口
 ```

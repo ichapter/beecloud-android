@@ -29,7 +29,8 @@ public class BCQuery {
     private static final String TAG = "BCQuery";
 
     private static BCQuery instance;
-    private BCQuery() {}
+    private BCQuery() {
+    }
 
     //查询订单类型-支付订单, 退款订单
     public enum QueryOrderType{QUERY_BILLS, QUERY_REFUNDS}

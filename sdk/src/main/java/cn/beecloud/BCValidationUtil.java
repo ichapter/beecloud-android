@@ -22,6 +22,14 @@ class BCValidationUtil {
     }
 
     /**
+     * 判断string是否只包含数字和字母, 且长度8-32
+     */
+    public static boolean isValidBillNum(String str) {
+        return str != null && str.length() >= 8
+                && str.length() <= 32 && str.matches("[A-Za-z0-9]+");
+    }
+
+    /**
      * 判断字符串是否为有效的正整数
      * @param str 被校验字符串
      */

@@ -166,8 +166,8 @@ public class BCPay {
             return "parameters: 不合法的参数-订单标题长度不合法, 32个字节内, 汉字以2个字节计";
         }
 
-        if (!BCValidationUtil.isValidString(billNum))
-            return "parameters: 不合法的参数-订单号";
+        if (!BCValidationUtil.isValidBillNum(billNum))
+            return "parameters: 订单号必须是长度8~32位字母和/或数字组合成的字符串";
 
         if (billTotalFee < 0) {
             return "parameters: billTotalFee " + billTotalFee +
@@ -341,18 +341,28 @@ public class BCPay {
         String errMsg;
 
         //9000-订单支付成功, 8000-正在处理中, 4000-订单支付失败, 6001-用户中途取消, 6002-网络连接出错
-        if (resCode.equals("8000") || resCode.equals("9000")) {
+        String errDetail;
+        if (resCode.equals("9000")) {
             result = BCPayResult.RESULT_SUCCESS;
             errMsg = BCPayResult.RESULT_SUCCESS;
+            errDetail = errMsg;
         } else if (resCode.equals("6001")) {
             result = BCPayResult.RESULT_CANCEL;
             errMsg = BCPayResult.RESULT_CANCEL;
+            errDetail = errMsg;
         } else {
             result = BCPayResult.RESULT_FAIL;
             errMsg = BCPayResult.FAIL_ERR_FROM_CHANNEL;
+
+            if (resCode.equals("8000"))
+                errDetail = "订单正在处理中，无法获取成功确认信息";
+            else if (resCode.equals("4000"))
+                errDetail = "订单支付失败";
+            else
+                errDetail = "网络连接出错";
         }
 
-        payCallback.done(new BCPayResult(result, errMsg, aliResult));
+        payCallback.done(new BCPayResult(result, errMsg, errDetail));
     }
 
     /**
