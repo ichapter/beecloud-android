@@ -51,6 +51,7 @@ public class BCQuery {
         switch (operation){
             case QUERY_BILLS:
                 callback.done(new BCQueryBillOrderResult(errCode, errMsg, errDetail));
+                break;
             case QUERY_REFUNDS:
                 callback.done(new BCQueryRefundOrderResult(errCode, errMsg, errDetail));
         }

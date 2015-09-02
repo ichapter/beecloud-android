@@ -6,18 +6,20 @@
  */
 package cn.beecloud;
 
+import android.util.Base64;
+
 import java.security.MessageDigest;
 
 /**
  * 用于MD5签名
  */
-public class BCMD5Util {
+public class BCSecurityUtil {
 
     /**
      * @param s     待签名的字符串
      * @return      签名后的字符串
      */
-    public static String getMessageDigest(String s) {
+    public static String getMessageMD5Digest(String s) {
 
         char hexDigits[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
         try {
@@ -46,4 +48,14 @@ public class BCMD5Util {
         }
     }
 
+    /**
+     * @param login
+     * @param pass
+     * @return  Base64 Auth encoded string
+     */
+    static String getB64Auth (String login, String pass) {
+        String source=login+":"+pass;
+        String ret="Basic "+ Base64.encodeToString(source.getBytes(), Base64.URL_SAFE | Base64.NO_WRAP);
+        return ret;
+    }
 }
