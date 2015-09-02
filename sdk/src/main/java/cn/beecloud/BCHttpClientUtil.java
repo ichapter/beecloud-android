@@ -60,6 +60,11 @@ class BCHttpClientUtil {
     //退款订单查询部分URL
     private static final String REFUND_STATUS_QUERY_URL = "rest/refund/status?para=";
 
+    private final static String PAYPAL_LIVE_BASE_URL = "https://api.paypal.com/v1/";
+    private final static String PAYPAL_SANDBOX_BASE_URL = "https://api.sandbox.paypal.com/v1/";
+
+    private final static String PAYPAL_ACCESS_TOKEN_URL= "oauth2/token";
+
     /**
      * 随机获取主机, 并加入API版本号
      */
@@ -103,6 +108,13 @@ class BCHttpClientUtil {
         return getRandomHost() + REFUND_STATUS_QUERY_URL;
     }
 
+    public static String getPayPalAccessTokenUrl() {
+        if (BCCache.getInstance(null).paypalPayType == BCPay.PAYPAL_PAY_TYPE.LIVE)
+            return PAYPAL_LIVE_BASE_URL + PAYPAL_ACCESS_TOKEN_URL;
+        else
+            return PAYPAL_SANDBOX_BASE_URL + PAYPAL_ACCESS_TOKEN_URL;
+    }
+
     /**
      * @return  HttpClient实例
      */
@@ -116,8 +128,8 @@ class BCHttpClientUtil {
 
             HttpParams params = new BasicHttpParams();
 
-            HttpConnectionParams.setConnectionTimeout(params, BCCache.getInstance().networkTimeout);
-            HttpConnectionParams.setSoTimeout(params, BCCache.getInstance().networkTimeout);
+            HttpConnectionParams.setConnectionTimeout(params, BCCache.getInstance(null).networkTimeout);
+            HttpConnectionParams.setSoTimeout(params, BCCache.getInstance(null).networkTimeout);
 
             HttpProtocolParams.setVersion(params, HttpVersion.HTTP_1_1);
             HttpProtocolParams.setContentCharset(params, HTTP.UTF_8);
@@ -165,6 +177,7 @@ class BCHttpClientUtil {
 
         HttpPost httpPost = new HttpPost(url);
         httpPost.setEntity(entity);
+
         try {
             return client.execute(httpPost);
         } catch (IOException e) {
@@ -182,6 +195,9 @@ class BCHttpClientUtil {
     public static HttpResponse httpPost(String url, Map<String, Object> para) {
         Gson gson = new Gson();
         String param = gson.toJson(para);
+
+        //Log.w("BCHttpClientUtil", param);
+
         StringEntity entity;
         try {
             entity = new StringEntity(param, HTTP.UTF_8);
@@ -192,4 +208,33 @@ class BCHttpClientUtil {
         entity.setContentType("application/json");
         return httpPost(url, entity);
     }
+
+    public static HttpResponse getPayPalAccessToken() {
+        HttpClient client = wrapClient();
+
+        HttpPost httpPost = new HttpPost(getPayPalAccessTokenUrl());
+        httpPost.addHeader("Accept", "application/json");
+        httpPost.addHeader("Authorization", BCSecurityUtil.getB64Auth(
+                BCCache.getInstance(null).paypalClientID, BCCache.getInstance(null).paypalSecret));
+
+        StringEntity entity;
+        try {
+            entity = new StringEntity("grant_type=client_credentials", HTTP.UTF_8);
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+            return null;
+        }
+
+        entity.setContentType("application/x-www-form-urlencoded");
+
+        httpPost.setEntity(entity);
+
+        try {
+            return client.execute(httpPost);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
 }

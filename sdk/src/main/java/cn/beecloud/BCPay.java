@@ -33,7 +33,10 @@ import org.apache.http.util.EntityUtils;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -79,6 +82,10 @@ public class BCPay {
         return instance;
     }
 
+    static Activity getContextActivity() {
+        return mContextActivity;
+    }
+
     /**
      * 初始化微信支付，必须在需要调起微信支付的Activity的onCreate函数中调用，例如：
      * BCPay.initWechatPay(XXActivity.this);
@@ -105,7 +112,7 @@ public class BCPay {
         // 通过WXAPIFactory工厂，获取IWXAPI的实例
         wxAPI = WXAPIFactory.createWXAPI(context, null);
 
-        BCCache.getInstance().wxAppId = wechatAppID;
+        BCCache.getInstance(null).wxAppId = wechatAppID;
 
         try {
             if (isWXPaySupported()) {
@@ -121,6 +128,25 @@ public class BCPay {
         }
 
         return errMsg;
+    }
+
+    public enum PAYPAL_PAY_TYPE {
+        SANDBOX, LIVE
+    }
+
+    /**
+     * 初始化paypal, 仅在需要paypal支付的时候需要调用
+     * @param clientId  PayPal APP Client ID
+     * @param secret    PayPal APP Secret
+     * @param type      paypay pay type, SANDBOX for test before online, LIVE is for online
+     * @param retrieveShippingAddresses set true then it will enable PayPal Shipping Addresses Retrieval, but it sometimes may cause 'shipping address invalid' error during payment
+     */
+    public static void initPayPal(String clientId, String secret, PAYPAL_PAY_TYPE type, Boolean retrieveShippingAddresses){
+        BCCache instance = BCCache.getInstance(null);
+        instance.paypalClientID = clientId;
+        instance.paypalSecret = secret;
+        instance.paypalPayType = type;
+        instance.retrieveShippingAddresses = retrieveShippingAddresses;
     }
 
     /**
@@ -350,13 +376,15 @@ public class BCPay {
             result = BCPayResult.RESULT_CANCEL;
             errMsg = BCPayResult.RESULT_CANCEL;
             errDetail = errMsg;
+        } else if (resCode.equals("8000")) {
+            result = BCPayResult.RESULT_UNKNOWN;
+            errMsg = BCPayResult.RESULT_UNKNOWN;
+            errDetail = "订单正在处理中，无法获取成功确认信息";
         } else {
             result = BCPayResult.RESULT_FAIL;
             errMsg = BCPayResult.FAIL_ERR_FROM_CHANNEL;
 
-            if (resCode.equals("8000"))
-                errDetail = "订单正在处理中，无法获取成功确认信息";
-            else if (resCode.equals("4000"))
+            if (resCode.equals("4000"))
                 errDetail = "订单支付失败";
             else
                 errDetail = "网络连接出错";
@@ -415,6 +443,215 @@ public class BCPay {
     }
 
     /**
+     * PayPal支付
+     *
+     * @param billTitle       商品描述, 32个字节内, 汉字以2个字节计
+     * @param billTotalFee    支付金额，以分为单位，必须是正整数
+     * @param optional        为扩展参数HashMap，可以传入任意数量的key/value对来补充对业务逻辑的需求
+     * @param callback        支付完成后的回调函数
+     */
+    public void reqPayPalPaymentAsync(final String billTitle, final Integer billTotalFee,
+                                          final HashMap<String, String> optional,
+                                          final BCCallback callback) {
+
+        payCallback = callback;
+
+        if (BCCache.getInstance(null).paypalClientID == null ||
+                BCCache.getInstance(null).paypalSecret == null ||
+                BCCache.getInstance(null).paypalPayType == null) {
+            callback.done(new BCPayResult(BCPayResult.RESULT_FAIL, BCPayResult.FAIL_INVALID_PARAMS,
+                    "使用PayPal支付需要设置client id，PayPal应用secret和PayPal支付类型"));
+            return;
+        }
+
+        Intent intent = new Intent(mContextActivity, BCPayPalPaymentActivity.class);
+        intent.putExtra("billTitle", billTitle);
+        intent.putExtra("billTotalFee", billTotalFee);
+        Gson gson = new Gson();
+        intent.putExtra("optional", gson.toJson(optional));
+        mContextActivity.startActivity(intent);
+
+    }
+
+    private String getPayPalAccessToken() {
+        HttpResponse response = BCHttpClientUtil.getPayPalAccessToken();
+
+        if (response == null)
+            return null;
+
+        String accessToken = null;
+
+        if (response.getStatusLine().getStatusCode() == 200) {
+            String ret;
+            try {
+                ret = EntityUtils.toString(response.getEntity(), "UTF-8");
+
+                //反序列化json
+                Gson res = new Gson();
+
+                Type type = new TypeToken<Map<String, Object>>() {}.getType();
+                Map<String, Object> responseMap = res.fromJson(ret, type);
+
+                //判断后台返回结果
+                accessToken = String.valueOf(responseMap.get("access_token"));
+            } catch (IOException e) {
+                Log.e("BCPayPalPaymentActivity", e.getMessage());
+            }
+
+        }
+
+        return accessToken;
+    }
+
+    /**
+     * sync with server to verify the payment
+     *
+     * @return BCPayResult.RESULT_SUCCESS means sync successfully and payment is valid
+     */
+    String syncPayPalPayment(final String billTitle, final Integer billTotalFee, final String billNum,
+                                    final String optional, final PAYPAL_PAY_TYPE paypalType, final String token) {
+
+        //verify params
+        BCPayReqParams parameters;
+        try {
+            parameters = new BCPayReqParams(paypalType == PAYPAL_PAY_TYPE.LIVE ?
+                    BCReqParams.BCChannelTypes.PAYPAL_LIVE : BCReqParams.BCChannelTypes.PAYPAL_SANDBOX);
+        } catch (BCException e) {
+            return e.getMessage();
+        }
+
+        Map<String, String> optionalMap = null;
+
+        if (optional != null) {
+            Gson gson = new Gson();
+            optionalMap = gson.fromJson(optional, new TypeToken<Map<String,Object>>() {}.getType());
+        }
+
+        String paramValidRes = prepareParametersForPay(billTitle, billTotalFee,
+                billNum, optionalMap, parameters);
+
+        if (paramValidRes != null) {
+            return paramValidRes;
+        }
+
+        String accessToken = token;
+
+        if (accessToken == null)
+            accessToken = getPayPalAccessToken();
+
+        //Log.w("BCPay", accessToken);
+
+        if (accessToken == null)
+            return "Can't get access Token";
+
+        parameters.currency="USD";
+        parameters.accessToken = "Bearer " + accessToken;
+
+        String payURL = BCHttpClientUtil.getBillPayURL();
+
+        HttpResponse response = BCHttpClientUtil.httpPost(payURL, parameters.transToBillReqMapParams());
+        if (null == response) {
+            return "Network Error";
+        }
+        if (response.getStatusLine().getStatusCode() == 200) {
+            String ret;
+            try {
+                ret = EntityUtils.toString(response.getEntity(), "UTF-8");
+
+                Gson res = new Gson();
+
+                Type type = new TypeToken<Map<String,Object>>() {}.getType();
+                Map<String, Object> responseMap = res.fromJson(ret, type);
+
+                //check result
+                Double resultCode = (Double) responseMap.get("result_code");
+                String errDetail = (String)responseMap.get("err_detail");
+
+                if (resultCode == 0) {
+                    return BCPayResult.RESULT_SUCCESS;
+                /*
+                } else if (resultCode == 7 && errDetail != null && errDetail.startsWith("PAYPAL")) {
+
+                    Log.w("BCPay", "not a valid payment: " + errDetail);
+
+                    //here RESULT_SUCCESS only means sync success, not means successful pay
+                    //for example, you paid 1 USD, but the PayPal server just received 0.1 USD
+                    //then it is not a valid payment, it is rare but to prevent fraud
+
+                    return BCPayResult.RESULT_SUCCESS;
+                */
+                } else {
+                    //return error info from server
+                    return String.valueOf(responseMap.get("result_msg")) + " - " +
+                                    String.valueOf(responseMap.get("err_detail"));
+                }
+
+            } catch (IOException e) {
+                return "Invalid Response";
+            }
+        } else {
+            return "Network Error";
+        }
+    }
+
+    /**
+     * sync with server to verify the payment
+     *
+     * @return BCPayResult.RESULT_SUCCESS means sync successfully and payment is valid
+     */
+    public String syncPayPalPayment(final String syncJson, final String token) {
+        Gson gson = new Gson();
+        Map<String, String> syncItem = gson.fromJson(syncJson, new TypeToken<Map<String,String>>() {}.getType());
+
+        Integer billTotalFee;
+        try{
+            billTotalFee = Integer.valueOf(syncItem.get("billTotalFee"));
+        } catch (Exception e){
+            Log.e(TAG, e.getMessage());
+            billTotalFee = -1;
+        }
+
+        String result = syncPayPalPayment(syncItem.get("billTitle"), billTotalFee,
+                syncItem.get("billNum"), syncItem.get("optional"),
+                PAYPAL_PAY_TYPE.valueOf(syncItem.get("channel")), token);
+
+        if (result.equals(BCPayResult.RESULT_SUCCESS)) {
+            Set<String> syncedRecord = new HashSet<String>(1);
+            syncedRecord.add(syncJson);
+            BCCache.getInstance(mContextActivity).removeSyncedPalPalRecords(syncedRecord);
+        }
+
+        return result;
+    }
+
+    /**
+     * batch sync PayPal local payments
+     *
+     * @return Map use key "cachedNum" to get the cached total number, use key "syncedNum" to get the successfully synced number(also payments are valid)
+     */
+    public Map<String, Integer> batchSyncPayPalPayment() {
+        Set<String> allRecords = BCCache.getInstance(mContextActivity).getUnSyncedPayPalRecords();
+
+        Map<String, Integer> result = new HashMap<String, Integer>();
+        result.put("cachedNum", allRecords.size());
+
+        String accessToken = getPayPalAccessToken();
+
+        Set<String> syncedRecords = new HashSet<String>();
+
+        for (String jsonStr : allRecords) {
+            if (syncPayPalPayment(jsonStr, accessToken).equals(BCPayResult.RESULT_SUCCESS))
+                syncedRecords.add(jsonStr);
+        }
+
+        result.put("syncedNum", syncedRecords.size());
+
+        BCCache.getInstance(mContextActivity).removeSyncedPalPalRecords(syncedRecords);
+
+        return result;
+    }
+
+    /**
      * 银联在线支付
      *
      * @param billTitle       商品描述, 32个字节内, 汉字以2个字节计
@@ -424,8 +661,8 @@ public class BCPay {
      * @param callback        支付完成后的回调函数
      */
     public void reqUnionPaymentAsync(final String billTitle, final Integer billTotalFee,
-                                          final String billNum,final Map<String, String> optional,
-                                          final BCCallback callback) {
+                                     final String billNum,final Map<String, String> optional,
+                                     final BCCallback callback) {
         this.reqPaymentAsync(BCReqParams.BCChannelTypes.UN_APP, billTitle, billTotalFee,
                 billNum, optional, callback);
     }

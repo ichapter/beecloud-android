@@ -23,7 +23,9 @@
         android:id="@+id/btnQueryRefunds"
         android:layout_height="wrap_content"
         android:padding="5dp"
-        android:layout_margin ="20dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginTop="20dp"
         android:background="#007edf"
         android:text="查询退款订单"
         android:textColor="#ffffff"
@@ -37,7 +39,21 @@
         android:background="#007edf"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
+        android:layout_marginTop="20dp"
         android:text="查看退款状态"
+        android:textColor="#ffffff"
+        android:textSize="20sp"
+        android:layout_width="match_parent" />
+
+    <Button
+        android:id="@+id/btnPayPalUnSynced"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:background="#007edf"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginTop="20dp"
+        android:text="PayPal未同步服务器的订单"
         android:textColor="#ffffff"
         android:textSize="20sp"
         android:layout_width="match_parent" />

@@ -1,12 +1,12 @@
 ## BeeCloud Android SDK (Open Source)
 
-![pass](https://img.shields.io/badge/Build-pass-green.svg) ![license](https://img.shields.io/badge/license-MIT-brightgreen.svg) ![version](https://img.shields.io/badge/version-v1.4.0-blue.svg)
+![pass](https://img.shields.io/badge/Build-pass-green.svg) ![license](https://img.shields.io/badge/license-MIT-brightgreen.svg) ![version](https://img.shields.io/badge/version-v1.5.0-blue.svg)
 
 ## 简介
 
 本项目的官方GitHub地址是 [https://github.com/beecloud/beecloud-android](https://github.com/beecloud/beecloud-android)
 
-本SDK是根据[BeeCloud Rest API](https://github.com/beecloud/beecloud-rest-api) 开发的 Android SDK。可以作为调用BeeCloud Rest API的示例或者直接用于生产。
+本SDK是根据[BeeCloud Rest API](https://github.com/beecloud/beecloud-rest-api) 开发的 Android SDK。目前已经包含微信支付、支付宝支付、银联在线支付、PayPal支付和生成二维码方式支付，以及支付订单和退款订单的查询功能，可以作为调用BeeCloud Rest API的示例或者直接用于生产。
 
 ## 流程
 ![pic](http://7xavqo.com1.z0.glb.clouddn.com/UML.png)
@@ -24,6 +24,7 @@
 微信支付需要引入`libammsdk.jar`，<br/>
 支付宝需要引入`alipaysdk.jar`、`alipayutdid.jar`、`alipaysecsdk.jar`，<br/>
 银联需要引入`UPPayAssistEx.jar`、`UPPayPluginEx.jar`，<br/>
+PayPal需要引入`PayPalAndroidSDK-2.9.11.jar`，<br/>
 最后添加`beecloud android sdk`：`beecloud-android\sdk\beecloud.jar`
 
 2.对于银联支付需要将银联插件`beecloud-android\demo\src\main\assets\UPPayPluginEx.apk`引入你的工程`assets`目录下
@@ -42,16 +43,35 @@
 BeeCloud.setAppIdAndSecret("c5d1cba1-5e3f-4ba0-941d-9b0a371fe719", "39a7a518-9ac8-4a9e-87bc-7885f33cf18c");
 ```
 <br/>
->2. 如果用到微信支付，在用到微信支付的Activity的onCreate函数里调用以下函数,第二个参数需要换成你自己的微信AppID，例如
+>2. 如果用到微信支付，在用到微信支付的Activity的onCreate函数里调用以下函数，第二个参数需要换成你自己的微信AppID，例如
 ```java
 BCPay.initWechatPay(ShoppingCartActivity.this, "wxf1aa465362b4c8f1");
 ```
+>3. 如果用到PayPal，在用到PayPal的Activity的onCreate函数里调用函数，例如
+```java
+BCPay.initPayPal(
+    //在PayPal官网申请的APP Client ID
+    "AVT1Ch18aTIlUJIeeCxvC7ZKQYHczGwiWm8jOwhrREc4a5FnbdwlqEB4evlHPXXUA67RAAZqZM0H8TCR", 
+    //在PayPal官网申请的APP Secret   
+    "EL-fkjkEUyxrwZAmrfn46awFXlX-h2nRkyCVhhpeVdlSRuhPJKXx3ZvUTTJqPQuAeomXA8PZ2MkX24vF",  
+    //测试过程中使用BCPay.PAYPAL_PAY_TYPE.SANDBOX，生产环境使用BCPay.PAYPAL_PAY_TYPE.LIVE，不同的环境需要与Client ID和Secret相匹配
+    BCPay.PAYPAL_PAY_TYPE.SANDBOX,  
+    //是否显示收货地址，如果为TRUE，用户地址没有正确配置可能导致不能付款，该选项可以自行考量
+    Boolean.FALSE
+    );
+````
 
 ### 2. 在`AndroidManifest.xml`中添加`permission`
 ```java
+<!-- for all -->
 <uses-permission android:name="android.permission.INTERNET" />
 <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+<!-- for PayPal -->
+<uses-permission android:name="android.permission.READ_PHONE_STATE" />
+<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 ```
 
 ### 3. 在`AndroidManifest.xml`中注册`activity`
@@ -89,6 +109,24 @@ BCPay.initWechatPay(ShoppingCartActivity.this, "wxf1aa465362b4c8f1");
     android:theme="@android:style/Theme.Translucent.NoTitleBar"
     android:windowSoftInputMode="adjustResize" />
 ```
+> 对于PayPal，需要添加
+```java
+<service
+    android:name="com.paypal.android.sdk.payments.PayPalService"
+    android:exported="false" />
+<activity android:name="com.paypal.android.sdk.payments.PaymentActivity" />
+<activity android:name="com.paypal.android.sdk.payments.LoginActivity" />
+<activity android:name="com.paypal.android.sdk.payments.PaymentMethodActivity" />
+<activity android:name="com.paypal.android.sdk.payments.PaymentConfirmActivity" />
+<activity
+    android:name="cn.beecloud.BCPayPalPaymentActivity"
+    android:configChanges="orientation|keyboardHidden"
+    android:excludeFromRecents="true"
+    android:launchMode="singleTop"
+    android:screenOrientation="portrait"
+    android:theme="@android:style/Theme.Translucent.NoTitleBar"
+    android:windowSoftInputMode="adjustResize" />
+```
 
 ### 4.支付
 
@@ -99,11 +137,12 @@ BCPay.initWechatPay(ShoppingCartActivity.this, "wxf1aa465362b4c8f1");
 通过`BCPay`的实例，以`reqWXPaymentAsync`方法发起微信支付请求。 <br/>
 通过`BCPay`的实例，以`reqAliPaymentAsync`方法发起支付宝支付请求。<br/>
 通过`BCPay`的实例，以`reqUnionPaymentAsync`方法发起银联支付请求。<br/>
+通过`BCPay`的实例，以`reqPayPalPaymentAsync`方法发起PayPal支付请求。<br/>
 
 参数依次为
 > billTitle       商品描述, 32个字节内, 汉字以2个字节计<br/>
 > billTotalFee    支付金额，以分为单位，必须是正整数<br/>
-> billNum         商户自定义订单号<br/>
+> billNum         商户自定义订单号，PayPal不需要该参数<br/>
 > optional        为扩展参数，可以传入任意数量的key/value对来补充对业务逻辑<br/>
 > callback        支付完成后的回调入口
 
@@ -153,6 +192,33 @@ BCPay.getInstance(ShoppingCartActivity.this).reqWXPaymentAsync(
     mapOptional,            //扩展参数(可以null)
     bcCallback);            //支付完成后回调入口
 ```
+##### 对于PayPal支付的补充说明（非强制，但建议执行）
+PayPal回调返回的成功表示手机支付已经完成，但是PayPal官方推荐服务端进一步校验以防止非法欺诈行为，为此每次PayPal支付完成之后，SDK都会主动向服务端发送同步请求，所以在生产环境中`建议`以服务端的订单状态为标准。<br />
+另外在同步过程中为防止网络故障导致的同步失败，每次同步失败的PayPal订单都会保留在缓存，这种情况属于小概率事件，但是周全起见，可以参考`demo`中的`PayPalUnSyncedListActivity`如何进行手动同步，可以直接调用`batchSyncPayPalPayment`，例如
+```java
+BCCache.executorService.execute(new Runnable() {
+    @Override
+    public void run() {
+        //batch sync
+        Map<String, Integer> result = BCPay.getInstance(PayPalUnSyncedListActivity.this).
+                batchSyncPayPalPayment();
+
+        //total cached number
+        Integer allCached = result.get("cachedNum");
+        //total successfully synced number
+        Integer synced = result.get("syncedNum");
+
+        if (allCached.equals(synced)) {
+            //成功全部同步
+        } else {
+            //没有成功同步的订单
+            Set<String> unSynced = BCCache.getInstance(activity).getUnSyncedPayPalRecords());
+        }
+    }
+});
+```
+如果想手动清除未同步订单，调用`BCCache.getInstance(activity).clearUnSyncedPayPalRecords()`
+
 ### 5.生成支付二维码
 请查看`doc`中的`API`，支付类`BCPay`，参照`demo`中`GenQRCodeActivity`
 

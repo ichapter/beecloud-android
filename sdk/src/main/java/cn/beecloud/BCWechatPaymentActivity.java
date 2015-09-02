@@ -34,7 +34,7 @@ public class BCWechatPaymentActivity extends Activity implements IWXAPIEventHand
         Log.i(TAG, "into weixin return activity");
 
         try {
-            String wxAppId = BCCache.getInstance().wxAppId;
+            String wxAppId = BCCache.getInstance(null).wxAppId;
             if (wxAppId != null && wxAppId.length() > 0) {
                 wxAPI = WXAPIFactory.createWXAPI(this, wxAppId);
                 wxAPI.handleIntent(getIntent(), this);
@@ -103,7 +103,6 @@ public class BCWechatPaymentActivity extends Activity implements IWXAPIEventHand
                 break;
             default:
                 detailInfo += "支付失败";
-                break;
         }
 
         BCPay instance = BCPay.getInstance(BCWechatPaymentActivity.this);
