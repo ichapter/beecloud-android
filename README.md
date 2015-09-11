@@ -59,7 +59,7 @@ BCPay.initPayPal(
     //是否显示收货地址，如果为TRUE，用户地址没有正确配置可能导致不能付款，该选项可以自行考量
     Boolean.FALSE
     );
-````
+```
 
 ### 2. 在`AndroidManifest.xml`中添加`permission`
 ```java

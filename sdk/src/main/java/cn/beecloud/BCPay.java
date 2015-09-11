@@ -15,6 +15,9 @@ import android.os.Looper;
 import android.util.Log;
 
 import com.alipay.sdk.app.PayTask;
+import com.baidu.android.pay.PayCallBack;
+import com.baidu.paysdk.PayCallBackManager;
+import com.baidu.paysdk.api.BaiduPay;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.google.zxing.BarcodeFormat;
@@ -32,11 +35,11 @@ import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -254,6 +257,8 @@ public class BCPay {
                     return;
                 }
 
+                parameters.billTimeout = 120;
+
                 String payURL = BCHttpClientUtil.getBillPayURL();
 
                 HttpResponse response = BCHttpClientUtil.httpPost(payURL, parameters.transToBillReqMapParams());
@@ -290,6 +295,9 @@ public class BCPay {
                                     case UN_APP:
                                         reqUnionPaymentViaAPP(responseMap);
                                         break;
+                                    case BD_APP:
+                                        reqBaiduPaymentViaAPP(responseMap);
+                                        break;
                                     default:
                                         callback.done(new BCPayResult(BCPayResult.RESULT_FAIL, BCPayResult.FAIL_INVALID_PARAMS,
                                                 "channelType参数不合法"));
@@ -302,7 +310,7 @@ public class BCPay {
                         } else {
                             //返回后端传回的错误信息
                             callback.done(new BCPayResult(BCPayResult.RESULT_FAIL, BCPayResult.FAIL_ERR_FROM_SERVER,
-                                    String.valueOf(responseMap.get("result_msg")) +
+                                    String.valueOf(responseMap.get("result_msg")) + ", " +
                                             String.valueOf(responseMap.get("err_detail"))));
                         }
 
@@ -378,7 +386,7 @@ public class BCPay {
             errDetail = errMsg;
         } else if (resCode.equals("8000")) {
             result = BCPayResult.RESULT_UNKNOWN;
-            errMsg = BCPayResult.RESULT_UNKNOWN;
+            errMsg = BCPayResult.RESULT_PAYING_UNCONFIRMED;
             errDetail = "订单正在处理中，无法获取成功确认信息";
         } else {
             result = BCPayResult.RESULT_FAIL;
@@ -406,6 +414,82 @@ public class BCPay {
         intent.setClass(mContextActivity, BCUnionPaymentActivity.class);
         intent.putExtra("tn", TN);
         mContextActivity.startActivity(intent);
+    }
+
+    /**
+     * 与服务器交互后下一步进入百度app支付
+     *
+     * @param responseMap     服务端返回参数
+     */
+    private void reqBaiduPaymentViaAPP(final Map<String, Object> responseMap) {
+        String orderInfo = (String) responseMap.get("orderInfo");
+
+        Log.w(TAG, orderInfo);
+
+        Map<String, String> map = new HashMap<String, String>();
+        BaiduPay.getInstance().doPay(mContextActivity, orderInfo, new PayCallBack() {
+            public void onPayResult(int stateCode, String payDesc) {
+                Log.d(TAG, "rsult=" + stateCode + "#desc=" + payDesc);
+
+                String result;
+                String errMsg;
+                String errDetail;
+
+                switch (stateCode) {
+                    case PayCallBackManager.PayStateModle.PAY_STATUS_SUCCESS:// 需要到服务端验证支付结果
+                        result = BCPayResult.RESULT_SUCCESS;
+                        errMsg = BCPayResult.RESULT_SUCCESS;
+                        errDetail = errMsg;
+                        break;
+                    case PayCallBackManager.PayStateModle.PAY_STATUS_PAYING:// 需要到服务端验证支付结果
+                        result = BCPayResult.RESULT_UNKNOWN;
+                        errMsg = BCPayResult.RESULT_PAYING_UNCONFIRMED;
+                        errDetail = "订单正在处理中，无法获取成功确认信息";
+                        break;
+                    case PayCallBackManager.PayStateModle.PAY_STATUS_CANCEL:
+                        result = BCPayResult.RESULT_CANCEL;
+                        errDetail = errMsg = BCPayResult.RESULT_CANCEL;
+                        break;
+                    case PayCallBackManager.PayStateModle.PAY_STATUS_NOSUPPORT:
+                        result = BCPayResult.RESULT_FAIL;
+                        errMsg = BCPayResult.FAIL_ERR_FROM_CHANNEL;
+                        errDetail = "不支持该种支付方式";
+                        break;
+                    case PayCallBackManager.PayStateModle.PAY_STATUS_TOKEN_INVALID:
+                        result = BCPayResult.RESULT_FAIL;
+                        errMsg = BCPayResult.FAIL_ERR_FROM_CHANNEL;
+                        errDetail = "无效的登陆状态";
+                        break;
+                    case PayCallBackManager.PayStateModle.PAY_STATUS_LOGIN_ERROR:
+                        result = BCPayResult.RESULT_FAIL;
+                        errMsg = BCPayResult.FAIL_ERR_FROM_CHANNEL;
+                        errDetail = "登陆失败";
+                        break;
+                    case PayCallBackManager.PayStateModle.PAY_STATUS_ERROR:
+                        result = BCPayResult.RESULT_FAIL;
+                        errMsg = BCPayResult.FAIL_ERR_FROM_CHANNEL;
+                        errDetail = "支付失败";
+                        break;
+                    case PayCallBackManager.PayStateModle.PAY_STATUS_LOGIN_OUT:
+                        result = BCPayResult.RESULT_FAIL;
+                        errMsg = BCPayResult.FAIL_ERR_FROM_CHANNEL;
+                        errDetail = "退出登录";
+                        break;
+                    default:
+                        result = BCPayResult.RESULT_FAIL;
+                        errMsg = BCPayResult.FAIL_ERR_FROM_CHANNEL;
+                        errDetail = "支付失败";
+                        break;
+                }
+
+                payCallback.done(new BCPayResult(result, errMsg, errDetail+"#result=" + stateCode + "#desc=" + payDesc));
+            }
+
+            public boolean isHideLoadingDialog() {
+                return true;
+            }
+        }, map);
+
     }
 
     /**
@@ -439,6 +523,22 @@ public class BCPay {
                                    final String billNum,final Map<String, String> optional,
                                    final BCCallback callback) {
         this.reqPaymentAsync(BCReqParams.BCChannelTypes.ALI_APP, billTitle, billTotalFee,
+                billNum, optional, callback);
+    }
+
+    /**
+     * 百度钱包支付
+     *
+     * @param billTitle       商品描述, 32个字节内, 汉字以2个字节计
+     * @param billTotalFee    支付金额，以分为单位，必须是正整数
+     * @param billNum         商户自定义订单号
+     * @param optional        为扩展参数，可以传入任意数量的key/value对来补充对业务逻辑的需求
+     * @param callback        支付完成后的回调函数
+     */
+    public void reqBaiduPaymentAsync(final String billTitle, final Integer billTotalFee,
+                                   final String billNum,final Map<String, String> optional,
+                                   final BCCallback callback) {
+        this.reqPaymentAsync(BCReqParams.BCChannelTypes.BD_APP, billTitle, billTotalFee,
                 billNum, optional, callback);
     }
 
@@ -565,7 +665,7 @@ public class BCPay {
 
                 //check result
                 Double resultCode = (Double) responseMap.get("result_code");
-                String errDetail = (String)responseMap.get("err_detail");
+                //String errDetail = (String)responseMap.get("err_detail");
 
                 if (resultCode == 0) {
                     return BCPayResult.RESULT_SUCCESS;
@@ -616,7 +716,7 @@ public class BCPay {
                 PAYPAL_PAY_TYPE.valueOf(syncItem.get("channel")), token);
 
         if (result.equals(BCPayResult.RESULT_SUCCESS)) {
-            Set<String> syncedRecord = new HashSet<String>(1);
+            List<String> syncedRecord = new ArrayList<String>(1);
             syncedRecord.add(syncJson);
             BCCache.getInstance(mContextActivity).removeSyncedPalPalRecords(syncedRecord);
         }
@@ -630,14 +730,14 @@ public class BCPay {
      * @return Map use key "cachedNum" to get the cached total number, use key "syncedNum" to get the successfully synced number(also payments are valid)
      */
     public Map<String, Integer> batchSyncPayPalPayment() {
-        Set<String> allRecords = BCCache.getInstance(mContextActivity).getUnSyncedPayPalRecords();
+        List<String> allRecords = BCCache.getInstance(mContextActivity).getUnSyncedPayPalRecords();
 
         Map<String, Integer> result = new HashMap<String, Integer>();
         result.put("cachedNum", allRecords.size());
 
         String accessToken = getPayPalAccessToken();
 
-        Set<String> syncedRecords = new HashSet<String>();
+        List<String> syncedRecords = new ArrayList<String>();
 
         for (String jsonStr : allRecords) {
             if (syncPayPalPayment(jsonStr, accessToken).equals(BCPayResult.RESULT_SUCCESS))
