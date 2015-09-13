@@ -38,6 +38,7 @@ public class BillListActivity extends Activity {
     Button btnWeChatOrder;
     Button btnAliPayOrder;
     Button btnUNPayOrder;
+    Button btnPayPalPayOrder;
     Button btnAllPayOrder;
     ListView listViewOrder;
 
@@ -175,6 +176,20 @@ public class BillListActivity extends Activity {
                         endTime.getTime(),                      //订单完成时间
                         2,                                      //忽略满足条件的前2条数据
                         15,                                      //只返回满足条件的15条数据
+                        bcCallback);
+            }
+        });
+
+        btnPayPalPayOrder = (Button) findViewById(R.id.btnPayPalPayOrder);
+        btnPayPalPayOrder.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // 如果调起支付太慢，可以在这里开启动画，表示正在loading
+                //以progressdialog为例
+                loadingDialog.show();
+
+                BCQuery.getInstance().queryBillsAsync(
+                        BCReqParams.BCChannelTypes.PAYPAL,  //此处表示PAYPAL支付的查询
                         bcCallback);
             }
         });

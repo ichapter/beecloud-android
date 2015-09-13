@@ -37,9 +37,19 @@ public class BCPayResult implements BCResult {
     public static final String RESULT_CANCEL = "CANCEL";
 
     /**
-     * 表示支付失败或者状态未知
+     * 表示支付失败
      */
     public static final String RESULT_FAIL = "FAIL";
+
+    /**
+     * 表示支付结果状态未知
+     */
+    public static final String RESULT_UNKNOWN = "UNKNOWN";
+
+    /**
+     * 表示支付中，未获取确认信息
+     */
+    public static final String RESULT_PAYING_UNCONFIRMED = "RESULT_PAYING_UNCONFIRMED";
 
     /**
      * 针对银联，存在插件不存在需要安装的问题

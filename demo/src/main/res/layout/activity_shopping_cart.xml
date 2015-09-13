@@ -43,7 +43,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="支付金额："
-                android:textSize="26sp"
+                android:textSize="20sp"
                 android:textColor="@color/black"/>
 
             <TextView
@@ -59,8 +59,8 @@
                 android:layout_marginTop="10dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="元"
-                android:textSize="26sp"
+                android:text="CNY|USD"
+                android:textSize="20sp"
                 android:textColor="@color/black"/>
         </LinearLayout>
 

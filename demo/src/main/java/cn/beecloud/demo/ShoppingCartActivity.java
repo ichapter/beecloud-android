@@ -56,6 +56,15 @@ public class ShoppingCartActivity extends Activity {
 
                     String result = bcPayResult.getResult();
 
+                    /*
+                      注意！
+                      所有支付渠道建议以服务端的状态为准，此处返回的RESULT_SUCCESS仅仅代表手机端支付成功，
+                      该操作并非强制性要求，虽然属于小概率事件，但渠道官方推荐以防止欺诈手段
+
+                        对于PayPal的每一次支付，sdk会自动帮你与服务端同步，
+                        如果与服务端同步失败，记录会被自动保存，此时你可以调用batchSyncPayPalPayment方法手动同步
+                        虽然这种情况比较少，但是建议参考PayPalUnSyncedListActivity做好同步，否则服务器将无法查阅到订单
+                    */
                     if (result.equals(BCPayResult.RESULT_SUCCESS))
                         Toast.makeText(ShoppingCartActivity.this, "用户支付成功", Toast.LENGTH_LONG).show();
                     else if (result.equals(BCPayResult.RESULT_CANCEL))
@@ -71,8 +80,10 @@ public class ShoppingCartActivity extends Activity {
                             msg.what = 1;
                             mHandler.sendMessage(msg);
                         }
-                    }
-                    else{
+                    } else if (result.equals(BCPayResult.RESULT_UNKNOWN)) {
+                        //可能出现在支付宝8000返回状态
+                        Toast.makeText(ShoppingCartActivity.this, "订单状态未知", Toast.LENGTH_LONG).show();
+                    } else{
                         Toast.makeText(ShoppingCartActivity.this, "invalid return", Toast.LENGTH_LONG).show();
                     }
                 }
@@ -127,16 +138,28 @@ public class ShoppingCartActivity extends Activity {
         setContentView(R.layout.activity_shopping_cart);
 
         // 推荐在主Activity里的onCreate函数中初始化BeeCloud.
-        BeeCloud.setAppIdAndSecret("c5d1cba1-5e3f-4ba0-941d-9b0a371fe719", "39a7a518-9ac8-4a9e-87bc-7885f33cf18c");
+        //BeeCloud.setAppIdAndSecret("c5d1cba1-5e3f-4ba0-941d-9b0a371fe719", "39a7a518-9ac8-4a9e-87bc-7885f33cf18c");
+        BeeCloud.setAppIdAndSecret("c37d661d-7e61-49ea-96a5-68c34e83db3b", "c37d661d-7e61-49ea-96a5-68c34e83db3b");
+        //BeeCloud.setAppIdAndSecret("6e49a763-ff8c-4e18-903c-23bbc8c6b8f4", "52690b4e-faef-4cb9-9a59-7e4427f5fa45");
 
         // 如果用到微信支付，在用到微信支付的Activity的onCreate函数里调用以下函数.
         // 第二个参数需要换成你自己的微信AppID.
         BCPay.initWechatPay(ShoppingCartActivity.this, "wx19433a59b15fe84d");
 
+        // 如果使用PayPal需要在支付之前设置client id和应用secret
+        // BCPay.PAYPAL_PAY_TYPE.SANDBOX用于测试，BCPay.PAYPAL_PAY_TYPE.LIVE用于生产环境
+        BCPay.initPayPal("AVT1Ch18aTIlUJIeeCxvC7ZKQYHczGwiWm8jOwhrREc4a5FnbdwlqEB4evlHPXXUA67RAAZqZM0H8TCR",
+                "EL-fkjkEUyxrwZAmrfn46awFXlX-h2nRkyCVhhpeVdlSRuhPJKXx3ZvUTTJqPQuAeomXA8PZ2MkX24vF",
+                BCPay.PAYPAL_PAY_TYPE.SANDBOX, Boolean.FALSE);
+
         payMethod = (ListView) this.findViewById(R.id.payMethod);
-        Integer[] payIcons = new Integer[]{R.drawable.wechat, R.drawable.alipay, R.drawable.unionpay, R.drawable.scan};
-        String[] payNames = new String[]{"微信支付", "支付宝支付", "银联在线", "二维码支付"};
-        String[] payDescs = new String[]{"使用微信支付", "使用支付宝支付", "使用银联在线支付", "通过扫描二维码支付"};
+        Integer[] payIcons = new Integer[]{R.drawable.wechat, R.drawable.alipay,
+                R.drawable.unionpay, R.drawable.baidupay ,R.drawable.paypal, R.drawable.scan};
+        String[] payNames = new String[]{"微信支付", "支付宝支付",
+                "银联在线", "百度钱包", "PayPal支付", "二维码支付"};
+        String[] payDescs = new String[]{"使用微信支付，以人民币CNY计费", "使用支付宝支付，以人民币CNY计费",
+                "使用银联在线支付，以人民币CNY计费", "使用百度钱包支付，以人民币CNY计费",
+                "使用PayPal支付，以美元USD计费", "通过扫描二维码支付"};
         PayMethodListItem adapter = new PayMethodListItem(this, payIcons, payNames, payDescs);
         payMethod.setAdapter(adapter);
 
@@ -189,7 +212,26 @@ public class ShoppingCartActivity extends Activity {
                         BCPay.getInstance(ShoppingCartActivity.this).reqUnionPaymentAsync("银联支付测试", 1,
                                 UUID.randomUUID().toString().replace("-", ""), null, bcCallback);
                         break;
-                    case 3: //通过二维码支付
+                    case 3: //通过百度钱包支付
+                        loadingDialog.show();
+
+                        HashMap<String, String> hashMapOptional = new HashMap<String, String>();
+                        hashMapOptional.put("goods desc", "商品详细描述");
+
+                        BCPay.getInstance(ShoppingCartActivity.this).reqBaiduPaymentAsync("Baidu钱包支付测试", 1,
+                                UUID.randomUUID().toString().replace("-", ""), hashMapOptional, bcCallback);
+                        break;
+                    case 4: //通过PayPal支付
+                        loadingDialog.show();
+
+                        hashMapOptional = new HashMap<String, String>();
+                        hashMapOptional.put("PayPal key1", "PayPal value1");
+                        hashMapOptional.put("PayPal key2", "PayPal value2");
+
+                        BCPay.getInstance(ShoppingCartActivity.this).reqPayPalPaymentAsync("PayPal payment test", 1,
+                                hashMapOptional, bcCallback);
+                        break;
+                    default:
                         Intent intent = new Intent(ShoppingCartActivity.this, GenQRCodeActivity.class);
                         startActivity(intent);
                 }

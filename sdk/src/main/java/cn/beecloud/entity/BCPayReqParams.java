@@ -37,6 +37,21 @@ public class BCPayReqParams extends BCReqParams {
     public String title;
 
     /**
+     * PayPal token;
+     */
+    public String accessToken;
+
+    /**
+     * PayPal currency
+     */
+    public String currency;
+
+    /**
+     * baidu timeout(seconds)
+     */
+    public Integer billTimeout;
+
+    /**
      * 附加数据
      * 用户自定义的参数, 将会在webhook通知中原样返回, 该字段主要用于商户携带订单的自定义数据
      */
@@ -92,6 +107,12 @@ public class BCPayReqParams extends BCReqParams {
         params.put("bill_no", billNum);
         params.put("title", title);
 
+        if (accessToken != null)
+            params.put("access_token",accessToken);
+
+        if (currency != null)
+            params.put("currency", currency);
+
         if (optional !=null && optional.size() != 0)
             params.put("optional", optional);
 
@@ -100,6 +121,9 @@ public class BCPayReqParams extends BCReqParams {
 
         if (returnUrl != null)
             params.put("return_url", returnUrl);
+
+        if (billTimeout != null)
+            params.put("bill_timeout", billTimeout);
 
         return params;
     }

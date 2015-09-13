@@ -10,6 +10,7 @@ public class OrdersEntryActivity extends Activity {
     Button btnQueryBills;
     Button btnQueryRefunds;
     Button btnRefundStatus;
+    Button btnPayPalUnSynced;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +40,15 @@ public class OrdersEntryActivity extends Activity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(OrdersEntryActivity.this, RefundStatusActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        btnPayPalUnSynced = (Button) findViewById(R.id.btnPayPalUnSynced);
+        btnPayPalUnSynced.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(OrdersEntryActivity.this, PayPalUnSyncedListActivity.class);
                 startActivity(intent);
             }
         });

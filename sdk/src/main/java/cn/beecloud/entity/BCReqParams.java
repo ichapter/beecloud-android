@@ -10,7 +10,7 @@ import java.util.Date;
 
 import cn.beecloud.BCCache;
 import cn.beecloud.BCException;
-import cn.beecloud.BCMD5Util;
+import cn.beecloud.BCSecurityUtil;
 
 /**
  * 向服务端请求的基类
@@ -124,7 +124,45 @@ public class BCReqParams {
          * 银联PC网页支付
          * 仅用于查询订单
          */
-        UN_WEB;
+        UN_WEB,
+
+        /**
+         * for PayPal query
+         */
+        PAYPAL,
+
+        /**
+         * for PayPal test env
+         */
+        PAYPAL_SANDBOX,
+
+        /**
+         * for PayPal live(production) env
+         */
+        PAYPAL_LIVE,
+
+        /**
+         * 百度钱包APP支付
+         */
+        BD_APP,
+
+        /**
+         * 百度PC网页支付
+         * 仅用于查询订单
+         */
+        BD_WEB,
+
+        /**
+         * 百度WAP网页支付
+         * 仅用于查询订单
+         */
+        BD_WAP,
+
+        /**
+         * 百度所有渠道,
+         * 用于查询
+         */
+        BD;
 
         /**
          * 判断是否为有效的app端支付渠道类型
@@ -135,7 +173,10 @@ public class BCReqParams {
         public static boolean isValidAPPPaymentChannelType(BCChannelTypes channel) {
             return channel == WX_APP ||
                     channel == ALI_APP ||
-                    channel == UN_APP;
+                    channel == UN_APP ||
+                    channel == PAYPAL_SANDBOX ||
+                    channel == PAYPAL_LIVE ||
+                    channel == BD_APP;
         }
 
         /**
@@ -156,7 +197,7 @@ public class BCReqParams {
          */
         public static String getTranslatedChannelName(String channel) {
             if (channel.equals(WX.name()))
-                return "微信所有渠道";
+                return "微信支付";
             else if (channel.equals(WX_NATIVE.name()))
                 return "微信公众号二维码支付";
             else if (channel.equals(WX_JSAPI.name()))
@@ -164,7 +205,7 @@ public class BCReqParams {
             else if (channel.equals(WX_APP.name()))
                 return "微信手机原生APP支付";
             else if (channel.equals(ALI.name()))
-                return "支付宝所有渠道";
+                return "支付宝支付";
             else if (channel.equals(ALI_APP.name()))
                 return "支付宝手机原生APP支付";
             else if (channel.equals(ALI_WEB.name()))
@@ -176,11 +217,25 @@ public class BCReqParams {
             else if (channel.equals(ALI_WAP.name()))
                 return "支付宝移动网页支付";
             else if (channel.equals(UN.name()))
-                return "银联所有渠道";
+                return "银联支付";
             else if (channel.equals(UN_APP.name()))
                 return "银联手机原生APP支付";
             else if (channel.equals(UN_WEB.name()))
                 return "银联PC网页支付";
+            else if (channel.equals(PAYPAL.name()))
+                return "PAYPAL";
+            else if (channel.equals(PAYPAL_SANDBOX.name()))
+                return "PAYPAL SANDBOX";
+            else if (channel.equals(PAYPAL_LIVE.name()))
+                return "PAYPAL LIVE";
+            else if (channel.equals(BD_APP.name()))
+                return "百度钱包APP支付";
+            else if (channel.equals(BD_WEB.name()))
+                return "百度PC网页支付";
+            else if (channel.equals(BD_WAP.name()))
+                return "百度WAP网页支付";
+            else if (channel.equals(BD.name()))
+                return "百度钱包支付";
             else
                 return "非法的支付类型";
         }
@@ -224,14 +279,14 @@ public class BCReqParams {
         if (reqType == ReqType.QRCODE && !BCChannelTypes.isValidQRCodeReqChannelType(channel))
             throw new BCException("非法二维码请求支付渠道");
 
-        BCCache mCache = BCCache.getInstance();
+        BCCache mCache = BCCache.getInstance(null);
 
         if (mCache.appId == null || mCache.appSecret == null) {
             throw new BCException("parameters: 请通过BeeCloud初始化appId和appSecret");
         } else {
             appId = mCache.appId;
             timestamp = (new Date()).getTime();
-            appSign = BCMD5Util.getMessageDigest(appId +
+            appSign = BCSecurityUtil.getMessageMD5Digest(appId +
                     timestamp + mCache.appSecret);
             this.channel = channel;
         }

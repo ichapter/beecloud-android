@@ -6,7 +6,7 @@ android {
         }
     }
     compileSdkVersion 21
-    buildToolsVersion "22.0.1"
+    buildToolsVersion "22.0.0"
     defaultConfig {
         minSdkVersion 9
         targetSdkVersion 21
@@ -47,7 +47,16 @@ dependencies {
 
     //QRCode
     libs/zxing-3.2.0.jar
+
+
+    //baidu
+    Cashier_SDK-v4.2.0.jar
+
+    //paypal
+    PayPalAndroidSDK-2.9.11.jar
+
     */
+
 }
 
 tasks.withType(JavaCompile) {
