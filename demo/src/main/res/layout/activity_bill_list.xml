@@ -42,6 +42,17 @@
         android:padding="5dp"/>
 
     <Button
+        android:id="@+id/btnBDPayOrder"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:background="#007edf"
+        android:textColor="#ffffff"
+        android:textSize="16sp"
+        android:text="百度钱包订单查询"
+        android:padding="5dp"/>
+
+    <Button
         android:id="@+id/btnPayPalPayOrder"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"

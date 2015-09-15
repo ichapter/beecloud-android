@@ -105,6 +105,8 @@ public class PayPalUnSyncedListAdapter extends BaseAdapter {
                     .findViewById(R.id.txtChannel);
             viewHolder.txtTitle = (TextView) convertView
                     .findViewById(R.id.txtTitle);
+            viewHolder.txtCurrency = (TextView) convertView
+                    .findViewById(R.id.txtCurrency);
             viewHolder.txtOptional = (TextView) convertView
                     .findViewById(R.id.txtOptional);
 
@@ -124,6 +126,7 @@ public class PayPalUnSyncedListAdapter extends BaseAdapter {
                 Integer.valueOf(item.getBillTotalFee())/100.0));
         viewHolder.txtChannel.setText("Channel: " + item.getChannel());
         viewHolder.txtTitle.setText("Bill Title: " + item.getBillTitle());
+        viewHolder.txtCurrency.setText("Bill Currency: " + item.getCurrency());
         viewHolder.txtOptional.setText("Optional Values: " + item.getOptional());
 
         return convertView;
@@ -135,6 +138,7 @@ public class PayPalUnSyncedListAdapter extends BaseAdapter {
         String billTitle;
         String billTotalFee;
         String channel;
+        String currency;
         String optional;
 
         public String getBillNum() {
@@ -157,6 +161,10 @@ public class PayPalUnSyncedListAdapter extends BaseAdapter {
             return channel;
         }
 
+        public String getCurrency() {
+            return currency;
+        }
+
         public String getOptional() {
             return optional;
         }
@@ -168,6 +176,7 @@ public class PayPalUnSyncedListAdapter extends BaseAdapter {
         public TextView txtTotalFee;
         public TextView txtChannel;
         public TextView txtTitle;
+        public TextView txtCurrency;
         public TextView txtOptional;
     }
 }

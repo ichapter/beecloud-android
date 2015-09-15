@@ -44,24 +44,6 @@
                 android:textSize="20sp"
                 android:layout_width="fill_parent" />
 
-            <Button
-                android:id="@+id/btnReqALIOfflineQRCode"
-                android:padding="5dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:background="#007edf"
-                android:text="支付宝线下二维码支付"
-                android:textColor="#ffffff"
-                android:textSize="20sp"
-                android:layout_width="fill_parent" />
-
-            <ImageView
-                android:id="@+id/aliOfflineQRImg"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:adjustViewBounds="true"/>
-
         </LinearLayout>
 
     </ScrollView>

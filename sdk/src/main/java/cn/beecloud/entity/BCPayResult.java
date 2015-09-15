@@ -47,6 +47,11 @@ public class BCPayResult implements BCResult {
     public static final String RESULT_UNKNOWN = "UNKNOWN";
 
     /**
+     * 表示支付中，未获取确认信息
+     */
+    public static final String RESULT_PAYING_UNCONFIRMED = "RESULT_PAYING_UNCONFIRMED";
+
+    /**
      * 针对银联，存在插件不存在需要安装的问题
      */
     public static final String FAIL_PLUGIN_NOT_INSTALLED = "FAIL_PLUGIN_NOT_INSTALLED";

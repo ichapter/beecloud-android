@@ -40,6 +40,7 @@ public class RefundOrdersActivity extends Activity {
     Button btnWeChatRefundOrder;
     Button btnAliPayRefundOrder;
     Button btnUNPayRefundOrder;
+    Button btnBDRefundOrder;
     Button btnAllPayRefundOrder;
     ListView listViewRefundOrder;
 
@@ -154,6 +155,20 @@ public class RefundOrdersActivity extends Activity {
                         BCReqParams.BCChannelTypes.ALI,     //渠道
                         "883dafee43b54c68a1dc7cf24f705463",     //订单号
                         "20150812436857",                     //商户退款流水号
+                        bcCallback);
+            }
+        });
+
+        btnBDRefundOrder  = (Button) findViewById(R.id.btnBDRefundOrder);
+        btnBDRefundOrder.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // 如果调起支付太慢，可以在这里开启动画，表示正在loading
+                //以progressdialog为例
+                loadingDialog.show();
+
+                BCQuery.getInstance().queryRefundsAsync(
+                        BCReqParams.BCChannelTypes.BD,      //直接以渠道方式查询
                         bcCallback);
             }
         });
