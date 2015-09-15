@@ -8,6 +8,8 @@ package cn.beecloud;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -19,6 +21,9 @@ import cn.beecloud.entity.BCPayResult;
  * 用于银联支付
  */
 public class BCUnionPaymentActivity extends Activity {
+
+    private static Integer targetVersion = 53;
+    private static final String UN_APK_PACKAGE = "com.unionpay.uppay";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,7 +37,16 @@ public class BCUnionPaymentActivity extends Activity {
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
             String tn= extras.getString("tn");
-            int retPay = UPPayAssistEx.startPay(this, null, null, tn, "00");
+            int retPay;
+
+            int curVer = getUNAPKVersion();
+            if (curVer == -1)
+                retPay = -1;
+            else if (curVer < targetVersion)
+                retPay = 2;
+            else
+                retPay = UPPayAssistEx.startPay(this, null, null, tn, "00");
+
 
             //插件问题 -1表示没有安装插件，2表示插件需要升级
             if (retPay==-1 || retPay==2) {
@@ -95,5 +109,19 @@ public class BCUnionPaymentActivity extends Activity {
         }
 
         this.finish();
+    }
+
+    private int getUNAPKVersion() {
+        Integer version = -1;
+
+        PackageManager packageManager=getPackageManager();
+        try {
+            PackageInfo Info=packageManager.getPackageInfo(UN_APK_PACKAGE, 0);
+            version = Info.versionCode;
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.e("union payment", e.getMessage());
+        }
+
+        return version;
     }
 }

@@ -37,17 +37,13 @@ public class GenQRCodeActivity extends Activity {
 
     Button btnReqWXQRCode;
     Button btnReqALIQRCode;
-    Button btnReqALIOfflineQRCode;
-
     private ImageView wxQRImg;
-    private ImageView aliOfflineQRImg;
 
     private Handler mHandler;
 
     private Bitmap wxQRBitmap;
     private String aliQRHtml;
     private String aliQRURL;
-    private Bitmap aliOfflineQRBitmap;
 
 
     @Override
@@ -64,9 +60,6 @@ public class GenQRCodeActivity extends Activity {
         wxQRImg = (ImageView) findViewById(R.id.wxQRImg);
 
         btnReqALIQRCode = (Button) findViewById(R.id.btnReqALIQRCode);
-
-        btnReqALIOfflineQRCode = (Button) findViewById(R.id.btnReqALIOfflineQRCode);
-        aliOfflineQRImg = (ImageView) findViewById(R.id.aliOfflineQRImg);
 
         // Defines a Handler object that's attached to the UI thread.
         // 通过Handler.Callback()可消除内存泄漏警告
@@ -85,8 +78,6 @@ public class GenQRCodeActivity extends Activity {
                         intent.putExtra("aliQRHtml", aliQRHtml);
                         startActivity(intent);
                         break;
-                    case 3:
-                        aliOfflineQRImg.setImageBitmap(aliOfflineQRBitmap);
                 }
 
                 return true;
@@ -196,58 +187,6 @@ public class GenQRCodeActivity extends Activity {
 
                                 Message msg = mHandler.obtainMessage();
                                 msg.what = 2;
-                                mHandler.sendMessage(msg);
-                            }
-                        });
-            }
-        });
-
-        btnReqALIOfflineQRCode.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                loadingDialog.show();
-
-                Map<String, String> mapOptional = new HashMap<String, String>();
-
-                mapOptional.put("testkey1", "测试value值1");
-                BCPay.getInstance(GenQRCodeActivity.this).reqAliOfflineQRCodeAsync("支付宝线下二维码支付测试", //商品描述
-                        1,                          //总金额, 以分为单位, 必须是正整数
-                        UUID.randomUUID().toString().replace("-", ""),          //流水号
-                        mapOptional,            //扩展参数
-                        true,                   //是否生成二维码的bitmap,
-                                                //如果为false，请自行根据getQrCodeRawContent返回的结果
-                                                //使用BCPay.generateBitmap方法生成支付二维码
-                                                //你也可以使用自己熟悉的二维码生成工具
-                        null,                   //二维码的尺寸, 以px为单位, 如果为null则默认为360
-                        new BCCallback() {     //回调入口
-                            @Override
-                            public void done(BCResult bcResult) {
-
-                                //此处关闭loading界面
-                                loadingDialog.dismiss();
-
-                                final BCQRCodeResult bcqrCodeResult = (BCQRCodeResult) bcResult;
-
-                                //resultCode为0表示请求成功
-                                if (bcqrCodeResult.getResultCode() == 0) {
-                                    aliOfflineQRBitmap = bcqrCodeResult.getQrCodeBitmap();
-                                    //Log.w(Tag, "ali offline qrcode url: " + bcqrCodeResult.getQrCodeRawContent());
-
-                                } else {
-
-                                    GenQRCodeActivity.this.runOnUiThread(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            Toast.makeText(GenQRCodeActivity.this, "err code:" + bcqrCodeResult.getResultCode() +
-                                                    "; err msg: " + bcqrCodeResult.getResultMsg() +
-                                                    "; err detail: " + bcqrCodeResult.getErrDetail(), Toast.LENGTH_LONG).show();
-                                        }
-                                    });
-
-                                }
-
-                                Message msg = mHandler.obtainMessage();
-                                msg.what = 3;
                                 mHandler.sendMessage(msg);
                             }
                         });
