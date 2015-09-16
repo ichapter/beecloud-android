@@ -33,6 +33,7 @@ import cn.beecloud.BeeCloud;
 import cn.beecloud.async.BCCallback;
 import cn.beecloud.async.BCResult;
 import cn.beecloud.entity.BCPayResult;
+import cn.beecloud.entity.BCReqParams;
 
 
 public class ShoppingCartActivity extends Activity {
@@ -157,7 +158,7 @@ public class ShoppingCartActivity extends Activity {
         payMethod = (ListView) this.findViewById(R.id.payMethod);
         Integer[] payIcons = new Integer[]{R.drawable.wechat, R.drawable.alipay,
                 R.drawable.unionpay, R.drawable.baidupay ,R.drawable.paypal, R.drawable.scan};
-        String[] payNames = new String[]{"微信支付", "支付宝支付",
+        final String[] payNames = new String[]{"微信支付", "支付宝支付",
                 "银联在线", "百度钱包", "PayPal支付", "二维码支付"};
         String[] payDescs = new String[]{"使用微信支付，以人民币CNY计费", "使用支付宝支付，以人民币CNY计费",
                 "使用银联在线支付，以人民币CNY计费", "使用百度钱包支付，以人民币CNY计费",
@@ -191,7 +192,6 @@ public class ShoppingCartActivity extends Activity {
                                     "微信支付测试",               //订单标题
                                     1,                           //订单金额(分)
                                     genBillNum(),  //订单流水号
-                                    120,                   //订单超时时间，以秒为单位，可以为null
                                     mapOptional,            //扩展参数(可以null)
                                     bcCallback);            //支付完成后回调入口
                         }
@@ -208,7 +208,6 @@ public class ShoppingCartActivity extends Activity {
                         BCPay.getInstance(ShoppingCartActivity.this).reqAliPaymentAsync("支付宝支付测试",
                                 1,
                                 genBillNum(),
-                                null,   //订单超时时间，以秒为单位，可以为null
                                 mapOptional, bcCallback);
                         break;
 
@@ -219,7 +218,6 @@ public class ShoppingCartActivity extends Activity {
                                 1,
                                 genBillNum(),
                                 null,
-                                null,
                                 bcCallback);
                         break;
                     case 3: //通过百度钱包支付
@@ -228,11 +226,36 @@ public class ShoppingCartActivity extends Activity {
                         HashMap<String, String> hashMapOptional = new HashMap<String, String>();
                         hashMapOptional.put("goods desc", "商品详细描述");
 
-                        BCPay.getInstance(ShoppingCartActivity.this).reqBaiduPaymentAsync("Baidu钱包支付测试",
-                                1,
-                                genBillNum(),
-                                null,
-                                hashMapOptional,
+                        //通过创建PayParam的方式发起支付
+                        //你也可以通过reqBaiduPaymentAsync的方式支付
+                        BCPay.PayParam payParam = new BCPay.PayParam();
+                        /*
+                        *  支付渠道，此处以百度钱包为例，实际支付允许
+                        *  BCReqParams.BCChannelTypes.WX_APP，
+                        *  BCReqParams.BCChannelTypes.ALI_APP，
+                        *  BCReqParams.BCChannelTypes.UN_APP，
+                        *  BCReqParams.BCChannelTypes.BD_APP，
+                        *  BCReqParams.BCChannelTypes.PAYPAL_SANDBOX，
+                        *  BCReqParams.BCChannelTypes.PAYPAL_LIVE
+                        */
+                        payParam.channelType = BCReqParams.BCChannelTypes.BD_APP;
+
+                        //商品描述, 32个字节内, 汉字以2个字节计
+                        payParam.billTitle = "Baidu钱包支付测试";
+
+                        //支付金额，以分为单位，必须是正整数
+                        payParam.billTotalFee = 1;
+
+                        //商户自定义订单号
+                        payParam.billNum = genBillNum();
+
+                        //订单超时时间，以秒为单位，可以为null
+                        payParam.billTimeout = 120;
+
+                        //扩展参数，可以传入任意数量的key/value对来补充对业务逻辑的需求，可以为null
+                        payParam.optional = hashMapOptional;
+
+                        BCPay.getInstance(ShoppingCartActivity.this).reqPaymentAsync(payParam,
                                 bcCallback);
                         break;
                     case 4: //通过PayPal支付

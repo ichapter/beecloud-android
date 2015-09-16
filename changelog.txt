@@ -1,10 +1,12 @@
 BeeCloud Android SDK Changelog
 ==========================
-v1.6 2015年09年15日
+v1.6 2015年09年16日
 集成百度钱包支付
-增加订单超时时间设置，该改变会影响之前的调用，需要在支付的调用函数中添加超时时间
+增加订单超时时间设置，该设置需要通过BCPay新方法reqPaymentAsync(BCPay.PayParam payParam, BCCallback callback)发起支付
 更新银联插件，务必在10月1号之前完成更新，否则银联将拒绝支付
 支付宝线下支付二维码从当前sdk中移除
+********银联插件的更新方法************
+按照readme中的安装步骤，更换原始工程中的UPPayAssistEx.jar（一般在libs目录下），和UPPayPluginEx.apk（一般在assets目录下）。
 
 v1.5 2015年09年02日
 集成PayPal支付

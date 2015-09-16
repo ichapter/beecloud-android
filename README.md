@@ -1,6 +1,6 @@
 ## BeeCloud Android SDK (Open Source)
 
-![pass](https://img.shields.io/badge/Build-pass-green.svg) ![license](https://img.shields.io/badge/license-MIT-brightgreen.svg) ![version](https://img.shields.io/badge/version-v1.5.0-blue.svg)
+![pass](https://img.shields.io/badge/Build-pass-green.svg) ![license](https://img.shields.io/badge/license-MIT-brightgreen.svg) ![version](https://img.shields.io/badge/version-v1.6.0-blue.svg)
 
 ## 简介
 
@@ -28,9 +28,11 @@
 PayPal需要引入`PayPalAndroidSDK-2.9.11.jar`，<br/>
 最后添加`beecloud android sdk`：`beecloud-android\sdk\beecloud.jar`
 
-2.对于银联支付需要将银联插件`beecloud-android\demo\src\main\assets\UPPayPluginEx.apk`引入你的工程`assets`目录下
+2.对于微信支付，需要注意你的`AndroidManifest.xml`中`package`需要和微信平台创建的移动应用`应用包名`保持一致，关于其`应用签名`请参阅[创建微信应用->B.填写平台信息](https://beecloud.cn/doc/payapply/?index=0)，
 
-3.对于百度钱包支付，需要
+3.对于银联支付需要将银联插件`beecloud-android\demo\src\main\assets\UPPayPluginEx.apk`引入你的工程`assets`目录下
+
+4.对于百度钱包支付，需要
 >1. 将`beecloud-android\sdk\manualres\baidupay\res`添加到你的`res`目录下；
 >2. 另外，对于使用`Android Studio`的用户，需要将`beecloud-android\sdk\manualres\baidupay\`目录下的`armeabi`文件夹拷贝到`src\main\jniLibs`目录下，如果没有`jniLibs`目录，请手动创建；对用使用`Eclipse`的用户，需要将`beecloud-android\sdk\manualres\baidupay\`目录下的`armeabi`文件夹拷贝到`libs`目录下。
 
@@ -161,6 +163,11 @@ BCPay.initPayPal(
 > optional        为扩展参数，可以传入任意数量的key/value对来补充对业务逻辑<br/>
 > callback        支付完成后的回调入口
 
+或者，通过`BCPay`的实例，以`reqPaymentAsync`方法发起所有支持的支付请求，该方法的调用请参考demo中百度钱包的支付调用，或者参阅[API](https://beecloud.cn/doc/api/beecloud-android/)。<br/>
+参数依次为
+> payParam        BCPay.PayParam类型<br/>
+> callback        支付完成后的回调入口
+
 在回调函数中将`BCResult`转化成`BCPayResult`之后做后续处理<br/>
 **调用：（以微信为例）**
 
@@ -204,7 +211,6 @@ BCPay.getInstance(ShoppingCartActivity.this).reqWXPaymentAsync(
     "微信支付测试",               //订单标题
     1,                           //订单金额(分)
     UUID.randomUUID().toString().replace("-", ""),  //订单流水号
-    120,                    //订单超时时间，以秒为单位，可以为null
     mapOptional,            //扩展参数(可以null)
     bcCallback);            //支付完成后回调入口
 ```
