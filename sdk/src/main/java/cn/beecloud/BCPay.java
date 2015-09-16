@@ -219,13 +219,14 @@ public class BCPay {
      * @param billTitle       商品描述, 32个字节内, 汉字以2个字节计
      * @param billTotalFee    支付金额，以分为单位，必须是正整数
      * @param billNum         商户自定义订单号
+     * @param billTimeout     订单超时时间，以秒为单位，可以为null
      * @param optional        为扩展参数，可以传入任意数量的key/value对来补充对业务逻辑的需求
      * @param callback        支付完成后的回调函数
      */
     private void reqPaymentAsync(final BCReqParams.BCChannelTypes channelType,
                                  final String billTitle, final Integer billTotalFee,
-                                 final String billNum,final Map<String, String> optional,
-                                 final BCCallback callback) {
+                                 final String billNum, final Integer billTimeout,
+                                 final Map<String, String> optional, final BCCallback callback) {
 
         if (callback == null) {
             Log.w(TAG, "请初始化callback");
@@ -257,7 +258,7 @@ public class BCPay {
                     return;
                 }
 
-                parameters.billTimeout = 120;
+                parameters.billTimeout = billTimeout;
 
                 String payURL = BCHttpClientUtil.getBillPayURL();
 
@@ -325,6 +326,31 @@ public class BCPay {
 
             }
         });
+    }
+
+    /**
+     * 支付调用总接口
+     *
+     * @param payParam        支付参数
+     * @param callback        支付完成后的回调函数
+     */
+    public void reqPaymentAsync(final PayParam payParam, final BCCallback callback) {
+        if (payParam.channelType != null &&
+                (payParam.channelType == BCReqParams.BCChannelTypes.PAYPAL_SANDBOX ||
+                    payParam.channelType == BCReqParams.BCChannelTypes.PAYPAL_LIVE)) {
+            reqPayPalPaymentAsync(payParam.billTitle,
+                    payParam.billTotalFee,
+                    payParam.currency,
+                    (HashMap<String,String>)payParam.optional,
+                    callback);
+        }
+        reqPaymentAsync(payParam.channelType,
+                payParam.billTitle,
+                payParam.billTotalFee,
+                payParam.billNum,
+                payParam.billTimeout,
+                payParam.optional,
+                callback);
     }
 
     /**
@@ -482,7 +508,7 @@ public class BCPay {
                         break;
                 }
 
-                payCallback.done(new BCPayResult(result, errMsg, errDetail+"#result=" + stateCode + "#desc=" + payDesc));
+                payCallback.done(new BCPayResult(result, errMsg, errDetail + "#result=" + stateCode + "#desc=" + payDesc));
             }
 
             public boolean isHideLoadingDialog() {
@@ -504,10 +530,10 @@ public class BCPay {
      * @param callback        支付完成后的回调函数
      */
     public void reqWXPaymentAsync(final String billTitle, final Integer billTotalFee,
-                                  final String billNum,final Map<String, String> optional,
-                                  final BCCallback callback) {
+                                  final String billNum,
+                                  final Map<String, String> optional, final BCCallback callback) {
         this.reqPaymentAsync(BCReqParams.BCChannelTypes.WX_APP, billTitle, billTotalFee,
-                billNum, optional, callback);
+                billNum, null, optional, callback);
     }
 
     /**
@@ -520,10 +546,28 @@ public class BCPay {
      * @param callback        支付完成后的回调函数
      */
     public void reqAliPaymentAsync(final String billTitle, final Integer billTotalFee,
-                                   final String billNum,final Map<String, String> optional,
+                                   final String billNum,
+                                   final Map<String, String> optional,
                                    final BCCallback callback) {
         this.reqPaymentAsync(BCReqParams.BCChannelTypes.ALI_APP, billTitle, billTotalFee,
-                billNum, optional, callback);
+                billNum, null, optional, callback);
+    }
+
+    /**
+     * 银联在线支付
+     *
+     * @param billTitle       商品描述, 32个字节内, 汉字以2个字节计
+     * @param billTotalFee    支付金额，以分为单位，必须是正整数
+     * @param billNum         商户自定义订单号
+     * @param optional        为扩展参数，可以传入任意数量的key/value对来补充对业务逻辑的需求
+     * @param callback        支付完成后的回调函数
+     */
+    public void reqUnionPaymentAsync(final String billTitle, final Integer billTotalFee,
+                                     final String billNum,
+                                     final Map<String, String> optional,
+                                     final BCCallback callback) {
+        this.reqPaymentAsync(BCReqParams.BCChannelTypes.UN_APP, billTitle, billTotalFee,
+                billNum, null, optional, callback);
     }
 
     /**
@@ -536,10 +580,11 @@ public class BCPay {
      * @param callback        支付完成后的回调函数
      */
     public void reqBaiduPaymentAsync(final String billTitle, final Integer billTotalFee,
-                                   final String billNum,final Map<String, String> optional,
+                                   final String billNum,
+                                     final Map<String, String> optional,
                                    final BCCallback callback) {
         this.reqPaymentAsync(BCReqParams.BCChannelTypes.BD_APP, billTitle, billTotalFee,
-                billNum, optional, callback);
+                billNum, null, optional, callback);
     }
 
     /**
@@ -547,11 +592,12 @@ public class BCPay {
      *
      * @param billTitle       商品描述, 32个字节内, 汉字以2个字节计
      * @param billTotalFee    支付金额，以分为单位，必须是正整数
+     * @param currency        支付货币，如USD
      * @param optional        为扩展参数HashMap，可以传入任意数量的key/value对来补充对业务逻辑的需求
      * @param callback        支付完成后的回调函数
      */
     public void reqPayPalPaymentAsync(final String billTitle, final Integer billTotalFee,
-                                          final HashMap<String, String> optional,
+                                          final String currency, final HashMap<String, String> optional,
                                           final BCCallback callback) {
 
         payCallback = callback;
@@ -567,6 +613,7 @@ public class BCPay {
         Intent intent = new Intent(mContextActivity, BCPayPalPaymentActivity.class);
         intent.putExtra("billTitle", billTitle);
         intent.putExtra("billTotalFee", billTotalFee);
+        intent.putExtra("currency", currency);
         Gson gson = new Gson();
         intent.putExtra("optional", gson.toJson(optional));
         mContextActivity.startActivity(intent);
@@ -609,7 +656,8 @@ public class BCPay {
      * @return BCPayResult.RESULT_SUCCESS means sync successfully and payment is valid
      */
     String syncPayPalPayment(final String billTitle, final Integer billTotalFee, final String billNum,
-                                    final String optional, final PAYPAL_PAY_TYPE paypalType, final String token) {
+                             final String currency, final String optional, final PAYPAL_PAY_TYPE paypalType,
+                             final String token) {
 
         //verify params
         BCPayReqParams parameters;
@@ -644,7 +692,7 @@ public class BCPay {
         if (accessToken == null)
             return "Can't get access Token";
 
-        parameters.currency="USD";
+        parameters.currency=currency;
         parameters.accessToken = "Bearer " + accessToken;
 
         String payURL = BCHttpClientUtil.getBillPayURL();
@@ -712,7 +760,7 @@ public class BCPay {
         }
 
         String result = syncPayPalPayment(syncItem.get("billTitle"), billTotalFee,
-                syncItem.get("billNum"), syncItem.get("optional"),
+                syncItem.get("billNum"), syncItem.get("currency"), syncItem.get("optional"),
                 PAYPAL_PAY_TYPE.valueOf(syncItem.get("channel")), token);
 
         if (result.equals(BCPayResult.RESULT_SUCCESS)) {
@@ -749,22 +797,6 @@ public class BCPay {
         BCCache.getInstance(mContextActivity).removeSyncedPalPalRecords(syncedRecords);
 
         return result;
-    }
-
-    /**
-     * 银联在线支付
-     *
-     * @param billTitle       商品描述, 32个字节内, 汉字以2个字节计
-     * @param billTotalFee    支付金额，以分为单位，必须是正整数
-     * @param billNum         商户自定义订单号
-     * @param optional        为扩展参数，可以传入任意数量的key/value对来补充对业务逻辑的需求
-     * @param callback        支付完成后的回调函数
-     */
-    public void reqUnionPaymentAsync(final String billTitle, final Integer billTotalFee,
-                                     final String billNum,final Map<String, String> optional,
-                                     final BCCallback callback) {
-        this.reqPaymentAsync(BCReqParams.BCChannelTypes.UN_APP, billTitle, billTotalFee,
-                billNum, optional, callback);
     }
 
     /**
@@ -1014,21 +1046,50 @@ public class BCPay {
     }
 
     /**
-     * 生成支付宝线下支付二维码
-     *
-     * @param billTitle       商品描述, 32个字节内, 汉字以2个字节计
-     * @param billTotalFee    支付金额，以分为单位，必须是正整数
-     * @param billNum         商户自定义订单号
-     * @param optional        为扩展参数，可以传入任意数量的key/value对来补充对业务逻辑的需求
-     * @param genQRCode       是否生成QRCode Bitmap
-     * @param qrCodeWidth     如果生成, QRCode的宽度, null则使用默认参数
-     * @param callback        支付完成后的回调函数
-    */
-    public void reqAliOfflineQRCodeAsync(final String billTitle, final Integer billTotalFee,
-                                 final String billNum, final Map<String, String> optional,
-                                 final Boolean genQRCode, final Integer qrCodeWidth,
-                                 final BCCallback callback) {
-        reqQRCodeAsync(BCReqParams.BCChannelTypes.ALI_OFFLINE_QRCODE, billTitle, billTotalFee,
-                billNum, optional, genQRCode, qrCodeWidth, null, null, callback);
+     * 外部支付参数实例
+     */
+    public static class PayParam {
+        /**
+         *  只允许
+         *  BCReqParams.BCChannelTypes.WX_APP，
+         *  BCReqParams.BCChannelTypes.ALI_APP，
+         *  BCReqParams.BCChannelTypes.UN_APP，
+         *  BCReqParams.BCChannelTypes.BD_APP，
+         *  BCReqParams.BCChannelTypes.PAYPAL_SANDBOX，
+         *  BCReqParams.BCChannelTypes.PAYPAL_LIVE
+         *
+         */
+        public BCReqParams.BCChannelTypes channelType;
+
+        /**
+         * 商品描述, 32个字节内, 汉字以2个字节计
+         */
+        public String billTitle;
+
+        /**
+         * 支付金额，以分为单位，必须是正整数
+         */
+        public Integer billTotalFee;
+
+        /**
+         * 商户自定义订单号，PayPal不需要该参数
+         */
+        public String billNum;
+
+        /**
+         * 支付货币，如CNY、USD，目前仅PayPal用到
+         */
+        public String currency;
+
+        /**
+         * 订单超时时间，以秒为单位，可以为null
+         */
+        public Integer billTimeout;
+
+        /**
+         * 扩展参数，可以传入任意数量的key/value对来补充对业务逻辑的需求，可以为null，
+         * 对于PayPal请以HashMap实例化
+         */
+        public Map<String, String> optional;
     }
 }

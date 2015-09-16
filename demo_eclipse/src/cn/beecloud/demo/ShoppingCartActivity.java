@@ -22,15 +22,18 @@ import android.widget.Toast;
 
 import com.unionpay.UPPayAssistEx;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
-import java.util.UUID;
 
 import cn.beecloud.BCPay;
 import cn.beecloud.BeeCloud;
 import cn.beecloud.async.BCCallback;
 import cn.beecloud.async.BCResult;
 import cn.beecloud.entity.BCPayResult;
+import cn.beecloud.entity.BCReqParams;
 
 
 public class ShoppingCartActivity extends Activity {
@@ -39,6 +42,8 @@ public class ShoppingCartActivity extends Activity {
 
     private ProgressDialog loadingDialog;
     private ListView payMethod;
+
+    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMddHHmmssSSS", Locale.CHINA);
 
     //支付结果返回入口
     BCCallback bcCallback = new BCCallback() {
@@ -56,12 +61,15 @@ public class ShoppingCartActivity extends Activity {
 
                     String result = bcPayResult.getResult();
 
-                    //注意！
-                    //对于PayPal的支付，返回的RESULT_SUCCESS仅仅代表手机端支付成功，
-                    //对于每一次支付，sdk会自动帮你与服务端同步，
-                    // 你需要查看server端的支付结果以确保订单金额准确无误，本操作并非强制性要求，但PayPal官方推荐以防止欺诈手段
-                    //另外如果与服务端同步失败，记录会被自动保存，此时你可以调用batchSyncPayPalPayment方法手动同步
-                    //虽然这种情况比较少，但是建议参考PayPalUnSyncedListActivity做好同步，否则服务器将无法查阅到订单
+                    /*
+                      注意！
+                      所有支付渠道建议以服务端的状态为准，此处返回的RESULT_SUCCESS仅仅代表手机端支付成功，
+                      该操作并非强制性要求，虽然属于小概率事件，但渠道官方推荐以防止欺诈手段
+
+                        对于PayPal的每一次支付，sdk会自动帮你与服务端同步，
+                        如果与服务端同步失败，记录会被自动保存，此时你可以调用batchSyncPayPalPayment方法手动同步
+                        虽然这种情况比较少，但是建议参考PayPalUnSyncedListActivity做好同步，否则服务器将无法查阅到订单
+                    */
                     if (result.equals(BCPayResult.RESULT_SUCCESS))
                         Toast.makeText(ShoppingCartActivity.this, "用户支付成功", Toast.LENGTH_LONG).show();
                     else if (result.equals(BCPayResult.RESULT_CANCEL))
@@ -104,7 +112,7 @@ public class ShoppingCartActivity extends Activity {
                 //如果用户手机没有安装银联支付控件,则会提示用户安装
                 AlertDialog.Builder builder = new AlertDialog.Builder(ShoppingCartActivity.this);
                 builder.setTitle("提示");
-                builder.setMessage("完成支付需要安装银联支付控件，是否安装？");
+                builder.setMessage("完成支付需要安装或者升级银联支付控件，是否安装？");
 
                 builder.setNegativeButton("确定",
                         new DialogInterface.OnClickListener() {
@@ -149,11 +157,12 @@ public class ShoppingCartActivity extends Activity {
 
         payMethod = (ListView) this.findViewById(R.id.payMethod);
         Integer[] payIcons = new Integer[]{R.drawable.wechat, R.drawable.alipay,
-                R.drawable.unionpay, R.drawable.paypal, R.drawable.scan};
-        String[] payNames = new String[]{"微信支付", "支付宝支付",
-                "银联在线", "PayPal支付", "二维码支付"};
+                R.drawable.unionpay, R.drawable.baidupay ,R.drawable.paypal, R.drawable.scan};
+        final String[] payNames = new String[]{"微信支付", "支付宝支付",
+                "银联在线", "百度钱包", "PayPal支付", "二维码支付"};
         String[] payDescs = new String[]{"使用微信支付，以人民币CNY计费", "使用支付宝支付，以人民币CNY计费",
-                "使用银联在线支付，以人民币CNY计费", "使用PayPal支付，以美元USD计费", "通过扫描二维码支付"};
+                "使用银联在线支付，以人民币CNY计费", "使用百度钱包支付，以人民币CNY计费",
+                "使用PayPal支付，以美元USD计费", "通过扫描二维码支付"};
         PayMethodListItem adapter = new PayMethodListItem(this, payIcons, payNames, payDescs);
         payMethod.setAdapter(adapter);
 
@@ -182,7 +191,7 @@ public class ShoppingCartActivity extends Activity {
                             BCPay.getInstance(ShoppingCartActivity.this).reqWXPaymentAsync(
                                     "微信支付测试",               //订单标题
                                     1,                           //订单金额(分)
-                                    UUID.randomUUID().toString().replace("-", ""),  //订单流水号
+                                    genBillNum(),  //订单流水号
                                     mapOptional,            //扩展参数(可以null)
                                     bcCallback);            //支付完成后回调入口
                         }
@@ -196,25 +205,72 @@ public class ShoppingCartActivity extends Activity {
                         mapOptional.put("consumptioncode", "consumptionCode");
                         mapOptional.put("money", "2");
 
-                        BCPay.getInstance(ShoppingCartActivity.this).reqAliPaymentAsync("支付宝支付测试", 1,
-                                UUID.randomUUID().toString().replace("-", ""), mapOptional, bcCallback);
+                        BCPay.getInstance(ShoppingCartActivity.this).reqAliPaymentAsync("支付宝支付测试",
+                                1,
+                                genBillNum(),
+                                mapOptional, bcCallback);
                         break;
 
                     case 2: //银联支付
                         loadingDialog.show();
 
-                        BCPay.getInstance(ShoppingCartActivity.this).reqUnionPaymentAsync("银联支付测试", 1,
-                                UUID.randomUUID().toString().replace("-", ""), null, bcCallback);
+                        BCPay.getInstance(ShoppingCartActivity.this).reqUnionPaymentAsync("银联支付测试",
+                                1,
+                                genBillNum(),
+                                null,
+                                bcCallback);
                         break;
-                    case 3: //通过PayPal支付
+                    case 3: //通过百度钱包支付
                         loadingDialog.show();
 
                         HashMap<String, String> hashMapOptional = new HashMap<String, String>();
+                        hashMapOptional.put("goods desc", "商品详细描述");
+
+                        //通过创建PayParam的方式发起支付
+                        //你也可以通过reqBaiduPaymentAsync的方式支付
+                        BCPay.PayParam payParam = new BCPay.PayParam();
+                        /*
+                        *  支付渠道，此处以百度钱包为例，实际支付允许
+                        *  BCReqParams.BCChannelTypes.WX_APP，
+                        *  BCReqParams.BCChannelTypes.ALI_APP，
+                        *  BCReqParams.BCChannelTypes.UN_APP，
+                        *  BCReqParams.BCChannelTypes.BD_APP，
+                        *  BCReqParams.BCChannelTypes.PAYPAL_SANDBOX，
+                        *  BCReqParams.BCChannelTypes.PAYPAL_LIVE
+                        */
+                        payParam.channelType = BCReqParams.BCChannelTypes.BD_APP;
+
+                        //商品描述, 32个字节内, 汉字以2个字节计
+                        payParam.billTitle = "Baidu钱包支付测试";
+
+                        //支付金额，以分为单位，必须是正整数
+                        payParam.billTotalFee = 1;
+
+                        //商户自定义订单号
+                        payParam.billNum = genBillNum();
+
+                        //订单超时时间，以秒为单位，可以为null
+                        payParam.billTimeout = 120;
+
+                        //扩展参数，可以传入任意数量的key/value对来补充对业务逻辑的需求，可以为null
+                        payParam.optional = hashMapOptional;
+
+                        BCPay.getInstance(ShoppingCartActivity.this).reqPaymentAsync(payParam,
+                                bcCallback);
+                        break;
+                    case 4: //通过PayPal支付
+                        loadingDialog.show();
+
+                        hashMapOptional = new HashMap<String, String>();
                         hashMapOptional.put("PayPal key1", "PayPal value1");
                         hashMapOptional.put("PayPal key2", "PayPal value2");
 
-                        BCPay.getInstance(ShoppingCartActivity.this).reqPayPalPaymentAsync("PayPal payment test", 1,
-                                hashMapOptional, bcCallback);
+                        BCPay.getInstance(ShoppingCartActivity.this).reqPayPalPaymentAsync(
+                                "PayPal payment test",  //bill title
+                                1,                      //bill amount(use cents)
+                                "USD",                  //bill currency
+                                hashMapOptional,        //optional info
+                                bcCallback);
                         break;
                     default:
                         Intent intent = new Intent(ShoppingCartActivity.this, GenQRCodeActivity.class);
@@ -233,4 +289,7 @@ public class ShoppingCartActivity extends Activity {
         });
     }
 
+    String genBillNum() {
+        return simpleDateFormat.format(new Date());
+    }
 }

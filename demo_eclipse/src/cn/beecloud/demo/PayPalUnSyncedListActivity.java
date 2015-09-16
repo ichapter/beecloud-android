@@ -21,7 +21,6 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import cn.beecloud.BCCache;
 import cn.beecloud.BCPay;
@@ -71,15 +70,14 @@ public class PayPalUnSyncedListActivity extends Activity {
         loadingDialog.setIndeterminate(true);
         loadingDialog.setCancelable(true);
 
-        Set<String> leftRecords = BCCache.getInstance(this).getUnSyncedPayPalRecords();
+        adapterData = BCCache.getInstance(this).getUnSyncedPayPalRecords();
 
-        if (leftRecords == null || leftRecords.size() == 0) {
+        if (adapterData == null || adapterData.size() == 0) {
             syncTip.setVisibility(View.VISIBLE);
             unSyncedListView.setVisibility(View.GONE);
             btnBatchSync.setVisibility(View.GONE);
         }
         else {
-            adapterData = new ArrayList<String>(leftRecords);
             unSyncedAdapter= new PayPalUnSyncedListAdapter(this, adapterData);
 
             unSyncedListView.setAdapter(unSyncedAdapter);

@@ -35,6 +35,7 @@ public class BCPayPalPaymentActivity extends Activity {
     private final static String TAG = "BCPayPalPaymentActivity";
     private Integer billTotalFee;
     private String billTitle;
+    private String currency;
     private String optional;
 
     private static PayPalConfiguration config = new PayPalConfiguration()
@@ -62,10 +63,11 @@ public class BCPayPalPaymentActivity extends Activity {
 
         billTotalFee = getIntent().getIntExtra("billTotalFee", -1);
         billTitle = getIntent().getStringExtra("billTitle");
+        currency = getIntent().getStringExtra("currency");
         optional = getIntent().getStringExtra("optional");
 
         PayPalPayment payment = new PayPalPayment(new BigDecimal(billTotalFee/100.0),
-                "USD", billTitle, PayPalPayment.PAYMENT_INTENT_SALE);
+                currency, billTitle, PayPalPayment.PAYMENT_INTENT_SALE);
 
         if (BCCache.getInstance(null).retrieveShippingAddresses != null)
             payment.enablePayPalShippingAddressesRetrieval(BCCache.getInstance(null).retrieveShippingAddresses);
@@ -110,7 +112,8 @@ public class BCPayPalPaymentActivity extends Activity {
                             Log.i(TAG, "sync with server...");
 
                             String remoteRes = BCPay.getInstance(BCPayPalPaymentActivity.this).syncPayPalPayment(
-                                    billTitle, billTotalFee, billNum, optional, BCCache.getInstance(null).paypalPayType, null);
+                                    billTitle, billTotalFee, billNum, currency,
+                                    optional, BCCache.getInstance(null).paypalPayType, null);
 
                             //Log.w(TAG, remoteRes);
 
@@ -123,7 +126,7 @@ public class BCPayPalPaymentActivity extends Activity {
                                 payInfo.put("billNum", billNum);
                                 payInfo.put("channel", String.valueOf(BCCache.getInstance(null).paypalPayType));
                                 payInfo.put("storeDate", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US).format(new Date()));
-                                payInfo.put("currency", "USD");
+                                payInfo.put("currency", currency);
 
                                 Gson gson = new Gson();
                                 String paystr = gson.toJson(payInfo);
