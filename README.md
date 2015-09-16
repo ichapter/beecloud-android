@@ -159,7 +159,6 @@ BCPay.initPayPal(
 > billTitle       商品描述, 32个字节内, 汉字以2个字节计<br/>
 > billTotalFee    支付金额，以分为单位，必须是正整数<br/>
 > billNum         商户自定义订单号，PayPal不需要该参数<br/>
-> billTimeout     订单超时时间，可以为null<br/>
 > optional        为扩展参数，可以传入任意数量的key/value对来补充对业务逻辑<br/>
 > callback        支付完成后的回调入口
 
