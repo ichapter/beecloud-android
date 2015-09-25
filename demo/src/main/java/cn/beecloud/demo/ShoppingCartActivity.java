@@ -267,7 +267,7 @@ public class ShoppingCartActivity extends Activity {
 
                         BCPay.getInstance(ShoppingCartActivity.this).reqPayPalPaymentAsync(
                                 "PayPal payment test",  //bill title
-                                1,                      //bill amount(use cents)
+                                231,                      //bill amount(use cents)
                                 "USD",                  //bill currency
                                 hashMapOptional,        //optional info
                                 bcCallback);
