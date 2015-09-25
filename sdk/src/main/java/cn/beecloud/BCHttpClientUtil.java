@@ -6,8 +6,6 @@
  */
 package cn.beecloud;
 
-import android.util.Log;
-
 import com.google.gson.Gson;
 
 import org.apache.http.HttpResponse;
@@ -41,14 +39,14 @@ import java.util.Random;
 class BCHttpClientUtil {
 
     //主机地址
-//    private static final String[] BEECLOUD_HOSTS = {"https://apibj.beecloud.cn",
-//            "https://apisz.beecloud.cn",
-//            "https://apiqd.beecloud.cn",
-//            "https://apihz.beecloud.cn"
-//    };
-    private static final String[] BEECLOUD_HOSTS = {
-            "https://apigk2.beecloud.cn"
+    private static final String[] BEECLOUD_HOSTS = {"https://apibj.beecloud.cn",
+            "https://apisz.beecloud.cn",
+            "https://apiqd.beecloud.cn",
+            "https://apihz.beecloud.cn"
     };
+//    private static final String[] BEECLOUD_HOSTS = {
+//            "https://apigk2.beecloud.cn"
+//    };
 
     //Rest API版本号
     private static final String HOST_API_VERSION = "/1/";
@@ -201,7 +199,7 @@ class BCHttpClientUtil {
         Gson gson = new Gson();
         String param = gson.toJson(para);
 
-        Log.w("BCHttpClientUtil", param);
+        //Log.w("BCHttpClientUtil", param);
 
         StringEntity entity;
         try {

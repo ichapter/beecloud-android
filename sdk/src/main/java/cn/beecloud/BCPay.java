@@ -672,7 +672,7 @@ public class BCPay {
 
         if (optional != null) {
             Gson gson = new Gson();
-            optionalMap = gson.fromJson(optional, new TypeToken<Map<String,Object>>() {}.getType());
+            optionalMap = gson.fromJson(optional, new TypeToken<Map<String,String>>() {}.getType());
         }
 
         String paramValidRes = prepareParametersForPay(billTitle, billTotalFee,

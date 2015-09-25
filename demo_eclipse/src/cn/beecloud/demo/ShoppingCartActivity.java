@@ -144,10 +144,10 @@ public class ShoppingCartActivity extends Activity {
 
         // 推荐在主Activity里的onCreate函数中初始化BeeCloud.
         BeeCloud.setAppIdAndSecret("c5d1cba1-5e3f-4ba0-941d-9b0a371fe719", "39a7a518-9ac8-4a9e-87bc-7885f33cf18c");
-
+        
         // 如果用到微信支付，在用到微信支付的Activity的onCreate函数里调用以下函数.
         // 第二个参数需要换成你自己的微信AppID.
-        BCPay.initWechatPay(ShoppingCartActivity.this, "wx19433a59b15fe84d");
+        BCPay.initWechatPay(ShoppingCartActivity.this, "wxf1aa465362b4c8f1");
 
         // 如果使用PayPal需要在支付之前设置client id和应用secret
         // BCPay.PAYPAL_PAY_TYPE.SANDBOX用于测试，BCPay.PAYPAL_PAY_TYPE.LIVE用于生产环境
