@@ -61,7 +61,7 @@ public class BCPayPalPaymentActivity extends Activity {
     public void onStart() {
         super.onStart();
 
-        billTotalFee = getIntent().getIntExtra("billTotalFee", -1);
+        billTotalFee = getIntent().getIntExtra("billTotalFee", 0);
         billTitle = getIntent().getStringExtra("billTitle");
         currency = getIntent().getStringExtra("currency");
         optional = getIntent().getStringExtra("optional");
@@ -121,7 +121,7 @@ public class BCPayPalPaymentActivity extends Activity {
                             if (!remoteRes.equals(BCPayResult.RESULT_SUCCESS)) {
                                 Map<String, String> payInfo = new HashMap<String, String>();
                                 payInfo.put("billTitle", billTitle);
-                                payInfo.put("billTotalFee", String.valueOf(1));
+                                payInfo.put("billTotalFee", String.valueOf(billTotalFee));
                                 payInfo.put("optional", optional);
                                 payInfo.put("billNum", billNum);
                                 payInfo.put("channel", String.valueOf(BCCache.getInstance(null).paypalPayType));
