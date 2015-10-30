@@ -9,14 +9,12 @@ package cn.beecloud.demo;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 import java.util.HashMap;
@@ -35,13 +33,13 @@ public class GenQRCodeActivity extends Activity {
     private static final String Tag = "GenQRCodeActivity";
     private ProgressDialog loadingDialog;
 
-    Button btnReqWXQRCode;
+    //Button btnReqWXQRCode;
     Button btnReqALIQRCode;
-    private ImageView wxQRImg;
+    //private ImageView wxQRImg;
 
     private Handler mHandler;
 
-    private Bitmap wxQRBitmap;
+    //private Bitmap wxQRBitmap;
     private String aliQRHtml;
     private String aliQRURL;
 
@@ -56,8 +54,8 @@ public class GenQRCodeActivity extends Activity {
         loadingDialog.setIndeterminate(true);
         loadingDialog.setCancelable(true);
 
-        btnReqWXQRCode = (Button) findViewById(R.id.btnReqWXQRCode);
-        wxQRImg = (ImageView) findViewById(R.id.wxQRImg);
+        //btnReqWXQRCode = (Button) findViewById(R.id.btnReqWXQRCode);
+        //wxQRImg = (ImageView) findViewById(R.id.wxQRImg);
 
         btnReqALIQRCode = (Button) findViewById(R.id.btnReqALIQRCode);
 
@@ -68,9 +66,10 @@ public class GenQRCodeActivity extends Activity {
             @Override
             public boolean handleMessage(Message msg) {
                 switch (msg.what) {
+                    /*
                     case 1:
                         wxQRImg.setImageBitmap(wxQRBitmap);
-                        break;
+                        break;*/
                     case 2:
                         //建议在新的activity显示ali内嵌二维码
                         Intent intent = new Intent(GenQRCodeActivity.this, ALIQRCodeActivity.class);
@@ -84,6 +83,7 @@ public class GenQRCodeActivity extends Activity {
             }
         });
 
+        /*
         btnReqWXQRCode.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -92,6 +92,7 @@ public class GenQRCodeActivity extends Activity {
                 Map<String, String> mapOptional = new HashMap<String, String>();
 
                 mapOptional.put("testkey1", "测试value值1");
+
                 BCPay.getInstance(GenQRCodeActivity.this).reqWXQRCodeAsync("微信二维码支付测试", //商品描述
                         1,                          //总金额, 以分为单位, 必须是正整数
                         UUID.randomUUID().toString().replace("-", ""),          //流水号
@@ -136,7 +137,7 @@ public class GenQRCodeActivity extends Activity {
             }
         });
 
-
+        */
         btnReqALIQRCode.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -145,7 +146,7 @@ public class GenQRCodeActivity extends Activity {
                 Map<String, String> mapOptional = new HashMap<String, String>();
 
                 mapOptional.put("testalikey1", "测试value值1");
-                BCPay.getInstance(GenQRCodeActivity.this).reqAliQRCodeAsync("支付宝内嵌二维码支付测试",   //商品描述
+                BCPay.getInstance(GenQRCodeActivity.this).reqAliInlineQRCodeAsync("支付宝内嵌二维码支付测试",   //商品描述
                         1,                                                  //总金额, 以分为单位, 必须是正整数
                         UUID.randomUUID().toString().replace("-", ""),      //流水号
                         mapOptional,                                        //扩展参数

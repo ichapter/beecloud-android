@@ -47,7 +47,7 @@ public class BCQueryRefundStatusResult extends BCRestfulCommonResult {
      * @param jsonStr   json串
      * @return          BCQueryRefundStatusResult实例
      */
-    public BCQueryRefundStatusResult transJsonToResultObject(String jsonStr) {
+    public static BCQueryRefundStatusResult transJsonToResultObject(String jsonStr) {
         Gson gson = new Gson();
 
         return gson.fromJson(jsonStr, new TypeToken<BCQueryRefundStatusResult>() {}.getType());

@@ -11,7 +11,7 @@ import com.google.gson.reflect.TypeToken;
 
 import java.util.List;
 
-public class BCQueryBillOrderResult extends BCRestfulCommonResult {
+public class BCQueryBillsResult extends BCRestfulCommonResult {
 
     //实际返回订单结果数量
     private Integer count;
@@ -37,7 +37,7 @@ public class BCQueryBillOrderResult extends BCRestfulCommonResult {
     /**
      * 无参构造
      */
-    public BCQueryBillOrderResult(){}
+    public BCQueryBillsResult(){}
 
     /**
      * 构造函数
@@ -46,7 +46,7 @@ public class BCQueryBillOrderResult extends BCRestfulCommonResult {
      * @param resultMsg  返回信息
      * @param errDetail  具体错误信息
      */
-    public BCQueryBillOrderResult(Integer resultCode, String resultMsg, String errDetail) {
+    public BCQueryBillsResult(Integer resultCode, String resultMsg, String errDetail) {
         super(resultCode, resultMsg, errDetail);
     }
 
@@ -58,8 +58,8 @@ public class BCQueryBillOrderResult extends BCRestfulCommonResult {
      * @param count         实际返回订单结果数量
      * @param bills         订单列表
      */
-    public BCQueryBillOrderResult(Integer resultCode, String resultMsg, String errDetail,
-                                  Integer count, List<BCBillOrder> bills) {
+    public BCQueryBillsResult(Integer resultCode, String resultMsg, String errDetail,
+                              Integer count, List<BCBillOrder> bills) {
         super(resultCode, resultMsg, errDetail);
         this.count = count;
         this.bills = bills;
@@ -70,10 +70,10 @@ public class BCQueryBillOrderResult extends BCRestfulCommonResult {
      * @param jsonStr   json串
      * @return          BCQueryOrderResult实例
      */
-    public BCQueryBillOrderResult transJsonToResultObject(String jsonStr){
+    public static BCQueryBillsResult transJsonToResultObject(String jsonStr){
         //反序列化json
         Gson res = new Gson();
 
-        return res.fromJson(jsonStr,new TypeToken<BCQueryBillOrderResult>() {}.getType() );
+        return res.fromJson(jsonStr,new TypeToken<BCQueryBillsResult>() {}.getType() );
     }
 }

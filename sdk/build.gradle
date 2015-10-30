@@ -5,11 +5,11 @@ android {
         config {
         }
     }
-    compileSdkVersion 21
-    buildToolsVersion "22.0.0"
+    compileSdkVersion 22
+    buildToolsVersion "22.0.1"
     defaultConfig {
-        minSdkVersion 9
-        targetSdkVersion 21
+        minSdkVersion 10
+        targetSdkVersion 22
         versionCode 1
         versionName "1.0"
     }
@@ -27,7 +27,7 @@ android {
 }
 
 dependencies {
-    compile 'com.android.support:appcompat-v7:21.+'
+    compile 'com.android.support:appcompat-v7:22.2.1'
     compile fileTree(dir: 'libs', include: ['*.jar'])
     /*  以下标识
     //must gson
@@ -72,7 +72,7 @@ task clearJar(type: Delete) {
 
 task makeJar(type:org.gradle.api.tasks.bundling.Jar) {
     //指定生成的jar名
-    baseName 'beecloud'
+    baseName 'beecloud-2.0.0'
     //从哪里打包class文件
     from('build/intermediates/classes/release/cn/beecloud')
     //打包到jar后的目录结构

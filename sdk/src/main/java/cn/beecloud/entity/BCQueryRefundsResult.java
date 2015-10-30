@@ -11,7 +11,7 @@ import com.google.gson.reflect.TypeToken;
 
 import java.util.List;
 
-public class BCQueryRefundOrderResult extends BCRestfulCommonResult {
+public class BCQueryRefundsResult extends BCRestfulCommonResult {
     //实际返回订单结果数量
     private Integer count;
 
@@ -35,7 +35,7 @@ public class BCQueryRefundOrderResult extends BCRestfulCommonResult {
     /**
      * 无参构造
      */
-    public BCQueryRefundOrderResult() {
+    public BCQueryRefundsResult() {
     }
 
     /**
@@ -45,7 +45,7 @@ public class BCQueryRefundOrderResult extends BCRestfulCommonResult {
      * @param resultMsg  返回信息
      * @param errDetail  具体错误信息
      */
-    public BCQueryRefundOrderResult(Integer resultCode, String resultMsg, String errDetail) {
+    public BCQueryRefundsResult(Integer resultCode, String resultMsg, String errDetail) {
         super(resultCode, resultMsg, errDetail);
     }
 
@@ -58,7 +58,7 @@ public class BCQueryRefundOrderResult extends BCRestfulCommonResult {
      * @param count      实际的退款订单数量
      * @param refunds    退款订单列表
      */
-    public BCQueryRefundOrderResult(Integer resultCode, String resultMsg, String errDetail, Integer count, List<BCRefundOrder> refunds) {
+    public BCQueryRefundsResult(Integer resultCode, String resultMsg, String errDetail, Integer count, List<BCRefundOrder> refunds) {
         super(resultCode, resultMsg, errDetail);
         this.count = count;
         this.refunds = refunds;
@@ -69,10 +69,10 @@ public class BCQueryRefundOrderResult extends BCRestfulCommonResult {
      * @param jsonStr   json串
      * @return          BCQueryRefundOrderResult实例
      */
-    public BCQueryRefundOrderResult transJsonToResultObject(String jsonStr){
+    public static BCQueryRefundsResult transJsonToResultObject(String jsonStr){
         //反序列化json
         Gson res = new Gson();
 
-        return res.fromJson(jsonStr,new TypeToken<BCQueryRefundOrderResult>() {}.getType() );
+        return res.fromJson(jsonStr,new TypeToken<BCQueryRefundsResult>() {}.getType() );
     }
 }
