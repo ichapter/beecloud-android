@@ -44,7 +44,7 @@ public class BCPayPalPaymentActivity extends Activity {
             .environment(BCCache.getInstance(null).paypalPayType == BCPay.PAYPAL_PAY_TYPE.LIVE ?
                     PayPalConfiguration.ENVIRONMENT_PRODUCTION : PayPalConfiguration.ENVIRONMENT_SANDBOX)
             .clientId(BCCache.getInstance(null).paypalClientID)
-            .acceptCreditCards(false);
+            .acceptCreditCards(false);  //取消扫描卡片发起支付，即demo中的“用卡支付”
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,7 +61,7 @@ public class BCPayPalPaymentActivity extends Activity {
     public void onStart() {
         super.onStart();
 
-        billTotalFee = getIntent().getIntExtra("billTotalFee", -1);
+        billTotalFee = getIntent().getIntExtra("billTotalFee", 0);
         billTitle = getIntent().getStringExtra("billTitle");
         currency = getIntent().getStringExtra("currency");
         optional = getIntent().getStringExtra("optional");
@@ -98,11 +98,12 @@ public class BCPayPalPaymentActivity extends Activity {
 
                 final String billNum = confirm.getProofOfPayment().getPaymentId().substring(4);
 
-                //Log.w("BCPayPalPaymentActivity", billNum);
+                Log.w("BCPayPalPaymentActivity", billNum);
 
                 if (confirm.getProofOfPayment().getState() != null &&
                         confirm.getProofOfPayment().getState().equals("approved")){
                     BCPay.payCallback.done(new BCPayResult(BCPayResult.RESULT_SUCCESS,
+                            BCPayResult.APP_PAY_SUCC_CODE,
                             BCPayResult.RESULT_SUCCESS, BCPayResult.RESULT_SUCCESS));
 
                     BCCache.executorService.execute(new Runnable() {
@@ -111,17 +112,23 @@ public class BCPayPalPaymentActivity extends Activity {
 
                             Log.i(TAG, "sync with server...");
 
-                            String remoteRes = BCPay.getInstance(BCPayPalPaymentActivity.this).syncPayPalPayment(
+                            String[] remoteRes = BCPay.getInstance(BCPayPalPaymentActivity.this).syncPayPalPayment(
                                     billTitle, billTotalFee, billNum, currency,
                                     optional, BCCache.getInstance(null).paypalPayType, null);
 
-                            //Log.w(TAG, remoteRes);
+                            Log.w(TAG, remoteRes[0] + " # " + remoteRes[1]);
 
-                            //verify fail, keep record to SharedPreferences
-                            if (!remoteRes.equals(BCPayResult.RESULT_SUCCESS)) {
+
+                            if (remoteRes[0].equals(BCPayResult.RESULT_SUCCESS)) {
+                                //verify successful, notify the observer
+                                if (BCPay.payPalSyncObserver != null){
+                                    BCPay.payPalSyncObserver.onSyncSucceed(BCCache.getInstance(null).billID);
+                                }
+                            } else {    //verify fail, keep record to SharedPreferences
+
                                 Map<String, String> payInfo = new HashMap<String, String>();
                                 payInfo.put("billTitle", billTitle);
-                                payInfo.put("billTotalFee", String.valueOf(1));
+                                payInfo.put("billTotalFee", String.valueOf(billTotalFee));
                                 payInfo.put("optional", optional);
                                 payInfo.put("billNum", billNum);
                                 payInfo.put("channel", String.valueOf(BCCache.getInstance(null).paypalPayType));
@@ -130,27 +137,39 @@ public class BCPayPalPaymentActivity extends Activity {
 
                                 Gson gson = new Gson();
                                 String paystr = gson.toJson(payInfo);
-                                Log.w(TAG, "store un-synced bill...");
-                                BCCache.getInstance(BCPayPalPaymentActivity.this).storeUnSyncedPayPalRecords(paystr);
+
+                                if (BCPay.payPalSyncObserver != null){
+                                    if (! BCPay.payPalSyncObserver.onSyncFailed(paystr, remoteRes[1])){
+                                        Log.w(TAG, "store un-synced bill...");
+                                        BCCache.getInstance(BCPayPalPaymentActivity.this).storeUnSyncedPayPalRecords(paystr);
+                                    }
+                                } else {
+                                    Log.w(TAG, "store un-synced bill...");
+                                    BCCache.getInstance(BCPayPalPaymentActivity.this).storeUnSyncedPayPalRecords(paystr);
+                                }
                             }
                         }
                     });
 
                 } else {
                     BCPay.payCallback.done(new BCPayResult(BCPayResult.RESULT_FAIL,
+                            BCPayResult.APP_INTERNAL_THIRD_CHANNEL_ERR_CODE,
                             BCPayResult.FAIL_ERR_FROM_CHANNEL, "not approved by PayPal Android SDK"));
                 }
             } else {
                 BCPay.payCallback.done(new BCPayResult(BCPayResult.RESULT_FAIL,
+                        BCPayResult.APP_INTERNAL_THIRD_CHANNEL_ERR_CODE,
                         BCPayResult.FAIL_ERR_FROM_CHANNEL, "no confirm from PayPal Android SDK"));
             }
         }
         else if (resultCode == Activity.RESULT_CANCELED) {
             BCPay.payCallback.done(new BCPayResult(BCPayResult.RESULT_CANCEL,
+                    BCPayResult.APP_PAY_CANCEL_CODE,
                     BCPayResult.RESULT_CANCEL, BCPayResult.RESULT_CANCEL));
         }
         else if (resultCode == PaymentActivity.RESULT_EXTRAS_INVALID) {
             BCPay.payCallback.done(new BCPayResult(BCPayResult.RESULT_FAIL,
+                    BCPayResult.APP_INTERNAL_THIRD_CHANNEL_ERR_CODE,
                     BCPayResult.FAIL_ERR_FROM_CHANNEL,
                     "An invalid Payment or PayPalConfiguration was submitted."));
         }

@@ -26,7 +26,7 @@ import java.util.List;
 import cn.beecloud.BCQuery;
 import cn.beecloud.async.BCCallback;
 import cn.beecloud.async.BCResult;
-import cn.beecloud.entity.BCQueryRefundOrderResult;
+import cn.beecloud.entity.BCQueryRefundsResult;
 import cn.beecloud.entity.BCRefundOrder;
 import cn.beecloud.entity.BCReqParams;
 
@@ -98,16 +98,16 @@ public class RefundOrdersActivity extends Activity {
                 //此处关闭loading界面
                 loadingDialog.dismiss();
 
-                final BCQueryRefundOrderResult bcQueryRefundOrderResult = (BCQueryRefundOrderResult) bcResult;
+                final BCQueryRefundsResult bcQueryRefundsResult = (BCQueryRefundsResult) bcResult;
 
                 //resultCode为0表示请求成功
                 //count包含返回的订单个数
-                if (bcQueryRefundOrderResult.getResultCode() == 0) {
+                if (bcQueryRefundsResult.getResultCode() == 0) {
 
                     //订单列表
-                    refundOrders = bcQueryRefundOrderResult.getRefunds();
+                    refundOrders = bcQueryRefundsResult.getRefunds();
 
-                    Log.i(BillListActivity.TAG, "bill count: " + bcQueryRefundOrderResult.getCount());
+                    Log.i(BillListActivity.TAG, "bill count: " + bcQueryRefundsResult.getCount());
 
                 } else {
                     //订单列表
@@ -116,9 +116,9 @@ public class RefundOrdersActivity extends Activity {
                     RefundOrdersActivity.this.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            Toast.makeText(RefundOrdersActivity.this, "err code:" + bcQueryRefundOrderResult.getResultCode() +
-                                    "; err msg: " + bcQueryRefundOrderResult.getResultMsg() +
-                                    "; err detail: " + bcQueryRefundOrderResult.getErrDetail(), Toast.LENGTH_LONG).show();
+                            Toast.makeText(RefundOrdersActivity.this, "err code:" + bcQueryRefundsResult.getResultCode() +
+                                    "; err msg: " + bcQueryRefundsResult.getResultMsg() +
+                                    "; err detail: " + bcQueryRefundsResult.getErrDetail(), Toast.LENGTH_LONG).show();
                         }
                     });
 

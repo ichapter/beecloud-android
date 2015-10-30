@@ -7,6 +7,8 @@
 package cn.beecloud.entity;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import cn.beecloud.BCCache;
 import cn.beecloud.BCException;
@@ -39,7 +41,7 @@ public class BCReqParams {
     /**
      * 请求类型
      */
-    public enum ReqType{PAY, QUERY, QRCODE}
+    public enum ReqType{PAY, QUERY, QRCODE, OFFLINE_PAY}
 
     /**
      * 渠道支付类型
@@ -75,6 +77,11 @@ public class BCReqParams {
         WX_APP,
 
         /**
+         * 微信被扫
+         */
+        WX_SCAN,
+
+        /**
          * 支付宝所有渠道
          * 仅用于查询订单
          */
@@ -102,6 +109,11 @@ public class BCReqParams {
          * 用于线下实体店扫码和查询订单
          */
         ALI_OFFLINE_QRCODE,
+
+        /**
+         * ALI被扫
+         */
+        ALI_SCAN,
 
         /**
          * 支付宝移动网页支付
@@ -162,7 +174,67 @@ public class BCReqParams {
          * 百度所有渠道,
          * 用于查询
          */
-        BD;
+        BD,
+
+        /**
+         * 京东移动网页支付
+         * 仅用于查询订单
+         */
+        JD_WAP,
+
+        /**
+         * 京东PC网页支付
+         * 仅用于查询订单
+         */
+        JD_WEB,
+
+        /**
+         * 京东
+         * 仅用于查询订单
+         */
+        JD,
+
+        /**
+         * 易宝移动网页支付
+         * 仅用于查询订单
+         */
+        YEE_WAP,
+
+        /**
+         * 易宝PC网页支付
+         * 仅用于查询订单
+         */
+        YEE_WEB,
+
+        /**
+         * 易宝充值卡支付
+         * 仅用于查询订单
+         */
+        YEE_NOBANKCARDB,
+
+        /**
+         * 易宝
+         * 仅用于查询订单
+         */
+        YEE,
+
+        /**
+         * 快钱移动网页支付
+         * 仅用于查询订单
+         */
+        KUAIQIAN_WAP,
+
+        /**
+         * 快钱PC网页支付
+         * 仅用于查询订单
+         */
+        KUAIQIAN_WEB,
+
+        /**
+         * 快钱
+         * 仅用于查询订单
+         */
+        KUAIQIAN;
 
         /**
          * 判断是否为有效的app端支付渠道类型
@@ -177,6 +249,19 @@ public class BCReqParams {
                     channel == PAYPAL_SANDBOX ||
                     channel == PAYPAL_LIVE ||
                     channel == BD_APP;
+        }
+
+        /**
+         * 判断是否为有效线下扫码支付渠道类型
+         *
+         * @param channel 支付渠道类型
+         * @return true表示有效
+         */
+        public static boolean isValidOfflinePayChannelType(BCChannelTypes channel) {
+            return channel == WX_NATIVE ||
+                    channel == WX_SCAN ||
+                    channel == ALI_OFFLINE_QRCODE ||
+                    channel == ALI_SCAN;
         }
 
         /**
@@ -236,6 +321,26 @@ public class BCReqParams {
                 return "百度WAP网页支付";
             else if (channel.equals(BD.name()))
                 return "百度钱包支付";
+            else if (channel.equals(JD.name()))
+                return "京东支付";
+            else if (channel.equals(JD_WAP.name()))
+                return "京东移动网页支付";
+            else if (channel.equals(JD_WEB.name()))
+                return "京东PC网页支付";
+            else if (channel.equals(YEE.name()))
+                return "易宝支付";
+            else if (channel.equals(YEE_WAP.name()))
+                return "易宝移动网页支付";
+            else if (channel.equals(YEE_WEB.name()))
+                return "易宝PC网页支付";
+            else if (channel.equals(YEE_NOBANKCARDB.name()))
+                return "易宝充值卡支付";
+            else if (channel.equals(KUAIQIAN.name()))
+                return "快钱支付";
+            else if (channel.equals(KUAIQIAN_WAP.name()))
+                return "快钱移动网页支付";
+            else if (channel.equals(KUAIQIAN_WEB.name()))
+                return "快钱PC网页支付";
             else
                 return "非法的支付类型";
         }
@@ -277,7 +382,10 @@ public class BCReqParams {
             throw new BCException("非法APP支付渠道");
 
         if (reqType == ReqType.QRCODE && !BCChannelTypes.isValidQRCodeReqChannelType(channel))
-            throw new BCException("非法二维码请求支付渠道");
+            throw new BCException("非法二维码生成请求渠道");
+
+        if (reqType == ReqType.OFFLINE_PAY && !BCChannelTypes.isValidOfflinePayChannelType(channel))
+            throw new BCException("非法的线下支付渠道");
 
         BCCache mCache = BCCache.getInstance(null);
 
@@ -290,5 +398,20 @@ public class BCReqParams {
                     timestamp + mCache.appSecret);
             this.channel = channel;
         }
+    }
+
+    /**
+     * 将实例转化成符合后台请求的键值对
+     * 用于以json方式post请求
+     */
+    public Map<String, Object> transToReqMapParams() {
+        Map<String, Object> params = new HashMap<String, Object>(8);
+
+        params.put("app_id", getAppId());
+        params.put("timestamp", getTimestamp());
+        params.put("app_sign", getAppSign());
+        params.put("channel", channel.name());
+
+        return params;
     }
 }

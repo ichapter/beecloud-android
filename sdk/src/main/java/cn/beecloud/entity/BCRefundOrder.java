@@ -62,7 +62,7 @@ public class BCRefundOrder extends BCOrder {
      * @return  退款创建时间, 毫秒时间戳, 13位
      */
     public Long getRefundCreatedTime() {
-        return created_time;
+        return create_time;
     }
 
 }

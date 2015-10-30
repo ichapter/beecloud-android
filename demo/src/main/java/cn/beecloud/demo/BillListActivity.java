@@ -26,7 +26,7 @@ import cn.beecloud.BCQuery;
 import cn.beecloud.async.BCCallback;
 import cn.beecloud.async.BCResult;
 import cn.beecloud.entity.BCBillOrder;
-import cn.beecloud.entity.BCQueryBillOrderResult;
+import cn.beecloud.entity.BCQueryBillsResult;
 import cn.beecloud.entity.BCReqParams;
 
 /**
@@ -91,7 +91,7 @@ public class BillListActivity extends Activity {
                 //此处关闭loading界面
                 loadingDialog.dismiss();
 
-                final BCQueryBillOrderResult bcQueryResult = (BCQueryBillOrderResult) bcResult;
+                final BCQueryBillsResult bcQueryResult = (BCQueryBillsResult) bcResult;
 
                 //resultCode为0表示请求成功
                 //count包含返回的订单个数

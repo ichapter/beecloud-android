@@ -56,7 +56,12 @@ public class BCCache {
      * 网络请求timeout时间
      * 以毫秒为单位
      */
-    public Integer networkTimeout;
+    public Integer connectTimeout;
+
+    /**
+     * 暂存每次支付结束后的返回的订单唯一标识
+     */
+    public String billID;
 
     /**
      * 线程池
@@ -79,7 +84,7 @@ public class BCCache {
 
             instance.wxAppId = null;
 
-            instance.networkTimeout = 10000;
+            instance.connectTimeout = 10000;
         }
 
         if (contextActivity != null)
@@ -120,7 +125,7 @@ public class BCCache {
                 BCCache.contextActivity.getSharedPreferences(BC_PAYPAL_SHARED_PREFERENCE_NAME, 0);
         SharedPreferences.Editor spEditor = prefs.edit();
         spEditor.clear();
-        spEditor.commit();
+        spEditor.apply();
     }
 
     /**
@@ -143,7 +148,7 @@ public class BCCache {
         List<String> oldRecords = Arrays.asList(records.split(separator));
 
         List<String> leftRecords = new ArrayList<String>();
-        if (oldRecords != null)
+        if (oldRecords.size() != 0)
             leftRecords.addAll(oldRecords);
 
         leftRecords.removeAll(rmRecords);
@@ -153,7 +158,7 @@ public class BCCache {
         } else {
             SharedPreferences.Editor spEditor = prefs.edit();
             spEditor.putString(BC_PAYPAL_UNSYNCED_STR_CACHE, joinStrings(leftRecords));
-            spEditor.commit();
+            spEditor.apply();
         }
     }
 
@@ -182,7 +187,7 @@ public class BCCache {
             spEditor.putString(BC_PAYPAL_UNSYNCED_STR_CACHE, joinStrings(totalRec));
         }
 
-        spEditor.commit();
+        spEditor.apply();
     }
 
     private String joinStrings(List<String> strings){
@@ -199,5 +204,9 @@ public class BCCache {
         }
 
         return joined.toString();
+    }
+
+    public void detach() {
+        contextActivity = null;
     }
 }

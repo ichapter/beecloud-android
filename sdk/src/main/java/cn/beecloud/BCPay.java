@@ -9,9 +9,6 @@ package cn.beecloud;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.Color;
-import android.os.Looper;
 import android.util.Log;
 
 import com.alipay.sdk.app.PayTask;
@@ -20,23 +17,13 @@ import com.baidu.paysdk.PayCallBackManager;
 import com.baidu.paysdk.api.BaiduPay;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.google.zxing.BarcodeFormat;
-import com.google.zxing.EncodeHintType;
-import com.google.zxing.MultiFormatWriter;
-import com.google.zxing.WriterException;
-import com.google.zxing.common.BitMatrix;
 import com.tencent.mm.sdk.constants.Build;
 import com.tencent.mm.sdk.modelpay.PayReq;
 import com.tencent.mm.sdk.openapi.IWXAPI;
 import com.tencent.mm.sdk.openapi.WXAPIFactory;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.util.EntityUtils;
-
-import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,6 +31,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import cn.beecloud.async.BCCallback;
+import cn.beecloud.async.BCPayPalSyncObserver;
 import cn.beecloud.entity.BCPayReqParams;
 import cn.beecloud.entity.BCPayResult;
 import cn.beecloud.entity.BCQRCodeResult;
@@ -66,6 +54,8 @@ public class BCPay {
 
     // IWXAPI 是第三方app和微信通信的openapi接口
     public static IWXAPI wxAPI = null;
+
+    public static BCPayPalSyncObserver payPalSyncObserver;
 
     private static BCPay instance;
 
@@ -133,6 +123,23 @@ public class BCPay {
         return errMsg;
     }
 
+    /**
+     * detach context
+     */
+    public static void detach() {
+        if (wxAPI != null) {
+            wxAPI.detach();
+        }
+
+        if (payCallback != null)
+            payCallback = null;
+
+        if (mContextActivity != null)
+            mContextActivity = null;
+
+        BCCache.getInstance(null).detach();
+    }
+
     public enum PAYPAL_PAY_TYPE {
         SANDBOX, LIVE
     }
@@ -177,56 +184,24 @@ public class BCPay {
     }
 
     /**
-     * 校验bill参数
-     * 设置公用参数
-     *
-     * @param billTitle       商品描述, 32个字节内, 汉字以2个字节计
-     * @param billTotalFee    支付金额，以分为单位，必须是正整数
-     * @param billNum         商户自定义订单号
-     * @param parameters      用于存储公用信息
-     * @param optional        为扩展参数，可以传入任意数量的key/value对来补充对业务逻辑的需求
-     * @return                返回校验失败信息, 为null则表明校验通过
-     */
-    private String prepareParametersForPay(final String billTitle, final Integer billTotalFee,
-                                           final String billNum, final Map<String, String> optional,
-                                           BCPayReqParams parameters) {
-
-        if (!BCValidationUtil.isValidBillTitleLength(billTitle)) {
-            return "parameters: 不合法的参数-订单标题长度不合法, 32个字节内, 汉字以2个字节计";
-        }
-
-        if (!BCValidationUtil.isValidBillNum(billNum))
-            return "parameters: 订单号必须是长度8~32位字母和/或数字组合成的字符串";
-
-        if (billTotalFee < 0) {
-            return "parameters: billTotalFee " + billTotalFee +
-                    " 格式不正确, 必须是以分为单位的正整数, 比如100表示1元";
-        }
-
-        parameters.title = billTitle;
-        parameters.totalFee = billTotalFee;
-        parameters.billNum = billNum;
-        parameters.optional = optional;
-
-        return null;
-    }
-
-    /**
      * 支付调用总接口
      *
-     * @param channelType     支付类型  对于支付手机APP端目前只支持WX_APP, ALI_APP, UN_APP
+     * @param channelType     支付类型  对于支付手机APP端目前只支持WX_APP, ALI_APP, UN_APP, BD_APP
      *                        @see cn.beecloud.entity.BCReqParams.BCChannelTypes
      * @param billTitle       商品描述, 32个字节内, 汉字以2个字节计
      * @param billTotalFee    支付金额，以分为单位，必须是正整数
      * @param billNum         商户自定义订单号
      * @param billTimeout     订单超时时间，以秒为单位，可以为null
      * @param optional        为扩展参数，可以传入任意数量的key/value对来补充对业务逻辑的需求
+     * @param analysis        为扩展参数，用于后期的分析，当前仅支持以category为key的分类分析
      * @param callback        支付完成后的回调函数
      */
     private void reqPaymentAsync(final BCReqParams.BCChannelTypes channelType,
                                  final String billTitle, final Integer billTotalFee,
                                  final String billNum, final Integer billTimeout,
-                                 final Map<String, String> optional, final BCCallback callback) {
+                                 final Map<String, String> optional,
+                                 final Map<String, String> analysis,
+                                 final BCCallback callback) {
 
         if (callback == null) {
             Log.w(TAG, "请初始化callback");
@@ -244,84 +219,100 @@ public class BCPay {
                 try {
                     parameters = new BCPayReqParams(channelType);
                 } catch (BCException e) {
-                    callback.done(new BCPayResult(BCPayResult.RESULT_FAIL, BCPayResult.FAIL_EXCEPTION,
+                    callback.done(new BCPayResult(BCPayResult.RESULT_FAIL,
+                            BCPayResult.APP_INTERNAL_EXCEPTION_ERR_CODE,
+                            BCPayResult.FAIL_EXCEPTION,
                             e.getMessage()));
                     return;
                 }
 
-                String paramValidRes = prepareParametersForPay(billTitle, billTotalFee,
+                String paramValidRes = BCValidationUtil.prepareParametersForPay(billTitle, billTotalFee,
                         billNum, optional, parameters);
 
                 if (paramValidRes != null) {
-                    callback.done(new BCPayResult(BCPayResult.RESULT_FAIL, BCPayResult.FAIL_INVALID_PARAMS,
+                    callback.done(new BCPayResult(BCPayResult.RESULT_FAIL,
+                            BCPayResult.APP_INTERNAL_PARAMS_ERR_CODE,
+                            BCPayResult.FAIL_INVALID_PARAMS,
                             paramValidRes));
                     return;
                 }
 
                 parameters.billTimeout = billTimeout;
+                parameters.analysis = analysis;
 
                 String payURL = BCHttpClientUtil.getBillPayURL();
 
-                HttpResponse response = BCHttpClientUtil.httpPost(payURL, parameters.transToBillReqMapParams());
-                if (null == response) {
-                    callback.done(new BCPayResult(BCPayResult.RESULT_FAIL, BCPayResult.FAIL_NETWORK_ISSUE,
-                            "Network Error"));
-                    return;
-                }
-                if (response.getStatusLine().getStatusCode() == 200) {
-                    String ret;
-                    try {
-                        ret = EntityUtils.toString(response.getEntity(), "UTF-8");
+                BCHttpClientUtil.Response response = BCHttpClientUtil.httpPost(payURL, parameters.transToBillReqMapParams());
 
-                        //反序列化json串
-                        Gson res = new Gson();
+                if (response.code == 200) {
+                    String ret = response.content;
 
-                        Type type = new TypeToken<Map<String,Object>>() {}.getType();
-                        Map<String, Object> responseMap = res.fromJson(ret, type);
+                    //反序列化json串
+                    Gson res = new Gson();
 
-                        //判断后台返回结果
-                        Double resultCode = (Double) responseMap.get("result_code");
-                        if (resultCode == 0) {
+                    Type type = new TypeToken<Map<String, Object>>() {
+                    }.getType();
+                    Map<String, Object> responseMap = res.fromJson(ret, type);
 
-                            if (mContextActivity != null) {
+                    //判断后台返回结果
+                    Double resultCode = (Double) responseMap.get("result_code");
+                    if (resultCode == 0) {
 
-                                //针对不同的支付渠道调用不同的API
-                                switch (channelType){
-                                    case WX_APP:
-                                        reqWXPaymentViaAPP(responseMap);
-                                        break;
-                                    case ALI_APP:
-                                        reqAliPaymentViaAPP(responseMap);
-                                        break;
-                                    case UN_APP:
-                                        reqUnionPaymentViaAPP(responseMap);
-                                        break;
-                                    case BD_APP:
-                                        reqBaiduPaymentViaAPP(responseMap);
-                                        break;
-                                    default:
-                                        callback.done(new BCPayResult(BCPayResult.RESULT_FAIL, BCPayResult.FAIL_INVALID_PARAMS,
-                                                "channelType参数不合法"));
-                                }
+                        if (mContextActivity != null) {
 
-                            } else {
-                                callback.done(new BCPayResult(BCPayResult.RESULT_FAIL, BCPayResult.FAIL_EXCEPTION,
-                                        "Context-Activity Exception in reqAliPayment"));
+                            BCCache.getInstance(null).billID = (String)responseMap.get("id");
+
+                            //针对不同的支付渠道调用不同的API
+                            switch (channelType) {
+                                case WX_APP:
+                                    reqWXPaymentViaAPP(responseMap);
+                                    break;
+                                case ALI_APP:
+                                    reqAliPaymentViaAPP(responseMap);
+                                    break;
+                                case UN_APP:
+                                    reqUnionPaymentViaAPP(responseMap);
+                                    break;
+                                case BD_APP:
+                                    reqBaiduPaymentViaAPP(responseMap);
+                                    break;
+                                default:
+                                    callback.done(new BCPayResult(BCPayResult.RESULT_FAIL,
+                                            BCPayResult.APP_INTERNAL_PARAMS_ERR_CODE,
+                                            BCPayResult.FAIL_INVALID_PARAMS,
+                                            "channelType参数不合法"));
                             }
+
                         } else {
-                            //返回后端传回的错误信息
-                            callback.done(new BCPayResult(BCPayResult.RESULT_FAIL, BCPayResult.FAIL_ERR_FROM_SERVER,
-                                    String.valueOf(responseMap.get("result_msg")) + ", " +
-                                            String.valueOf(responseMap.get("err_detail"))));
+                            callback.done(new BCPayResult(BCPayResult.RESULT_FAIL,
+                                    BCPayResult.APP_INTERNAL_EXCEPTION_ERR_CODE,
+                                    BCPayResult.FAIL_EXCEPTION,
+                                    "Context-Activity Exception in reqAliPayment"));
+                        }
+                    } else {
+                        //返回后端传回的错误信息
+                        int serverCode = BCPayResult.APP_INTERNAL_EXCEPTION_ERR_CODE;
+                        String serverMsg = String.valueOf(responseMap.get("result_msg"));
+                        String serverDetail = String.valueOf(responseMap.get("err_detail"));
+
+                        try{
+                            serverCode = Integer.valueOf((String)responseMap.get("result_code"));
+                        } catch (Exception e) {
+                            serverMsg = BCPayResult.FAIL_ERR_FROM_SERVER;
+                            serverDetail = e.getMessage();
                         }
 
-                    } catch (IOException e) {
-                        callback.done(new BCPayResult(BCPayResult.RESULT_FAIL, BCPayResult.FAIL_NETWORK_ISSUE,
-                                "Invalid Response"));
+                        callback.done(new BCPayResult(BCPayResult.RESULT_FAIL,
+                                serverCode,
+                                serverMsg,
+                                serverDetail));
                     }
+
                 } else {
-                    callback.done(new BCPayResult(BCPayResult.RESULT_FAIL, BCPayResult.FAIL_NETWORK_ISSUE,
-                            "Network Error"));
+                    callback.done(new BCPayResult(BCPayResult.RESULT_FAIL,
+                            BCPayResult.APP_INTERNAL_NETWORK_ERR_CODE,
+                            BCPayResult.FAIL_NETWORK_ISSUE,
+                            "Network Error:" + response.code + " # " + response.content));
                 }
 
             }
@@ -334,23 +325,27 @@ public class BCPay {
      * @param payParam        支付参数
      * @param callback        支付完成后的回调函数
      */
-    public void reqPaymentAsync(final PayParam payParam, final BCCallback callback) {
-        if (payParam.channelType != null &&
-                (payParam.channelType == BCReqParams.BCChannelTypes.PAYPAL_SANDBOX ||
-                    payParam.channelType == BCReqParams.BCChannelTypes.PAYPAL_LIVE)) {
+    public void reqPaymentAsync(final PayParams payParam, final BCCallback callback) {
+        if (payParam.channelType == null)
+            return;
+
+        if (payParam.channelType == BCReqParams.BCChannelTypes.PAYPAL_SANDBOX ||
+                    payParam.channelType == BCReqParams.BCChannelTypes.PAYPAL_LIVE) {
             reqPayPalPaymentAsync(payParam.billTitle,
                     payParam.billTotalFee,
                     payParam.currency,
-                    (HashMap<String,String>)payParam.optional,
+                    (HashMap<String, String>) payParam.optional,
+                    callback);
+        } else {
+            reqPaymentAsync(payParam.channelType,
+                    payParam.billTitle,
+                    payParam.billTotalFee,
+                    payParam.billNum,
+                    payParam.billTimeout,
+                    payParam.optional,
+                    payParam.analysis,
                     callback);
         }
-        reqPaymentAsync(payParam.channelType,
-                payParam.billTitle,
-                payParam.billTotalFee,
-                payParam.billNum,
-                payParam.billTimeout,
-                payParam.optional,
-                callback);
     }
 
     /**
@@ -373,7 +368,9 @@ public class BCPay {
         if (wxAPI != null) {
             wxAPI.sendReq(request);
         } else {
-            payCallback.done(new BCPayResult(BCPayResult.RESULT_FAIL, BCPayResult.FAIL_EXCEPTION,
+            payCallback.done(new BCPayResult(BCPayResult.RESULT_FAIL,
+                    BCPayResult.APP_INTERNAL_EXCEPTION_ERR_CODE,
+                    BCPayResult.FAIL_EXCEPTION,
                     "Error: 微信API为空, 请确认已经在需要调起微信支付的Activity的onCreate函数中调用BCPay.initWechatPay(XXActivity.this)"));
         }
     }
@@ -398,24 +395,29 @@ public class BCPay {
             resCode = matcher.group(1);
 
         String result;
+        int errCode;
         String errMsg;
 
         //9000-订单支付成功, 8000-正在处理中, 4000-订单支付失败, 6001-用户中途取消, 6002-网络连接出错
         String errDetail;
         if (resCode.equals("9000")) {
             result = BCPayResult.RESULT_SUCCESS;
+            errCode = BCPayResult.APP_PAY_SUCC_CODE;
             errMsg = BCPayResult.RESULT_SUCCESS;
             errDetail = errMsg;
         } else if (resCode.equals("6001")) {
             result = BCPayResult.RESULT_CANCEL;
+            errCode = BCPayResult.APP_PAY_CANCEL_CODE;
             errMsg = BCPayResult.RESULT_CANCEL;
             errDetail = errMsg;
         } else if (resCode.equals("8000")) {
             result = BCPayResult.RESULT_UNKNOWN;
+            errCode = BCPayResult.APP_INTERNAL_THIRD_CHANNEL_ERR_CODE;
             errMsg = BCPayResult.RESULT_PAYING_UNCONFIRMED;
             errDetail = "订单正在处理中，无法获取成功确认信息";
         } else {
             result = BCPayResult.RESULT_FAIL;
+            errCode = BCPayResult.APP_INTERNAL_THIRD_CHANNEL_ERR_CODE;
             errMsg = BCPayResult.FAIL_ERR_FROM_CHANNEL;
 
             if (resCode.equals("4000"))
@@ -424,7 +426,8 @@ public class BCPay {
                 errDetail = "网络连接出错";
         }
 
-        payCallback.done(new BCPayResult(result, errMsg, errDetail));
+        payCallback.done(new BCPayResult(result, errCode, errMsg,
+                errDetail, BCCache.getInstance(null).billID));
     }
 
     /**
@@ -450,65 +453,78 @@ public class BCPay {
     private void reqBaiduPaymentViaAPP(final Map<String, Object> responseMap) {
         String orderInfo = (String) responseMap.get("orderInfo");
 
-        Log.w(TAG, orderInfo);
+        //Log.w(TAG, orderInfo);
 
         Map<String, String> map = new HashMap<String, String>();
         BaiduPay.getInstance().doPay(mContextActivity, orderInfo, new PayCallBack() {
             public void onPayResult(int stateCode, String payDesc) {
-                Log.d(TAG, "rsult=" + stateCode + "#desc=" + payDesc);
+                //Log.w(TAG, "rsult=" + stateCode + "#desc=" + payDesc);
 
                 String result;
+                int errCode;
                 String errMsg;
                 String errDetail;
 
                 switch (stateCode) {
                     case PayCallBackManager.PayStateModle.PAY_STATUS_SUCCESS:// 需要到服务端验证支付结果
+
                         result = BCPayResult.RESULT_SUCCESS;
+                        errCode = BCPayResult.APP_PAY_SUCC_CODE;
                         errMsg = BCPayResult.RESULT_SUCCESS;
                         errDetail = errMsg;
                         break;
                     case PayCallBackManager.PayStateModle.PAY_STATUS_PAYING:// 需要到服务端验证支付结果
                         result = BCPayResult.RESULT_UNKNOWN;
+                        errCode = BCPayResult.APP_INTERNAL_THIRD_CHANNEL_ERR_CODE;
                         errMsg = BCPayResult.RESULT_PAYING_UNCONFIRMED;
                         errDetail = "订单正在处理中，无法获取成功确认信息";
                         break;
                     case PayCallBackManager.PayStateModle.PAY_STATUS_CANCEL:
                         result = BCPayResult.RESULT_CANCEL;
+                        errCode = BCPayResult.APP_PAY_CANCEL_CODE;
                         errDetail = errMsg = BCPayResult.RESULT_CANCEL;
                         break;
                     case PayCallBackManager.PayStateModle.PAY_STATUS_NOSUPPORT:
                         result = BCPayResult.RESULT_FAIL;
+                        errCode = BCPayResult.APP_INTERNAL_THIRD_CHANNEL_ERR_CODE;
                         errMsg = BCPayResult.FAIL_ERR_FROM_CHANNEL;
                         errDetail = "不支持该种支付方式";
                         break;
                     case PayCallBackManager.PayStateModle.PAY_STATUS_TOKEN_INVALID:
                         result = BCPayResult.RESULT_FAIL;
+                        errCode = BCPayResult.APP_INTERNAL_THIRD_CHANNEL_ERR_CODE;
                         errMsg = BCPayResult.FAIL_ERR_FROM_CHANNEL;
                         errDetail = "无效的登陆状态";
                         break;
                     case PayCallBackManager.PayStateModle.PAY_STATUS_LOGIN_ERROR:
                         result = BCPayResult.RESULT_FAIL;
+                        errCode = BCPayResult.APP_INTERNAL_THIRD_CHANNEL_ERR_CODE;
                         errMsg = BCPayResult.FAIL_ERR_FROM_CHANNEL;
                         errDetail = "登陆失败";
                         break;
                     case PayCallBackManager.PayStateModle.PAY_STATUS_ERROR:
                         result = BCPayResult.RESULT_FAIL;
+                        errCode = BCPayResult.APP_INTERNAL_THIRD_CHANNEL_ERR_CODE;
                         errMsg = BCPayResult.FAIL_ERR_FROM_CHANNEL;
                         errDetail = "支付失败";
                         break;
                     case PayCallBackManager.PayStateModle.PAY_STATUS_LOGIN_OUT:
                         result = BCPayResult.RESULT_FAIL;
+                        errCode = BCPayResult.APP_INTERNAL_THIRD_CHANNEL_ERR_CODE;
                         errMsg = BCPayResult.FAIL_ERR_FROM_CHANNEL;
                         errDetail = "退出登录";
                         break;
                     default:
                         result = BCPayResult.RESULT_FAIL;
+                        errCode = BCPayResult.APP_INTERNAL_THIRD_CHANNEL_ERR_CODE;
                         errMsg = BCPayResult.FAIL_ERR_FROM_CHANNEL;
                         errDetail = "支付失败";
                         break;
                 }
 
-                payCallback.done(new BCPayResult(result, errMsg, errDetail + "#result=" + stateCode + "#desc=" + payDesc));
+                payCallback.done(new BCPayResult(result, errCode, errMsg,
+                        errDetail + "#result=" + stateCode + "#desc=" + payDesc,
+                        BCCache.getInstance(null).billID));
             }
 
             public boolean isHideLoadingDialog() {
@@ -533,7 +549,7 @@ public class BCPay {
                                   final String billNum,
                                   final Map<String, String> optional, final BCCallback callback) {
         this.reqPaymentAsync(BCReqParams.BCChannelTypes.WX_APP, billTitle, billTotalFee,
-                billNum, null, optional, callback);
+                billNum, null, optional, null, callback);
     }
 
     /**
@@ -550,7 +566,7 @@ public class BCPay {
                                    final Map<String, String> optional,
                                    final BCCallback callback) {
         this.reqPaymentAsync(BCReqParams.BCChannelTypes.ALI_APP, billTitle, billTotalFee,
-                billNum, null, optional, callback);
+                billNum, null, optional, null, callback);
     }
 
     /**
@@ -567,7 +583,7 @@ public class BCPay {
                                      final Map<String, String> optional,
                                      final BCCallback callback) {
         this.reqPaymentAsync(BCReqParams.BCChannelTypes.UN_APP, billTitle, billTotalFee,
-                billNum, null, optional, callback);
+                billNum, null, optional, null, callback);
     }
 
     /**
@@ -584,7 +600,7 @@ public class BCPay {
                                      final Map<String, String> optional,
                                    final BCCallback callback) {
         this.reqPaymentAsync(BCReqParams.BCChannelTypes.BD_APP, billTitle, billTotalFee,
-                billNum, null, optional, callback);
+                billNum, null, optional, null, callback);
     }
 
     /**
@@ -605,7 +621,9 @@ public class BCPay {
         if (BCCache.getInstance(null).paypalClientID == null ||
                 BCCache.getInstance(null).paypalSecret == null ||
                 BCCache.getInstance(null).paypalPayType == null) {
-            callback.done(new BCPayResult(BCPayResult.RESULT_FAIL, BCPayResult.FAIL_INVALID_PARAMS,
+            callback.done(new BCPayResult(BCPayResult.RESULT_FAIL,
+                    BCPayResult.APP_INTERNAL_PARAMS_ERR_CODE,
+                    BCPayResult.FAIL_INVALID_PARAMS,
                     "使用PayPal支付需要设置client id，PayPal应用secret和PayPal支付类型"));
             return;
         }
@@ -621,29 +639,21 @@ public class BCPay {
     }
 
     private String getPayPalAccessToken() {
-        HttpResponse response = BCHttpClientUtil.getPayPalAccessToken();
-
-        if (response == null)
-            return null;
+        BCHttpClientUtil.Response response = BCHttpClientUtil.getPayPalAccessToken();
 
         String accessToken = null;
 
-        if (response.getStatusLine().getStatusCode() == 200) {
-            String ret;
-            try {
-                ret = EntityUtils.toString(response.getEntity(), "UTF-8");
+        if (response.code == 200) {
+            String ret = response.content;
 
-                //反序列化json
-                Gson res = new Gson();
+            //反序列化json
+            Gson res = new Gson();
 
-                Type type = new TypeToken<Map<String, Object>>() {}.getType();
-                Map<String, Object> responseMap = res.fromJson(ret, type);
+            Type type = new TypeToken<Map<String, Object>>() {}.getType();
+            Map<String, Object> responseMap = res.fromJson(ret, type);
 
-                //判断后台返回结果
-                accessToken = String.valueOf(responseMap.get("access_token"));
-            } catch (IOException e) {
-                Log.e("BCPayPalPaymentActivity", e.getMessage());
-            }
+            //判断后台返回结果
+            accessToken = String.valueOf(responseMap.get("access_token"));
 
         }
 
@@ -655,7 +665,7 @@ public class BCPay {
      *
      * @return BCPayResult.RESULT_SUCCESS means sync successfully and payment is valid
      */
-    String syncPayPalPayment(final String billTitle, final Integer billTotalFee, final String billNum,
+    String[] syncPayPalPayment(final String billTitle, final Integer billTotalFee, final String billNum,
                              final String currency, final String optional, final PAYPAL_PAY_TYPE paypalType,
                              final String token) {
 
@@ -665,21 +675,21 @@ public class BCPay {
             parameters = new BCPayReqParams(paypalType == PAYPAL_PAY_TYPE.LIVE ?
                     BCReqParams.BCChannelTypes.PAYPAL_LIVE : BCReqParams.BCChannelTypes.PAYPAL_SANDBOX);
         } catch (BCException e) {
-            return e.getMessage();
+            return new String[]{BCPayResult.RESULT_FAIL, e.getMessage()};
         }
 
         Map<String, String> optionalMap = null;
 
         if (optional != null) {
             Gson gson = new Gson();
-            optionalMap = gson.fromJson(optional, new TypeToken<Map<String,Object>>() {}.getType());
+            optionalMap = gson.fromJson(optional, new TypeToken<Map<String,String>>() {}.getType());
         }
 
-        String paramValidRes = prepareParametersForPay(billTitle, billTotalFee,
+        String paramValidRes = BCValidationUtil.prepareParametersForPay(billTitle, billTotalFee,
                 billNum, optionalMap, parameters);
 
         if (paramValidRes != null) {
-            return paramValidRes;
+            return new String[] {BCPayResult.RESULT_FAIL,paramValidRes};
         }
 
         String accessToken = token;
@@ -690,55 +700,53 @@ public class BCPay {
         //Log.w("BCPay", accessToken);
 
         if (accessToken == null)
-            return "Can't get access Token";
+            return new String[]{BCPayResult.RESULT_FAIL, "Can't get access Token"};
 
         parameters.currency=currency;
         parameters.accessToken = "Bearer " + accessToken;
 
         String payURL = BCHttpClientUtil.getBillPayURL();
 
-        HttpResponse response = BCHttpClientUtil.httpPost(payURL, parameters.transToBillReqMapParams());
-        if (null == response) {
-            return "Network Error";
-        }
-        if (response.getStatusLine().getStatusCode() == 200) {
-            String ret;
-            try {
-                ret = EntityUtils.toString(response.getEntity(), "UTF-8");
+        BCHttpClientUtil.Response response = BCHttpClientUtil.httpPost(payURL, parameters.transToBillReqMapParams());
 
-                Gson res = new Gson();
+        if (response.code == 200) {
+            String ret = response.content;
 
-                Type type = new TypeToken<Map<String,Object>>() {}.getType();
-                Map<String, Object> responseMap = res.fromJson(ret, type);
+            Gson res = new Gson();
 
-                //check result
-                Double resultCode = (Double) responseMap.get("result_code");
-                //String errDetail = (String)responseMap.get("err_detail");
+            Type type = new TypeToken<Map<String,Object>>() {}.getType();
+            Map<String, Object> responseMap = res.fromJson(ret, type);
 
-                if (resultCode == 0) {
-                    return BCPayResult.RESULT_SUCCESS;
-                /*
-                } else if (resultCode == 7 && errDetail != null && errDetail.startsWith("PAYPAL")) {
+            //check result
+            Double resultCode = (Double) responseMap.get("result_code");
+            //String errDetail = (String)responseMap.get("err_detail");
 
-                    Log.w("BCPay", "not a valid payment: " + errDetail);
+            if (resultCode == 0) {
 
-                    //here RESULT_SUCCESS only means sync success, not means successful pay
-                    //for example, you paid 1 USD, but the PayPal server just received 0.1 USD
-                    //then it is not a valid payment, it is rare but to prevent fraud
+                BCCache.getInstance(null).billID=String.valueOf(responseMap.get("id"));
 
-                    return BCPayResult.RESULT_SUCCESS;
-                */
-                } else {
-                    //return error info from server
-                    return String.valueOf(responseMap.get("result_msg")) + " - " +
-                                    String.valueOf(responseMap.get("err_detail"));
-                }
+                return new String[]{BCPayResult.RESULT_SUCCESS,
+                        String.valueOf(responseMap.get("id"))};
+            /*
+            } else if (resultCode == 7 && errDetail != null && errDetail.startsWith("PAYPAL")) {
 
-            } catch (IOException e) {
-                return "Invalid Response";
+                Log.w("BCPay", "not a valid payment: " + errDetail);
+
+                //here RESULT_SUCCESS only means sync success, not means successful pay
+                //for example, you paid 1 USD, but the PayPal server just received 0.1 USD
+                //then it is not a valid payment, it is rare but to prevent fraud
+
+                return BCPayResult.RESULT_SUCCESS;
+            */
+            } else {
+                //return error info from server
+                return new String[] {BCPayResult.RESULT_FAIL,
+                        String.valueOf(responseMap.get("result_msg")) + " # " +
+                                String.valueOf(responseMap.get("err_detail"))};
             }
+
         } else {
-            return "Network Error";
+            return new String[] {BCPayResult.RESULT_FAIL,"Network Error"};
         }
     }
 
@@ -759,17 +767,17 @@ public class BCPay {
             billTotalFee = -1;
         }
 
-        String result = syncPayPalPayment(syncItem.get("billTitle"), billTotalFee,
+        String[] result = syncPayPalPayment(syncItem.get("billTitle"), billTotalFee,
                 syncItem.get("billNum"), syncItem.get("currency"), syncItem.get("optional"),
                 PAYPAL_PAY_TYPE.valueOf(syncItem.get("channel")), token);
 
-        if (result.equals(BCPayResult.RESULT_SUCCESS)) {
+        if (result[0].equals(BCPayResult.RESULT_SUCCESS)) {
             List<String> syncedRecord = new ArrayList<String>(1);
             syncedRecord.add(syncJson);
             BCCache.getInstance(mContextActivity).removeSyncedPalPalRecords(syncedRecord);
         }
 
-        return result;
+        return result[0];
     }
 
     /**
@@ -800,228 +808,10 @@ public class BCPay {
     }
 
     /**
-     * 将string转化成对应的bitmap
      *
-     * @param contentsToEncode          原始字符串
-     * @param imageWidth                生成的图片宽度, 以px为单位
-     * @param imageHeight               生成的图片高度, 以px为单位
-     * @param marginSize                生成的图片中二维码到图片边缘的留边
-     * @param color                     二维码图片的前景色
-     * @param colorBack                 二维码图片的背景色
-     * @return bitmap                   QR Code图片
-     * @throws WriterException          zxing无法生成QR Code
-     * @throws IllegalStateException    本函数不应该在UI主进程调用, 通过使用AsyncTask或者新建进程
      */
-    public static Bitmap generateBitmap(String contentsToEncode,
-                                        int imageWidth, int imageHeight,
-                                        int marginSize, int color, int colorBack)
-            throws WriterException, IllegalStateException {
-
-        if (Looper.myLooper() == Looper.getMainLooper()) {
-            throw new IllegalStateException("Should not be invoked from the UI thread");
-        }
-
-        Map<EncodeHintType, Object> hints = new EnumMap<EncodeHintType, Object>(EncodeHintType.class);
-        hints.put(EncodeHintType.MARGIN, marginSize);
-        hints.put(EncodeHintType.CHARACTER_SET, "UTF-8");
-
-        MultiFormatWriter writer = new MultiFormatWriter();
-        BitMatrix result = writer.encode(contentsToEncode, BarcodeFormat.QR_CODE, imageWidth, imageHeight, hints);
-
-        final int width = result.getWidth();
-        final int height = result.getHeight();
-        int[] pixels = new int[width * height];
-        for (int y = 0; y < height; y++) {
-            int offset = y * width;
-            for (int x = 0; x < width; x++) {
-                pixels[offset + x] = result.get(x, y) ? color : colorBack;
-            }
-        }
-
-        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-        bitmap.setPixels(pixels, 0, width, 0, 0, width, height);
-        return bitmap;
-    }
-
-    /**
-     * 生成二维码总接口
-     *
-     * @param channelType     生成扫码的类型  对于支付手机APP端目前只支持WX_NATIVE, ALI_QRCODE, ALI_OFFLINE_QRCODE
-     *                        @see cn.beecloud.entity.BCReqParams.BCChannelTypes
-     * @param billTitle       商品描述, 32个字节内, 汉字以2个字节计
-     * @param billTotalFee    支付金额，以分为单位，必须是正整数
-     * @param billNum         商户自定义订单号
-     * @param optional        为扩展参数，可以传入任意数量的key/value对来补充对业务逻辑的需求
-     * @param genQRCode       是否生成QRCode Bitmap
-     * @param qrCodeWidth     如果生成, QRCode的宽度, null则使用默认参数
-     * @param qrPayMode       支付宝内嵌二维码支付(ALI_QRCODE)的选填参数
-     *                        @see BCPayReqParams
-     * @param returnUrl       同步返回页面, ALI_QRCODE时为必填
-     * @param callback        支付完成后的回调函数
-     */
-    private void reqQRCodeAsync(final BCReqParams.BCChannelTypes channelType,
-                                final String billTitle, final Integer billTotalFee,
-                                final String billNum, final Map<String, String> optional,
-                                final Boolean genQRCode, final Integer qrCodeWidth,
-                                final String qrPayMode, final String returnUrl,
-                                final BCCallback callback) {
-
-        if (callback == null) {
-            Log.w(TAG, "请初始化callback");
-            return;
-        }
-
-        BCCache.executorService.execute(new Runnable() {
-            @Override
-            public void run() {
-
-                //校验并准备公用参数
-                BCPayReqParams parameters;
-                try {
-                    parameters = new BCPayReqParams(channelType, BCReqParams.ReqType.QRCODE);
-                } catch (BCException e) {
-                    callback.done(new BCQRCodeResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
-                            BCRestfulCommonResult.APP_INNER_FAIL, e.getMessage()));
-                    return;
-                }
-
-                String paramValidRes = prepareParametersForPay(billTitle, billTotalFee,
-                        billNum, optional, parameters);
-
-                if (paramValidRes != null) {
-                    callback.done(new BCQRCodeResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
-                            BCRestfulCommonResult.APP_INNER_FAIL,
-                            paramValidRes));
-                    return;
-                }
-
-                //添加ALI_QRCODE参数
-                if (channelType == BCReqParams.BCChannelTypes.ALI_QRCODE){
-                    if (returnUrl == null || !BCValidationUtil.isStringValidURL(returnUrl)){
-                        callback.done(new BCQRCodeResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
-                                BCRestfulCommonResult.APP_INNER_FAIL,
-                                "returnUrl为ALI_QRCODE的必填参数，并且需要以http://或https://开始"));
-                        return;
-                    }
-
-                    parameters.returnUrl = returnUrl;
-                    parameters.qrPayMode = qrPayMode;
-                }
-
-                String qrCodeReqURL = BCHttpClientUtil.getQRCodeReqURL();
-
-                HttpResponse response = BCHttpClientUtil.httpPost(qrCodeReqURL, parameters.transToBillReqMapParams());
-                if (null == response) {
-                    callback.done(new BCQRCodeResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
-                            BCRestfulCommonResult.APP_INNER_FAIL,
-                            "Network Error"));
-                    return;
-                }
-                if (response.getStatusLine().getStatusCode() == 200) {
-                    String ret;
-                    try {
-                        ret = EntityUtils.toString(response.getEntity(), "UTF-8");
-
-                        //反序列化json
-                        Gson res = new Gson();
-
-                        Type type = new TypeToken<Map<String,Object>>() {}.getType();
-                        Map<String, Object> responseMap = res.fromJson(ret, type);
-
-                        //判断后台返回结果
-                        Integer resultCode = ((Double) responseMap.get("result_code")).intValue();
-                        if (resultCode == 0) {
-
-                            String content = null;
-                            Bitmap qrBitmap = null;
-                            String aliQRCodeHtml = null;
-                            int imgSize = BCQRCodeResult.DEFAULT_QRCODE_WIDTH;
-
-                            //针对不同的支付渠道获取不同的参数
-                            switch (channelType){
-                                case WX_NATIVE:
-                                    if (responseMap.get("code_url") != null) {
-                                        content = (String) responseMap.get("code_url");
-                                    }
-                                    break;
-                                case ALI_QRCODE:
-                                    if (responseMap.get("url") != null) {
-                                        content = (String) responseMap.get("url");
-                                    }
-                                    aliQRCodeHtml = String.valueOf(responseMap.get("html"));
-                                    break;
-                                case ALI_OFFLINE_QRCODE:
-                                    if (responseMap.get("qr_code") != null) {
-                                        content = (String) responseMap.get("qr_code");
-                                    }
-                                    break;
-                                default:
-                                    callback.done(new BCQRCodeResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
-                                            BCRestfulCommonResult.APP_INNER_FAIL,
-                                            "channelType参数不合法"));
-                            }
-
-                            if (genQRCode && content != null) {
-
-                                if (qrCodeWidth != null)
-                                    imgSize = qrCodeWidth;
-
-                                try {
-                                    qrBitmap = BCPay.generateBitmap(content, imgSize,
-                                            imgSize, 0,
-                                            Color.BLACK, Color.WHITE);
-                                } catch (WriterException e) {
-                                    callback.done(new BCQRCodeResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
-                                            BCRestfulCommonResult.APP_INNER_FAIL, e.getMessage()));
-                                    return;
-                                }
-                            }
-
-                            callback.done(new BCQRCodeResult(resultCode,
-                                    String.valueOf(responseMap.get("result_msg")),
-                                    String.valueOf(responseMap.get("err_detail")),
-                                    imgSize, imgSize,
-                                    content, qrBitmap,
-                                    aliQRCodeHtml));
-
-                        } else {
-                            //返回服务端传回的错误信息
-                            callback.done(new BCQRCodeResult(resultCode,
-                                    String.valueOf(responseMap.get("result_msg")),
-                                    String.valueOf(responseMap.get("err_detail"))));
-                        }
-
-                    } catch (IOException e) {
-                        callback.done(new BCQRCodeResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
-                                BCRestfulCommonResult.APP_INNER_FAIL, e.getMessage()));
-                    }
-                } else {
-                    callback.done(new BCQRCodeResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
-                            BCRestfulCommonResult.APP_INNER_FAIL,
-                            "Network Error"));
-                }
-
-            }
-        });
-    }
-
-    /**
-     * 生成微信支付二维码
-     *
-     * @param billTitle       商品描述, 32个字节内, 汉字以2个字节计
-     * @param billTotalFee    支付金额，以分为单位，必须是正整数
-     * @param billNum         商户自定义订单号
-     * @param optional        为扩展参数，可以传入任意数量的key/value对来补充对业务逻辑的需求
-     * @param genQRCode       是否生成QRCode Bitmap
-     * @param qrCodeWidth     如果生成, QRCode的宽度, null则使用默认参数
-     * @param callback        支付完成后的回调函数
-     */
-    public void reqWXQRCodeAsync(final String billTitle, final Integer billTotalFee,
-                                final String billNum, final Map<String, String> optional,
-                                final Boolean genQRCode, final Integer qrCodeWidth,
-                                final BCCallback callback) {
-        reqQRCodeAsync(BCReqParams.BCChannelTypes.WX_NATIVE, billTitle, billTotalFee,
-                billNum, optional, genQRCode, qrCodeWidth, null, null, callback);
+    public void addPayPalSyncObserver(BCPayPalSyncObserver observer) {
+        BCPay.payPalSyncObserver = observer;
     }
 
     /**
@@ -1036,19 +826,106 @@ public class BCPay {
      *                        @see BCPayReqParams
      * @param callback        支付完成后的回调函数
      */
-    public void reqAliQRCodeAsync(final String billTitle, final Integer billTotalFee,
+    public void reqAliInlineQRCodeAsync(final String billTitle, final Integer billTotalFee,
                                   final String billNum, final Map<String, String> optional,
                                   final String returnUrl,
                                   final String qrPayMode,
                                   final BCCallback callback) {
-        reqQRCodeAsync(BCReqParams.BCChannelTypes.ALI_QRCODE, billTitle, billTotalFee,
-                billNum, optional, false, null, qrPayMode, returnUrl, callback);
+        if (callback == null) {
+            Log.w(TAG, "请初始化callback");
+            return;
+        }
+
+        BCCache.executorService.execute(new Runnable() {
+            @Override
+            public void run() {
+
+                //校验并准备公用参数
+                BCPayReqParams parameters;
+                try {
+                    parameters = new BCPayReqParams(BCReqParams.BCChannelTypes.ALI_QRCODE,
+                            BCReqParams.ReqType.QRCODE);
+                } catch (BCException e) {
+                    callback.done(new BCQRCodeResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
+                            BCRestfulCommonResult.APP_INNER_FAIL, e.getMessage()));
+                    return;
+                }
+
+                String paramValidRes = BCValidationUtil.prepareParametersForPay(billTitle, billTotalFee,
+                        billNum, optional, parameters);
+
+                if (paramValidRes != null) {
+                    callback.done(new BCQRCodeResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
+                            BCRestfulCommonResult.APP_INNER_FAIL,
+                            paramValidRes));
+                    return;
+                }
+
+                //添加ALI_QRCODE参数
+                if (returnUrl == null || !BCValidationUtil.isStringValidURL(returnUrl)) {
+                    callback.done(new BCQRCodeResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
+                            BCRestfulCommonResult.APP_INNER_FAIL,
+                            "returnUrl为ALI_QRCODE的必填参数，并且需要以http://或https://开始"));
+                    return;
+                }
+
+                parameters.returnUrl = returnUrl;
+                parameters.qrPayMode = qrPayMode;
+
+                String qrCodeReqURL = BCHttpClientUtil.getQRCodeReqURL();
+
+                BCHttpClientUtil.Response response = BCHttpClientUtil.httpPost(qrCodeReqURL, parameters.transToBillReqMapParams());
+
+                if (response.code == 200) {
+                    String ret = response.content;
+
+                    //反序列化json
+                    Gson res = new Gson();
+
+                    Type type = new TypeToken<Map<String, Object>>() {
+                    }.getType();
+                    Map<String, Object> responseMap = res.fromJson(ret, type);
+
+                    //判断后台返回结果
+                    Integer resultCode = ((Double) responseMap.get("result_code")).intValue();
+                    if (resultCode == 0) {
+
+                        String content = null;
+                        String aliQRCodeHtml;
+
+                        if (responseMap.get("url") != null) {
+                            content = (String) responseMap.get("url");
+                        }
+                        aliQRCodeHtml = String.valueOf(responseMap.get("html"));
+
+                        callback.done(new BCQRCodeResult(resultCode,
+                                String.valueOf(responseMap.get("result_msg")),
+                                String.valueOf(responseMap.get("err_detail")),
+                                null, null,
+                                content, null,
+                                aliQRCodeHtml));
+
+                    } else {
+                        //返回服务端传回的错误信息
+                        callback.done(new BCQRCodeResult(resultCode,
+                                String.valueOf(responseMap.get("result_msg")),
+                                String.valueOf(responseMap.get("err_detail"))));
+                    }
+
+                } else {
+                    callback.done(new BCQRCodeResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
+                            BCRestfulCommonResult.APP_INNER_FAIL,
+                            "Network Error:" + response.code + " # " + response.content));
+                }
+
+            }
+        });
     }
 
     /**
      * 外部支付参数实例
      */
-    public static class PayParam {
+    public static class PayParams {
         /**
          *  只允许
          *  BCReqParams.BCChannelTypes.WX_APP，
@@ -1082,7 +959,7 @@ public class BCPay {
         public String currency;
 
         /**
-         * 订单超时时间，以秒为单位，可以为null
+         * 订单超时时间，以秒为单位，建议不小于300, 可以为null
          */
         public Integer billTimeout;
 
@@ -1091,5 +968,11 @@ public class BCPay {
          * 对于PayPal请以HashMap实例化
          */
         public Map<String, String> optional;
+
+        /**
+         * 扩展参数，用于分析，可以为null
+         * 目前key只有是"category"时才会进行分析
+         */
+        public Map<String, String> analysis;
     }
 }

@@ -21,10 +21,22 @@ import cn.beecloud.async.BCResult;
 public class BCPayResult implements BCResult {
     //result包含支付成功、取消支付、支付失败
     private String result;
+    //针对支付失败的情况，提供失败代码
+    private Integer errCode;
     //针对支付失败的情况，提供失败原因
     private String errMsg;
     //提供详细的支付信息，比如原生的支付宝返回信息
     private String detailInfo;
+    //成功发起支付后返回支付表记录唯一标识
+    private String id;
+
+    public static final int APP_PAY_SUCC_CODE = 0;
+    public static final int APP_PAY_CANCEL_CODE = -1;
+
+    public static final int APP_INTERNAL_PARAMS_ERR_CODE = -10;
+    public static final int APP_INTERNAL_NETWORK_ERR_CODE = -11;
+    public static final int APP_INTERNAL_THIRD_CHANNEL_ERR_CODE = -12;
+    public static final int APP_INTERNAL_EXCEPTION_ERR_CODE = -13;
 
     /**
      * 表示支付成功
@@ -92,10 +104,28 @@ public class BCPayResult implements BCResult {
      * @param errMsg        支付失败的分类错误信息
      * @param detailInfo    详细的支付结果信息, 对于错误显示详细的错误信息
      */
-    public BCPayResult(String result, String errMsg, String detailInfo) {
+    public BCPayResult(String result, Integer errCode,
+                       String errMsg, String detailInfo) {
         this.result = result;
+        this.id = null;
+        this.errCode = errCode;
         this.errMsg = errMsg;
         this.detailInfo = detailInfo;
+    }
+
+    /**
+     * 构造函数
+     * @param result        包含支付成功, 用户取消支付, 支付失败
+     * @param errMsg        支付失败的分类错误信息
+     * @param detailInfo    详细的支付结果信息, 对于错误显示详细的错误信息
+     * @param id            成功发起支付后返回支付表记录唯一标识
+     */
+    public BCPayResult(String result, Integer errCode, String errMsg, String detailInfo, String id) {
+        this.result = result;
+        this.errCode = errCode;
+        this.errMsg = errMsg;
+        this.detailInfo = detailInfo;
+        this.id = id;
     }
 
     /**
@@ -103,6 +133,13 @@ public class BCPayResult implements BCResult {
      */
     public String getResult() {
         return result;
+    }
+
+    /**
+     * @return  错误代号
+     */
+    public Integer getErrCode() {
+        return errCode;
     }
 
     /**
@@ -117,5 +154,12 @@ public class BCPayResult implements BCResult {
      */
     public String getDetailInfo() {
         return detailInfo;
+    }
+
+    /**
+     * @return 成功发起支付后返回支付表记录唯一标识
+     */
+    public String getId() {
+        return id;
     }
 }
