@@ -1,196 +1,272 @@
-/**
- * GenQRCodeActivity.java
- *
- * Created by xuanzhui on 2015/8/6.
- * Copyright (c) 2015 BeeCloud. All rights reserved.
- */
 package cn.beecloud.demo;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
-import cn.beecloud.BCPay;
+import cn.beecloud.BCOfflinePay;
+import cn.beecloud.BCQuery;
 import cn.beecloud.async.BCCallback;
 import cn.beecloud.async.BCResult;
+import cn.beecloud.demo.util.BillUtils;
+import cn.beecloud.demo.util.DisplayUtils;
+import cn.beecloud.entity.BCBillStatus;
 import cn.beecloud.entity.BCQRCodeResult;
+import cn.beecloud.entity.BCReqParams;
+import cn.beecloud.entity.BCRevertStatus;
 
-/**
- * 用于展示如何生成二维码支付
- */
-public class GenQRCodeActivity extends Activity {
-    private static final String Tag = "GenQRCodeActivity";
-    private ProgressDialog loadingDialog;
+public class GenQrcodeActivity extends Activity {
 
-    //Button btnReqWXQRCode;
-    Button btnReqALIQRCode;
-    //private ImageView wxQRImg;
+    private static final int REQ_QRCODE_CODE=1;
+    private static final int NOTIFY_RESULT = 10;
+    private static final int ERR_CODE = 99;
 
-    private Handler mHandler;
+    ProgressDialog loadingDialog;
 
-    //private Bitmap wxQRBitmap;
-    private String aliQRHtml;
-    private String aliQRURL;
+    String billNum;
 
+    String type;
+    BCReqParams.BCChannelTypes channelType;
+    String billTitle;
+
+    Bitmap qrCodeBitMap;
+    String notify;
+    String errMsg;
+
+    ImageView qrcodeImg;
+    Button btnQueryResult;
+    Button btnRevert;
+
+    private Handler mHandler= new Handler(new Handler.Callback() {
+
+        @Override
+        public boolean handleMessage(Message msg) {
+            switch (msg.what) {
+                case REQ_QRCODE_CODE:
+
+                    qrcodeImg.setImageBitmap(qrCodeBitMap);
+
+                    break;
+
+                case NOTIFY_RESULT:
+                    Toast.makeText(GenQrcodeActivity.this, notify, Toast.LENGTH_LONG).show();
+                    break;
+
+                case ERR_CODE:
+                    Toast.makeText(GenQrcodeActivity.this, errMsg, Toast.LENGTH_LONG).show();
+            }
+
+            return true;
+        }
+    });
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_gen_qrcode);
 
-        loadingDialog = new ProgressDialog(GenQRCodeActivity.this);
-        loadingDialog.setMessage("正在请求服务器, 请稍候...");
+        Intent intent = getIntent();
+        type = intent.getStringExtra("type");
+
+        //对于二维码，微信使用 WX_NATIVE 作为channel参数
+        //支付宝使用ALI_OFFLINE_QRCODE
+        if (type.equals("WX")) {
+            channelType = BCReqParams.BCChannelTypes.WX_NATIVE;
+            billTitle = "安卓微信二维码测试";
+        } else if (type.equals("ALI")) {
+            channelType = BCReqParams.BCChannelTypes.ALI_OFFLINE_QRCODE;
+            billTitle = "安卓支付宝线下二维码测试";
+        } else {
+            Toast.makeText(this, "invalid!", Toast.LENGTH_SHORT).show();
+            finish();
+        }
+
+        DisplayUtils.initBack(this);
+
+        loadingDialog = new ProgressDialog(this);
+        loadingDialog.setMessage("处理中，请稍候...");
         loadingDialog.setIndeterminate(true);
         loadingDialog.setCancelable(true);
 
-        //btnReqWXQRCode = (Button) findViewById(R.id.btnReqWXQRCode);
-        //wxQRImg = (ImageView) findViewById(R.id.wxQRImg);
+        qrcodeImg = (ImageView) this.findViewById(R.id.qrcodeImg);
+        btnQueryResult = (Button) findViewById(R.id.btnQueryResult);
 
-        btnReqALIQRCode = (Button) findViewById(R.id.btnReqALIQRCode);
+        initQueryButton();
 
-        // Defines a Handler object that's attached to the UI thread.
-        // 通过Handler.Callback()可消除内存泄漏警告
-        mHandler = new Handler(new Handler.Callback() {
+        btnRevert = (Button) findViewById(R.id.btnRevert);
 
+        initRevertBtn();
+
+        reqQrCode();
+    }
+
+    void reqQrCode(){
+
+        loadingDialog.show();
+
+        Map<String, String> optional=new HashMap<String, String>();
+        optional.put("用途", "测试二维码");
+        optional.put("testEN", "value哈哈");
+
+        //初始化回调入口
+        BCCallback callback = new BCCallback() {
             @Override
-            public boolean handleMessage(Message msg) {
-                switch (msg.what) {
-                    /*
-                    case 1:
-                        wxQRImg.setImageBitmap(wxQRBitmap);
-                        break;*/
-                    case 2:
-                        //建议在新的activity显示ali内嵌二维码
-                        Intent intent = new Intent(GenQRCodeActivity.this, ALIQRCodeActivity.class);
-                        intent.putExtra("aliQRURL", aliQRURL);
-                        intent.putExtra("aliQRHtml", aliQRHtml);
-                        startActivity(intent);
-                        break;
+            public void done(BCResult bcResult) {
+
+                //此处关闭loading界面
+                loadingDialog.dismiss();
+
+                final BCQRCodeResult bcqrCodeResult = (BCQRCodeResult) bcResult;
+
+                Message msg = mHandler.obtainMessage();
+
+                //resultCode为0表示请求成功
+                if (bcqrCodeResult.getResultCode() == 0) {
+                    //如果你设置了生成二维码参数为true那么此处可以获取二维码
+                    qrCodeBitMap = bcqrCodeResult.getQrCodeBitmap();
+
+                    //否则通过 bcqrCodeResult.getQrCodeRawContent() 获取二维码的内容，自己去生成对应的二维码
+
+                    msg.what = REQ_QRCODE_CODE;
+                } else {
+                    errMsg = "err code:" + bcqrCodeResult.getResultCode() +
+                            "; err msg: " + bcqrCodeResult.getResultMsg() +
+                            "; err detail: " + bcqrCodeResult.getErrDetail();
+
+                    msg.what = ERR_CODE;
                 }
 
-                return true;
+                mHandler.sendMessage(msg);
             }
-        });
+        };
 
-        /*
-        btnReqWXQRCode.setOnClickListener(new View.OnClickListener() {
+        billNum = BillUtils.genBillNum();
+
+        //你可以任选一种方法请求微信和支付宝二维码
+        //此处的判断只是示例和测试需要，并没有实际的逻辑意义
+        if (channelType == BCReqParams.BCChannelTypes.WX_NATIVE) {
+            BCOfflinePay.getInstance(GenQrcodeActivity.this).reqQRCodeAsync(
+                    channelType,
+                    billTitle,  //商品描述
+                    1,          //总金额, 以分为单位, 必须是正整数
+                    billNum,          //流水号
+                    optional,            //扩展参数
+                    true,                   //是否生成二维码的bitmap
+                    380,                   //二维码的尺寸, 以px为单位, 如果为null则默认为360
+                    callback);
+        } else {
+            BCOfflinePay.PayParam payParam = new BCOfflinePay.PayParam();
+
+            payParam.channelType = channelType;
+            payParam.billTitle = billTitle; //商品描述
+            payParam.billTotalFee = 1; //总金额, 以分为单位, 必须是正整数
+            payParam.billNum = billNum;         //流水号
+            payParam.optional = optional;   //扩展参数
+            payParam.genQRCode = true;      //是否生成二维码的bitmap
+            payParam.qrCodeWidth = 380;                   //二维码的尺寸, 以px为单位, 如果为null则默认为360
+
+            BCOfflinePay.getInstance(GenQrcodeActivity.this).reqQRCodeAsync(
+                    payParam,
+                    callback
+            );
+        }
+    }
+
+    void initQueryButton() {
+        btnQueryResult.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                loadingDialog.setMessage("订单查询中，请稍候...");
                 loadingDialog.show();
 
-                Map<String, String> mapOptional = new HashMap<String, String>();
-
-                mapOptional.put("testkey1", "测试value值1");
-
-                BCPay.getInstance(GenQRCodeActivity.this).reqWXQRCodeAsync("微信二维码支付测试", //商品描述
-                        1,                          //总金额, 以分为单位, 必须是正整数
-                        UUID.randomUUID().toString().replace("-", ""),          //流水号
-                        mapOptional,            //扩展参数
-                        true,                   //是否生成二维码的bitmap,
-                                                //如果为false，请自行根据getQrCodeRawContent返回的结果
-                                                //使用BCPay.generateBitmap方法生成支付二维码
-                                                //你也可以使用自己熟悉的二维码生成工具
-                        300,                   //二维码的尺寸, 以px为单位, 如果为null则默认为360
-                        new BCCallback() {     //回调入口
+                BCQuery.getInstance().queryOfflineBillStatusAsync(
+                        channelType,
+                        billNum,
+                        new BCCallback() {
                             @Override
-                            public void done(BCResult bcResult) {
-
-                                //此处关闭loading界面
+                            public void done(BCResult result) {
                                 loadingDialog.dismiss();
 
-                                final BCQRCodeResult bcqrCodeResult = (BCQRCodeResult) bcResult;
-
-                                //resultCode为0表示请求成功
-                                if (bcqrCodeResult.getResultCode() == 0) {
-                                    wxQRBitmap = bcqrCodeResult.getQrCodeBitmap();
-                                    Log.w(Tag, "weixin qrcode url: " + bcqrCodeResult.getQrCodeRawContent());
-
-                                } else {
-
-                                    GenQRCodeActivity.this.runOnUiThread(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            Toast.makeText(GenQRCodeActivity.this, "err code:" + bcqrCodeResult.getResultCode() +
-                                                    "; err msg: " + bcqrCodeResult.getResultMsg() +
-                                                    "; err detail: " + bcqrCodeResult.getErrDetail(), Toast.LENGTH_LONG).show();
-                                        }
-                                    });
-
-                                }
+                                BCBillStatus billStatus = (BCBillStatus) result;
 
                                 Message msg = mHandler.obtainMessage();
-                                msg.what = 1;
+
+                                //表示支付成功
+                                if (billStatus.getResultCode() == 0 &&
+                                        billStatus.getPayResult()) {
+                                    msg.what = NOTIFY_RESULT;
+                                    notify = "支付成功";
+                                } else {
+
+                                    msg.what = ERR_CODE;
+                                    errMsg = "支付失败：" + billStatus.getResultCode() + " # " +
+                                                    billStatus.getResultMsg() + " # " +
+                                                    billStatus.getErrDetail();
+                                }
+
                                 mHandler.sendMessage(msg);
                             }
-                        });
+                        }
+                );
             }
         });
+    }
 
-        */
-        btnReqALIQRCode.setOnClickListener(new View.OnClickListener() {
+    void initRevertBtn() {
+        btnRevert.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                //微信二维码无法撤销
+                if (channelType == BCReqParams.BCChannelTypes.WX_NATIVE) {
+                    Message msg = mHandler.obtainMessage();
+                    msg.what = NOTIFY_RESULT;
+                    notify = "微信二维码无法撤销";
+                    mHandler.sendMessage(msg);
+                    return;
+                }
+
+                loadingDialog.setMessage("订单撤销中，请稍候...");
                 loadingDialog.show();
 
-                Map<String, String> mapOptional = new HashMap<String, String>();
-
-                mapOptional.put("testalikey1", "测试value值1");
-                BCPay.getInstance(GenQRCodeActivity.this).reqAliInlineQRCodeAsync("支付宝内嵌二维码支付测试",   //商品描述
-                        1,                                                  //总金额, 以分为单位, 必须是正整数
-                        UUID.randomUUID().toString().replace("-", ""),      //流水号
-                        mapOptional,                                        //扩展参数
-                        "https://beecloud.cn/",  //支付成功之后的返回url
-                        "1",                          /* 注： 二维码类型含义
-                                                        * null则支付宝生成默认类型, 不建议
-                                                        * "0": 订单码-简约前置模式, 对应 iframe 宽度不能小于 600px, 高度不能小于 300px
-                                                        * "1": 订单码-前置模式, 对应 iframe 宽度不能小于 300px, 高度不能小于 600px
-                                                        * "3": 订单码-迷你前置模式, 对应 iframe 宽度不能小于 75px, 高度不能小于 75px
-                                                        */
-                        new BCCallback() {     //回调入口
+                BCOfflinePay.getInstance(GenQrcodeActivity.this).reqRevertBillAsync(
+                        channelType,
+                        billNum,
+                        new BCCallback() {
                             @Override
-                            public void done(BCResult bcResult) {
-
-                                //此处关闭loading界面
+                            public void done(BCResult result) {
                                 loadingDialog.dismiss();
 
-                                final BCQRCodeResult bcqrCodeResult = (BCQRCodeResult) bcResult;
-
-                                //resultCode为0表示请求成功
-                                if (bcqrCodeResult.getResultCode() == 0) {
-                                    aliQRURL = bcqrCodeResult.getQrCodeRawContent();
-                                    aliQRHtml = bcqrCodeResult.getAliQRCodeHtml();
-                                    Log.w(Tag, "ali qrcode url: " + aliQRURL);
-                                    Log.w(Tag, "ali qrcode html: " + aliQRHtml);
-
-                                } else {
-
-                                    GenQRCodeActivity.this.runOnUiThread(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            Toast.makeText(GenQRCodeActivity.this, "err code:" + bcqrCodeResult.getResultCode() +
-                                                    "; err msg: " + bcqrCodeResult.getResultMsg() +
-                                                    "; err detail: " + bcqrCodeResult.getErrDetail(), Toast.LENGTH_LONG).show();
-                                        }
-                                    });
-
-                                }
+                                BCRevertStatus revertStatus = (BCRevertStatus) result;
 
                                 Message msg = mHandler.obtainMessage();
-                                msg.what = 2;
+
+                                if (revertStatus.getResultCode() == 0 &&
+                                        revertStatus.getRevertStatus()) {
+                                    msg.what = NOTIFY_RESULT;
+                                    notify = "撤销成功";
+                                } else {
+
+                                    msg.what = ERR_CODE;
+                                    errMsg = "撤销失败：" + revertStatus.getResultCode() + " # " +
+                                            revertStatus.getResultMsg() + " # " +
+                                            revertStatus.getErrDetail();
+                                }
+
                                 mHandler.sendMessage(msg);
                             }
-                        });
+                        }
+                );
             }
         });
 

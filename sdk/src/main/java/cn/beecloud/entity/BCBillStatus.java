@@ -1,5 +1,5 @@
 /**
- * BCRevertStatus.java
+ * BCBillStatus.java
  * <p/>
  * Created by xuanzhui on 2015/9/22.
  * Copyright (c) 2015 BeeCloud. All rights reserved.
@@ -9,8 +9,8 @@ package cn.beecloud.entity;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-public class BCRevertStatus extends BCRestfulCommonResult {
-    private Boolean revert_status;
+public class BCBillStatus extends BCRestfulCommonResult {
+    private Boolean pay_result;
 
     /**
      * 构造函数
@@ -19,7 +19,7 @@ public class BCRevertStatus extends BCRestfulCommonResult {
      * @param resultMsg  返回信息
      * @param errDetail  具体错误信息
      */
-    public BCRevertStatus(Integer resultCode, String resultMsg, String errDetail) {
+    public BCBillStatus(Integer resultCode, String resultMsg, String errDetail) {
         super(resultCode, resultMsg, errDetail);
     }
 
@@ -29,29 +29,29 @@ public class BCRevertStatus extends BCRestfulCommonResult {
      * @param resultCode 返回码
      * @param resultMsg  返回信息
      * @param errDetail  具体错误信息
-     * @param revertStatus  撤销订单结果
+     * @param payResult  支付结果
      */
-    public BCRevertStatus(Integer resultCode, String resultMsg, String errDetail, Boolean revertStatus) {
+    public BCBillStatus(Integer resultCode, String resultMsg, String errDetail, Boolean payResult) {
         super(resultCode, resultMsg, errDetail);
-        this.revert_status = revert_status;
+        this.pay_result = pay_result;
     }
 
     /**
-     * @return  true表示撤销成功
+     * @return  true表示支付成功
      */
-    public Boolean getRevertStatus() {
-        return revert_status;
+    public Boolean getPayResult() {
+        return pay_result;
     }
 
     /**
-     * 将json串转化为BCRevertStatus实例
+     * 将json串转化为BCBillStatus实例
      * @param jsonStr   json串
-     * @return          BCRevertStatus实例
+     * @return          BCBillStatus实例
      */
-    public static BCRevertStatus transJsonToObject(String jsonStr){
+    public static BCBillStatus transJsonToObject(String jsonStr){
         //反序列化json
         Gson res = new Gson();
 
-        return res.fromJson(jsonStr,new TypeToken<BCRevertStatus>() {}.getType() );
+        return res.fromJson(jsonStr,new TypeToken<BCBillStatus>() {}.getType() );
     }
 }

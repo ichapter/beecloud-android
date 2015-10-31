@@ -17,7 +17,7 @@ import android.widget.Toast;
 import cn.beecloud.BCQuery;
 import cn.beecloud.async.BCCallback;
 import cn.beecloud.async.BCResult;
-import cn.beecloud.entity.BCQueryRefundStatusResult;
+import cn.beecloud.entity.BCRefundStatus;
 import cn.beecloud.entity.BCReqParams;
 
 /**
@@ -59,7 +59,7 @@ public class RefundStatusActivity extends Activity {
                 if (msg.what == 1) {
 
                     txtRefundStatus.setText(
-                            BCQueryRefundStatusResult.RefundStatus.getTranslatedRefundStatus(refundStatus));
+                            BCRefundStatus.RefundStatus.getTranslatedRefundStatus(refundStatus));
                 }
                 return true;
             }
@@ -73,7 +73,7 @@ public class RefundStatusActivity extends Activity {
                 //此处关闭loading界面
                 loadingDialog.dismiss();
 
-                final BCQueryRefundStatusResult bcQueryResult = (BCQueryRefundStatusResult) bcResult;
+                final BCRefundStatus bcQueryResult = (BCRefundStatus) bcResult;
 
                 //resultCode为0表示请求成功
                 if (bcQueryResult.getResultCode() == 0) {

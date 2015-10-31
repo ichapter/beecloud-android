@@ -36,7 +36,7 @@ import cn.beecloud.entity.BCRevertStatus;
 /**
  * 线下扫码
  */
-class BCOfflinePay {
+public class BCOfflinePay {
     private static final String TAG = "BCOfflinePay";
 
     /**
@@ -461,16 +461,9 @@ class BCOfflinePay {
                 BCHttpClientUtil.Response response = BCHttpClientUtil.httpPost(revertURL, reqMap);
 
                 if (response.code == 200) {
-                    String ret = response.content;
 
-                    //反序列化json
-                    Gson res = new Gson();
-
-                    Type type = new TypeToken<BCRevertStatus>() {}.getType();
-                    BCRevertStatus revertStatus = res.fromJson(ret, type);
-
-                    //后台返回结果
-                    callback.done(revertStatus);
+                    //返回后台结果
+                    callback.done(BCRevertStatus.transJsonToObject(response.content));
 
                 } else {
                     callback.done(new BCRevertStatus(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
@@ -485,7 +478,7 @@ class BCOfflinePay {
     /**
      * 外部支付参数实例
      */
-    private static class PayParam {
+    public static class PayParam {
         /**
          *  只允许
          *  BCReqParams.BCChannelTypes.WX_NATIVE，

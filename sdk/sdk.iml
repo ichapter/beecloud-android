@@ -94,16 +94,15 @@
     <orderEntry type="jdk" jdkName="Android API 22 Platform" jdkType="Android SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" exported="" name="Cashier_SDK-v4.2.0" level="project" />
+    <orderEntry type="library" exported="" name="libammsdk" level="project" />
     <orderEntry type="library" exported="" name="alipaysdk" level="project" />
     <orderEntry type="library" exported="" name="alipayutdid" level="project" />
-    <orderEntry type="library" exported="" name="alipaysecsdk" level="project" />
-    <orderEntry type="library" exported="" name="UPPayAssistEx" level="project" />
-    <orderEntry type="library" exported="" name="support-annotations-22.2.1" level="project" />
-    <orderEntry type="library" exported="" name="libammsdk" level="project" />
-    <orderEntry type="library" exported="" name="okhttp-2.5.0" level="project" />
     <orderEntry type="library" exported="" name="support-v4-22.2.1" level="project" />
     <orderEntry type="library" exported="" name="zxing-3.2.0" level="project" />
+    <orderEntry type="library" exported="" name="alipaysecsdk" level="project" />
     <orderEntry type="library" exported="" name="PayPalAndroidSDK-2.11.2" level="project" />
+    <orderEntry type="library" exported="" name="UPPayAssistEx" level="project" />
+    <orderEntry type="library" exported="" name="support-annotations-22.2.1" level="project" />
     <orderEntry type="library" exported="" name="appcompat-v7-22.2.1" level="project" />
     <orderEntry type="library" exported="" name="gson-2.4" level="project" />
   </component>

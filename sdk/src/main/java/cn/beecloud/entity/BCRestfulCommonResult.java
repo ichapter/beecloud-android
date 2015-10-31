@@ -74,4 +74,5 @@ public abstract class BCRestfulCommonResult implements BCResult {
         this.result_msg = resultMsg;
         this.err_detail = errDetail;
     }
+
 }

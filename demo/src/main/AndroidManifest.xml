@@ -14,14 +14,13 @@
     <!-- for Baidu and PayPal pay -->
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
-    <!--for Baidu pay -->
+    <!-- for Baidu pay -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.WRITE_SETTINGS" />
     <uses-permission android:name="android.permission.READ_SMS" />
 
     <!-- for PayPal -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-
 
     <application
         android:allowBackup="true"
@@ -72,8 +71,9 @@
             android:windowSoftInputMode="adjustResize" />
         <!-- union pay sdk end -->
 
+
         <!-- baidu pay start -->
-        <!-- 支付相关Activity 开始-->
+        <!-- 支付相关Activity 开始 -->
         <activity
             android:name="com.baidu.paysdk.login.LoginActivity"
             android:configChanges="keyboardHidden|navigation|orientation|screenSize"
@@ -224,7 +224,7 @@
             android:theme="@style/EbpayThemeActivit"
             android:windowSoftInputMode="stateHidden" />
         <!-- 支付相关 Activity 结束 -->
-        <!-- 安全中心 Activity 开始-->
+        <!-- 安全中心 Activity 开始 -->
         <activity
             android:name="com.baidu.paysdk.ui.PhonePwdActivity"
             android:configChanges="keyboardHidden|navigation|orientation|screenSize"
@@ -232,8 +232,9 @@
             android:exported="@bool/bd_wallet_switch_global_debug"
             android:screenOrientation="portrait"
             android:theme="@style/EbpayThemeActivit"
-            android:windowSoftInputMode="adjustUnspecified|stateHidden" /> -->
-        <!-- 安全中心 Activity 结束-->
+            android:windowSoftInputMode="adjustUnspecified|stateHidden" />
+ -->
+        <!-- 安全中心 Activity 结束 -->
         <activity
             android:name="com.baidu.paysdk.ui.SignChannelListActivity"
             android:configChanges="keyboardHidden|navigation|orientation|screenSize"
@@ -244,6 +245,7 @@
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <!-- baidu pay end -->
+
 
         <!-- PayPal start -->
         <service
@@ -276,6 +278,7 @@
             android:name=".RefundStatusActivity"
             android:label="@string/title_activity_refund_status" >
         </activity>
+        <activity android:name=".QRCodeEntryActivity" />
         <activity
             android:name=".GenQRCodeActivity"
             android:label="@string/title_activity_gen_qrcode" >
@@ -291,6 +294,10 @@
         <activity
             android:name=".PayPalUnSyncedListActivity"
             android:label="@string/title_activity_pay_pal_un_synced_list" >
+        </activity>
+        <activity android:name=".GenQrcodeActivity" >
+        </activity>
+        <activity android:name=".PayViaAuthCodeActivity" >
         </activity>
     </application>
 

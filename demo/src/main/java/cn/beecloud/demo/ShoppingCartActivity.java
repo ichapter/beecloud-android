@@ -59,8 +59,8 @@ public class ShoppingCartActivity extends Activity {
             //此处关闭loading界面
             loadingDialog.dismiss();
 
-            //如果想通过Toast通知用户结果，请使用如下方式，
-            // 直接makeText有可能会造成java.lang.RuntimeException: Can't create handler inside thread that has not called Looper.prepare()
+            //根据你自己的需求处理支付结果
+            //需要注意的是，此处如果涉及到UI的更新，请在UI主进程或者Handler操作
             ShoppingCartActivity.this.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -70,10 +70,6 @@ public class ShoppingCartActivity extends Activity {
                     /*
                       注意！
                       所有支付渠道建议以服务端的状态金额为准，此处返回的RESULT_SUCCESS仅仅代表手机端支付成功
-
-                        对于PayPal的每一次支付，sdk会自动帮你与服务端同步，
-                        如果与服务端同步失败，记录会被自动保存，此时你可以调用batchSyncPayPalPayment方法手动同步
-                        虽然这种情况比较少，但是建议参考PayPalUnSyncedListActivity做好同步，否则服务器将无法查阅到订单
                     */
                     if (result.equals(BCPayResult.RESULT_SUCCESS)) {
                         Toast.makeText(ShoppingCartActivity.this, "用户支付成功", Toast.LENGTH_LONG).show();
@@ -194,6 +190,7 @@ public class ShoppingCartActivity extends Activity {
 
         // 如果使用PayPal需要在支付之前设置client id和应用secret
         // BCPay.PAYPAL_PAY_TYPE.SANDBOX用于测试，BCPay.PAYPAL_PAY_TYPE.LIVE用于生产环境
+        //最后一个参数表示是否在paypal支付页面显示收货地址，如果地址不合法有可能造成无法支付
         BCPay.initPayPal("AVT1Ch18aTIlUJIeeCxvC7ZKQYHczGwiWm8jOwhrREc4a5FnbdwlqEB4evlHPXXUA67RAAZqZM0H8TCR",
                 "EL-fkjkEUyxrwZAmrfn46awFXlX-h2nRkyCVhhpeVdlSRuhPJKXx3ZvUTTJqPQuAeomXA8PZ2MkX24vF",
                 BCPay.PAYPAL_PAY_TYPE.SANDBOX, Boolean.FALSE);
@@ -334,6 +331,11 @@ public class ShoppingCartActivity extends Activity {
                                 bcCallback);
                         break;
                     case 4: //通过PayPal支付
+                        /*
+                         对于PayPal的每一次支付，sdk会自动帮你与服务端同步，
+                         如果与服务端同步失败，记录会被自动保存，此时你可以调用batchSyncPayPalPayment方法手动同步
+                         虽然这种情况比较少，但是建议参考PayPalUnSyncedListActivity做好同步，否则服务器将无法查阅到订单
+                         */
                         loadingDialog.show();
 
                         HashMap<String, String> hashMapOptional = new HashMap<String, String>();
@@ -367,7 +369,7 @@ public class ShoppingCartActivity extends Activity {
                                 bcCallback);
                         break;
                     default:
-                        Intent intent = new Intent(ShoppingCartActivity.this, GenQRCodeActivity.class);
+                        Intent intent = new Intent(ShoppingCartActivity.this, QRCodeEntryActivity.class);
                         startActivity(intent);
                 }
             }

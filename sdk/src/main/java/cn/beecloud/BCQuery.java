@@ -8,13 +8,16 @@ package cn.beecloud;
 
 import android.util.Log;
 
+import java.util.Map;
+
 import cn.beecloud.async.BCCallback;
+import cn.beecloud.entity.BCBillStatus;
 import cn.beecloud.entity.BCQueryBillResult;
 import cn.beecloud.entity.BCQueryBillsResult;
 import cn.beecloud.entity.BCQueryRefundResult;
-import cn.beecloud.entity.BCQueryRefundStatusResult;
 import cn.beecloud.entity.BCQueryRefundsResult;
 import cn.beecloud.entity.BCQueryReqParams;
+import cn.beecloud.entity.BCRefundStatus;
 import cn.beecloud.entity.BCReqParams;
 import cn.beecloud.entity.BCRestfulCommonResult;
 
@@ -255,7 +258,7 @@ public class BCQuery {
             @Override
             public void run() {
                 if (refundNum == null) {
-                    callback.done(new BCQueryRefundStatusResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
+                    callback.done(new BCRefundStatus(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
                             BCRestfulCommonResult.APP_INNER_FAIL, "refundNum不能为null", null));
                     return;
                 }
@@ -264,7 +267,7 @@ public class BCQuery {
                         channel.equals(BCReqParams.BCChannelTypes.YEE) ||
                         channel.equals(BCReqParams.BCChannelTypes.KUAIQIAN) ||
                         channel.equals(BCReqParams.BCChannelTypes.BD))) {
-                    callback.done(new BCQueryRefundStatusResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
+                    callback.done(new BCRefundStatus(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
                             BCRestfulCommonResult.APP_INNER_FAIL, "退款状态查询的channel参数只能是WX、YEE、KUAIQIAN或BD", null));
                     return;
                 }
@@ -273,7 +276,7 @@ public class BCQuery {
                 try {
                     bcQueryReqParams = new BCQueryReqParams(channel);
                 } catch (BCException e) {
-                    callback.done(new BCQueryRefundStatusResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
+                    callback.done(new BCRefundStatus(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
                             BCRestfulCommonResult.APP_INNER_FAIL, e.getMessage(), null));
                     return;
                 }
@@ -291,10 +294,10 @@ public class BCQuery {
 
                     String ret = response.content;
 
-                    callback.done(BCQueryRefundStatusResult.transJsonToResultObject(ret));
+                    callback.done(BCRefundStatus.transJsonToObject(ret));
 
                 } else {
-                    callback.done(new BCQueryRefundStatusResult(
+                    callback.done(new BCRefundStatus(
                             BCRestfulCommonResult.APP_INNER_FAIL_NUM,
                             BCRestfulCommonResult.APP_INNER_FAIL,
                             "Network Error:" + response.code + " # " + response.content, null));
@@ -397,6 +400,68 @@ public class BCQuery {
                             BCRestfulCommonResult.APP_INNER_FAIL,
                             "Network Error:" + response.code + " # " + response.content));
                 }
+            }
+        });
+    }
+
+    /**
+     * 查询线下订单状态
+     *
+     * @param channelType     目前只支持WX_NATIVE, WX_SCAN, ALI_OFFLINE_QRCODE, ALI_SCAN
+     *                        @see cn.beecloud.entity.BCReqParams.BCChannelTypes
+     * @param billNum         订单号
+     * @param callback        支付完成后的回调函数
+     */
+    public void queryOfflineBillStatusAsync(final BCReqParams.BCChannelTypes channelType,
+                                          final String billNum,
+                                          final BCCallback callback) {
+
+        if (callback == null) {
+            Log.w(TAG, "请初始化callback");
+            return;
+        }
+
+        BCCache.executorService.execute(new Runnable() {
+            @Override
+            public void run() {
+
+                //校验并准备公用参数
+                BCReqParams parameters;
+                try {
+                    parameters = new BCReqParams(channelType, BCReqParams.ReqType.OFFLINE_PAY);
+                } catch (BCException e) {
+                    callback.done(new BCBillStatus(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
+                            BCRestfulCommonResult.APP_INNER_FAIL,
+                            e.getMessage()));
+                    return;
+                }
+
+                if (billNum == null ||
+                        billNum.length() == 0){
+                    callback.done(new BCBillStatus(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
+                            BCRestfulCommonResult.APP_INNER_FAIL,
+                            "invalid bill number"));
+                    return;
+                }
+
+                String queryURL = BCHttpClientUtil.getOfflineBillStatusURL();
+
+                Map<String, Object> reqMap = parameters.transToReqMapParams();
+                reqMap.put("bill_no", billNum);
+
+                BCHttpClientUtil.Response response = BCHttpClientUtil.httpPost(queryURL, reqMap);
+
+                if (response.code == 200) {
+
+                    //返回后台结果
+                    callback.done(BCBillStatus.transJsonToObject(response.content));
+
+                } else {
+                    callback.done(new BCBillStatus(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
+                            BCRestfulCommonResult.APP_INNER_FAIL,
+                            "Network Error:" + response.code + " # " + response.content));
+                }
+
             }
         });
     }

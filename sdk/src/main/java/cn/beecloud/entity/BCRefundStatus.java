@@ -13,7 +13,7 @@ import com.google.gson.reflect.TypeToken;
  * 用于查询退款状态
  * @see BCRestfulCommonResult
  */
-public class BCQueryRefundStatusResult extends BCRestfulCommonResult {
+public class BCRefundStatus extends BCRestfulCommonResult {
 
     /**
      * 以下命名需要和restful API匹配
@@ -29,7 +29,7 @@ public class BCQueryRefundStatusResult extends BCRestfulCommonResult {
         return refund_status;
     }
 
-    public BCQueryRefundStatusResult(){}
+    public BCRefundStatus(){}
 
     /**
      * @param resultCode    返回码
@@ -37,7 +37,7 @@ public class BCQueryRefundStatusResult extends BCRestfulCommonResult {
      * @param errDetail     具体错误信息
      * @param refundStatus  退款状态
      */
-    public BCQueryRefundStatusResult(Integer resultCode, String resultMsg, String errDetail, String refundStatus) {
+    public BCRefundStatus(Integer resultCode, String resultMsg, String errDetail, String refundStatus) {
         super(resultCode, resultMsg, errDetail);
         this.refund_status = refundStatus;
     }
@@ -47,10 +47,10 @@ public class BCQueryRefundStatusResult extends BCRestfulCommonResult {
      * @param jsonStr   json串
      * @return          BCQueryRefundStatusResult实例
      */
-    public static BCQueryRefundStatusResult transJsonToResultObject(String jsonStr) {
+    public static BCRefundStatus transJsonToObject(String jsonStr) {
         Gson gson = new Gson();
 
-        return gson.fromJson(jsonStr, new TypeToken<BCQueryRefundStatusResult>() {}.getType());
+        return gson.fromJson(jsonStr, new TypeToken<BCRefundStatus>() {}.getType());
     }
 
     /**

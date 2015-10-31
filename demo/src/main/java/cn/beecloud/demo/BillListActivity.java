@@ -216,8 +216,15 @@ public class BillListActivity extends Activity {
 
                 loadingDialog.show();
 
+                //通过查询参数类QueryParams
+                BCQuery.QueryParams params = new BCQuery.QueryParams();
+                params.channel = BCReqParams.BCChannelTypes.ALL;
+                params.skip = 10;
+                params.limit = 20;
+                //添加其他约束...
+
                 BCQuery.getInstance().queryBillsAsync(
-                        BCReqParams.BCChannelTypes.ALL, //全渠道查询
+                        params, //全渠道查询
                         bcCallback);
             }
         });
