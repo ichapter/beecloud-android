@@ -295,8 +295,6 @@
             android:name=".PayPalUnSyncedListActivity"
             android:label="@string/title_activity_pay_pal_un_synced_list" >
         </activity>
-        <activity android:name=".GenQrcodeActivity" >
-        </activity>
         <activity android:name=".PayViaAuthCodeActivity" >
         </activity>
     </application>

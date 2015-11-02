@@ -26,7 +26,7 @@ import cn.beecloud.entity.BCQRCodeResult;
 import cn.beecloud.entity.BCReqParams;
 import cn.beecloud.entity.BCRevertStatus;
 
-public class GenQrcodeActivity extends Activity {
+public class GenQRCodeActivity extends Activity {
 
     private static final int REQ_QRCODE_CODE=1;
     private static final int NOTIFY_RESULT = 10;
@@ -60,11 +60,11 @@ public class GenQrcodeActivity extends Activity {
                     break;
 
                 case NOTIFY_RESULT:
-                    Toast.makeText(GenQrcodeActivity.this, notify, Toast.LENGTH_LONG).show();
+                    Toast.makeText(GenQRCodeActivity.this, notify, Toast.LENGTH_LONG).show();
                     break;
 
                 case ERR_CODE:
-                    Toast.makeText(GenQrcodeActivity.this, errMsg, Toast.LENGTH_LONG).show();
+                    Toast.makeText(GenQRCodeActivity.this, errMsg, Toast.LENGTH_LONG).show();
             }
 
             return true;
@@ -156,7 +156,7 @@ public class GenQrcodeActivity extends Activity {
         //你可以任选一种方法请求微信和支付宝二维码
         //此处的判断只是示例和测试需要，并没有实际的逻辑意义
         if (channelType == BCReqParams.BCChannelTypes.WX_NATIVE) {
-            BCOfflinePay.getInstance(GenQrcodeActivity.this).reqQRCodeAsync(
+            BCOfflinePay.getInstance(GenQRCodeActivity.this).reqQRCodeAsync(
                     channelType,
                     billTitle,  //商品描述
                     1,          //总金额, 以分为单位, 必须是正整数
@@ -176,7 +176,7 @@ public class GenQrcodeActivity extends Activity {
             payParam.genQRCode = true;      //是否生成二维码的bitmap
             payParam.qrCodeWidth = 380;                   //二维码的尺寸, 以px为单位, 如果为null则默认为360
 
-            BCOfflinePay.getInstance(GenQrcodeActivity.this).reqQRCodeAsync(
+            BCOfflinePay.getInstance(GenQRCodeActivity.this).reqQRCodeAsync(
                     payParam,
                     callback
             );
@@ -239,7 +239,7 @@ public class GenQrcodeActivity extends Activity {
                 loadingDialog.setMessage("订单撤销中，请稍候...");
                 loadingDialog.show();
 
-                BCOfflinePay.getInstance(GenQrcodeActivity.this).reqRevertBillAsync(
+                BCOfflinePay.getInstance(GenQRCodeActivity.this).reqRevertBillAsync(
                         channelType,
                         billNum,
                         new BCCallback() {
