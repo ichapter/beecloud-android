@@ -1,82 +1,52 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
-    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context="cn.beecloud.demo.BillListActivity">
 
-    <Button
-        android:id="@+id/btnWeChatOrder"
-        android:layout_width="fill_parent"
+    <include layout="@layout/common_head" />
+
+    <TextView
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
-        android:background="#007edf"
-        android:textColor="#ffffff"
+        android:layout_margin="15dp"
+        android:textColor="@color/main_orange"
         android:textSize="16sp"
-        android:text="微信订单查询"
-        android:padding="5dp"/>
+        android:text="此处提供的示例没有包含分页查询，如果你有需求，请通过skip和limit两个参数进行控制，关于通过ID查询的方式请参照ShoppingCartActivity"
+        />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="选择支付类型"
+                android:layout_margin="10dp"
+                android:textSize="18sp"
+                android:textColor="@color/main_orange"/>
+
+            <Spinner
+                android:id="@+id/channelChooser"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="10dp" />
+
+        </LinearLayout>
 
 
-    <Button
-        android:id="@+id/btnAliPayOrder"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:background="#007edf"
-        android:textColor="#ffffff"
-        android:layout_marginTop="5dp"
-        android:textSize="16sp"
-        android:text="支付宝订单查询"
-        android:padding="5dp"/>
-
-    <Button
-        android:id="@+id/btnUNPayOrder"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
-        android:background="#007edf"
-        android:textColor="#ffffff"
-        android:textSize="16sp"
-        android:text="银联订单查询"
-        android:padding="5dp"/>
-
-    <Button
-        android:id="@+id/btnBDPayOrder"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
-        android:background="#007edf"
-        android:textColor="#ffffff"
-        android:textSize="16sp"
-        android:text="百度钱包订单查询"
-        android:padding="5dp"/>
-
-    <Button
-        android:id="@+id/btnPayPalPayOrder"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
-        android:background="#007edf"
-        android:textColor="#ffffff"
-        android:textSize="16sp"
-        android:text="PayPal订单查询"
-        android:padding="5dp"/>
-
-    <Button
-        android:id="@+id/btnAllPayOrder"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
-        android:background="#007edf"
-        android:textColor="#ffffff"
-        android:textSize="16sp"
-        android:text="所有渠道支付订单查询"
-        android:padding="5dp"/>
+    </LinearLayout>
 
     <ListView
         android:id="@+id/listViewOrder"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="20dp"/>
+        android:layout_height="match_parent"/>
 </LinearLayout>

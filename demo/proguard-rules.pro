@@ -15,3 +15,26 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
+
+-keepattributes Signature
+
+#beecloud
+#你只可以直接 -keep class cn.beecloud.** { *; }
+#而取消下面三行
+
+-keep class cn.beecloud.* { *; }
+-keep class cn.beecloud.async.* { *; }
+-keep class cn.beecloud.entity.* { *; }
+
+-keep class com.google.** { *; }
+#支付宝
+-keep class com.alipay.** { *; }
+#微信
+-keep class com.tencent.** { *; }
+#银联
+-keep class com.unionpay.** { *; }
+#百度
+-keep class com.baidu.** { *; }
+-keep class com.dianxinos.** { *; }
+#PayPal
+-keep class com.paypal.** { *; }

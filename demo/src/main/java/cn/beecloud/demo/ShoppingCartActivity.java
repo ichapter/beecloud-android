@@ -110,7 +110,7 @@ public class ShoppingCartActivity extends Activity {
                                         Log.d(TAG, "------getErrDetail------" + billResult.getErrDetail());
 
                                         Log.d(TAG, "------- bill info ------");
-                                        BCBillOrder billOrder = billResult.getPay();
+                                        BCBillOrder billOrder = billResult.getBill();
                                         Log.d(TAG, "订单号:" + billOrder.getBillNum());
                                         Log.d(TAG, "订单金额, 单位为分:" + billOrder.getTotalFee());
                                         Log.d(TAG, "渠道类型:" + BCReqParams.BCChannelTypes.getTranslatedChannelName(billOrder.getChannel()));
@@ -119,7 +119,7 @@ public class ShoppingCartActivity extends Activity {
                                         Log.d(TAG, "订单是否成功:" + billOrder.getPayResult());
 
                                         if (billOrder.getPayResult())
-                                            Log.d(TAG, "渠道返回的交易号，未支付成功时，是不含该参数的:" + billOrder.getTradeNo());
+                                            Log.d(TAG, "渠道返回的交易号，未支付成功时，是不含该参数的:" + billOrder.getTradeNum());
                                         else
                                             Log.d(TAG, "订单是否被撤销，该参数仅在线下产品（例如二维码和扫码支付）有效:"
                                                     + billOrder.getRevertResult());
@@ -182,7 +182,8 @@ public class ShoppingCartActivity extends Activity {
 
         // 推荐在主Activity里的onCreate函数中初始化BeeCloud.
         //BeeCloud.setAppIdAndSecret("c5d1cba1-5e3f-4ba0-941d-9b0a371fe719", "39a7a518-9ac8-4a9e-87bc-7885f33cf18c");
-        BeeCloud.setAppIdAndSecret("c37d661d-7e61-49ea-96a5-68c34e83db3b", "c37d661d-7e61-49ea-96a5-68c34e83db3b");
+        BeeCloud.setAppIdAndSecret("c37d661d-7e61-49ea-96a5-68c34e83db3b",
+                "c37d661d-7e61-49ea-96a5-68c34e83db3b");
 
         // 如果用到微信支付，在用到微信支付的Activity的onCreate函数里调用以下函数.
         // 第二个参数需要换成你自己的微信AppID.
@@ -194,6 +195,10 @@ public class ShoppingCartActivity extends Activity {
         BCPay.initPayPal("AVT1Ch18aTIlUJIeeCxvC7ZKQYHczGwiWm8jOwhrREc4a5FnbdwlqEB4evlHPXXUA67RAAZqZM0H8TCR",
                 "EL-fkjkEUyxrwZAmrfn46awFXlX-h2nRkyCVhhpeVdlSRuhPJKXx3ZvUTTJqPQuAeomXA8PZ2MkX24vF",
                 BCPay.PAYPAL_PAY_TYPE.SANDBOX, Boolean.FALSE);
+
+//        BCPay.initPayPal("AUQadN7kwuxPalzWAi1zKRgXUGgxO5GDI0hdgh4QVcHv52yD-xmcIp4ZeWJUA9PnhQbq1ymMAtZhdJgV",
+//                "EGrHN6-GkDhkLnwecBM-rDZ9nGvTm-TR4DbeADhFG3eIHJ-vijfyPFpxSGGQ84kqaBoqmtYp0YRKBX6V",
+//                BCPay.PAYPAL_PAY_TYPE.LIVE, Boolean.FALSE);
 
         payMethod = (ListView) this.findViewById(R.id.payMethod);
         Integer[] payIcons = new Integer[]{R.drawable.wechat, R.drawable.alipay,
@@ -363,7 +368,7 @@ public class ShoppingCartActivity extends Activity {
 
                         BCPay.getInstance(ShoppingCartActivity.this).reqPayPalPaymentAsync(
                                 "PayPal payment test",  //bill title
-                                231,                      //bill amount(use cents)
+                                1,                      //bill amount(use cents)
                                 "USD",                  //bill currency
                                 hashMapOptional,        //optional info
                                 bcCallback);

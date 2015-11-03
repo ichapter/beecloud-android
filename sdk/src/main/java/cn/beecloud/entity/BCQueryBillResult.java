@@ -15,7 +15,7 @@ public class BCQueryBillResult extends BCRestfulCommonResult {
     /**
      * @return  支付结果
      */
-    public BCBillOrder getPay() {
+    public BCBillOrder getBill() {
         return pay;
     }
 

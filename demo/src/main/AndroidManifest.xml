@@ -3,7 +3,7 @@
     package="cn.beecloud.demo" > <!-- would be overridden by gradle -->
     <uses-sdk
         android:minSdkVersion="10"
-        android:targetSdkVersion="19" />
+        android:targetSdkVersion="22" />
 
     <!-- for all -->
     <uses-permission android:name="android.permission.INTERNET" />
@@ -256,6 +256,11 @@
         <activity android:name="com.paypal.android.sdk.payments.LoginActivity" />
         <activity android:name="com.paypal.android.sdk.payments.PaymentMethodActivity" />
         <activity android:name="com.paypal.android.sdk.payments.PaymentConfirmActivity" />
+
+        <activity android:name="io.card.payment.CardIOActivity"
+            android:configChanges="keyboardHidden|orientation" />
+        <activity android:name="io.card.payment.DataEntryActivity" />
+
         <activity
             android:name="cn.beecloud.BCPayPalPaymentActivity"
             android:configChanges="orientation|keyboardHidden"
@@ -295,7 +300,8 @@
             android:name=".PayPalUnSyncedListActivity"
             android:label="@string/title_activity_pay_pal_un_synced_list" >
         </activity>
-        <activity android:name=".PayViaAuthCodeActivity" >
+        <activity android:name=".PayViaAuthCodeActivity"
+            android:screenOrientation="portrait">
         </activity>
     </application>
 

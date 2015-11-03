@@ -139,7 +139,7 @@ public class QRCodeEntryActivity extends Activity {
         btnReqWXQRCode.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(QRCodeEntryActivity.this, GenQrcodeActivity.class);
+                Intent intent = new Intent(QRCodeEntryActivity.this, GenQRCodeActivity.class);
                 intent.putExtra("type", "WX");
                 startActivity(intent);
             }
@@ -149,7 +149,7 @@ public class QRCodeEntryActivity extends Activity {
         btnReqALIOfflineQRCode.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(QRCodeEntryActivity.this, GenQrcodeActivity.class);
+                Intent intent = new Intent(QRCodeEntryActivity.this, GenQRCodeActivity.class);
                 intent.putExtra("type", "ALI");
                 startActivity(intent);
             }

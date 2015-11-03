@@ -31,9 +31,6 @@ class BCHttpClientUtil {
             "https://apiqd.beecloud.cn",
             "https://apihz.beecloud.cn"
     };
-//    private static final String[] BEECLOUD_HOSTS = {
-//            "http://58.211.191.123:8080"
-//    };
 
     //Rest API版本号
     private static final String HOST_API_VERSION = "/2/";

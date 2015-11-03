@@ -1,11 +1,18 @@
 package cn.beecloud.demo;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.res.AssetManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -14,6 +21,10 @@ import android.widget.Toast;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,6 +39,7 @@ import cn.beecloud.entity.BCPayResult;
 import cn.beecloud.entity.BCReqParams;
 
 public class PayViaAuthCodeActivity extends Activity {
+    private static final String TAG = "PayViaAuthCodeActivity";
 
     private static final int REQ_OFF_PAY_SUCC=1;
     private static final int NOTIFY_RESULT = 10;
@@ -61,10 +73,17 @@ public class PayViaAuthCodeActivity extends Activity {
                             Toast.LENGTH_SHORT).show();
 
                     break;
+
+                case NOTIFY_RESULT:
+                    Toast.makeText(PayViaAuthCodeActivity.this,
+                            notify,
+                            Toast.LENGTH_SHORT).show();
+
+                    break;
                 case ERR_CODE:
 
                     Toast.makeText(PayViaAuthCodeActivity.this, errMsg, Toast.LENGTH_LONG).show();
-                    finish();
+                    //finish();
             }
 
             return true;
@@ -82,10 +101,10 @@ public class PayViaAuthCodeActivity extends Activity {
         //对于二维码，微信使用 WX_NATIVE 作为channel参数
         //支付宝使用ALI_OFFLINE_QRCODE
         if (type.equals("WX")) {
-            channelType = BCReqParams.BCChannelTypes.WX_NATIVE;
+            channelType = BCReqParams.BCChannelTypes.WX_SCAN;
             billTitle = "安卓通过扫描微信付款码支付测试";
         } else if (type.equals("ALI")) {
-            channelType = BCReqParams.BCChannelTypes.ALI_OFFLINE_QRCODE;
+            channelType = BCReqParams.BCChannelTypes.ALI_SCAN;
             billTitle = "安卓通过扫描支付宝付款码支付测试";
         } else {
             Toast.makeText(this, "invalid!", Toast.LENGTH_SHORT).show();
@@ -111,6 +130,10 @@ public class PayViaAuthCodeActivity extends Activity {
         scanBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                if (!preCheck())
+                    return;
+
                 IntentIntegrator integrator = new IntentIntegrator(PayViaAuthCodeActivity.this);
                 integrator.initiateScan();
             }
@@ -241,7 +264,9 @@ public class PayViaAuthCodeActivity extends Activity {
             if (scanResult != null)
             {
                 // handle scan result
-                authCode = scanResult.toString();
+                Log.d(TAG, scanResult.toString());
+
+                authCode = scanResult.getContents();
                 authCodeView.setText("收款码：" + authCode);
             }
             else
@@ -250,5 +275,85 @@ public class PayViaAuthCodeActivity extends Activity {
                 Toast.makeText(PayViaAuthCodeActivity.this, "无法获取收款码，请重试", Toast.LENGTH_LONG).show();
             }
         }
+    }
+
+    public boolean preCheck() {
+        boolean res = appInstalledOrNot("com.google.zxing.client.android");
+
+        if (!res){
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("提示");
+            builder.setMessage("本示例依赖ZXing扫码APP，是否安装？");
+
+            builder.setNegativeButton("确定",
+                    new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            installScannerPlugin();
+                            dialog.dismiss();
+                        }
+                    });
+
+            builder.setPositiveButton("取消",
+                    new DialogInterface.OnClickListener() {
+
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    });
+            builder.create().show();
+        }
+
+        return res;
+    }
+
+    private void installScannerPlugin() {
+        AssetManager assetManager = getAssets();
+
+        InputStream in;
+        OutputStream out;
+
+        try {
+            in = assetManager.open("BarcodeScanner.apk");
+            out = new FileOutputStream(Environment.getExternalStorageDirectory()
+                    + File.separator + "BarcodeScanner.apk");
+
+            byte[] buffer = new byte[1024];
+
+            int len;
+            while((len = in.read(buffer)) != -1) {
+                out.write(buffer, 0, len);
+            }
+
+            in.close();
+
+            out.flush();
+            out.close();
+
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+
+            intent.setDataAndType(Uri.fromFile(new File(Environment.getExternalStorageDirectory()
+                            + File.separator + "BarcodeScanner.apk")),
+                    "application/vnd.android.package-archive");
+
+            startActivity(intent);
+
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private boolean appInstalledOrNot(String uri) {
+        PackageManager pm = getPackageManager();
+        boolean app_installed;
+        try {
+            pm.getPackageInfo(uri, 0);
+            app_installed = true;
+        }
+        catch (PackageManager.NameNotFoundException e) {
+            app_installed = false;
+        }
+        return app_installed;
     }
 }

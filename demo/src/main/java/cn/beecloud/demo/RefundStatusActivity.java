@@ -17,6 +17,7 @@ import android.widget.Toast;
 import cn.beecloud.BCQuery;
 import cn.beecloud.async.BCCallback;
 import cn.beecloud.async.BCResult;
+import cn.beecloud.demo.util.DisplayUtils;
 import cn.beecloud.entity.BCRefundStatus;
 import cn.beecloud.entity.BCReqParams;
 
@@ -36,6 +37,8 @@ public class RefundStatusActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_refund_status);
+
+        DisplayUtils.initBack(this);
 
         txtRefundStatus = (TextView) findViewById(R.id.txtRefundStatus);
 
@@ -114,7 +117,7 @@ public class RefundStatusActivity extends Activity {
 
         loadingDialog.show();
         BCQuery.getInstance().queryRefundStatusAsync(
-                BCReqParams.BCChannelTypes.WX,     //目前仅支持微信
+                BCReqParams.BCChannelTypes.WX,     //目前仅支持WX、YEE、KUAIQIAN、BD
                 "20150812436857",                   //必须是微信的退款单号
                 bcCallback);                            //回调入口
     }

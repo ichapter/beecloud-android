@@ -28,7 +28,7 @@ public class BCBillOrder extends BCOrder{
     /**
      * @return  渠道返回的交易号，未支付成功时，无效
      */
-    public String getTradeNo() {
+    public String getTradeNum() {
         return trade_no;
     }
 

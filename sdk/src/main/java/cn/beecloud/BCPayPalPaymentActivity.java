@@ -43,8 +43,8 @@ public class BCPayPalPaymentActivity extends Activity {
             // or live (ENVIRONMENT_PRODUCTION)
             .environment(BCCache.getInstance(null).paypalPayType == BCPay.PAYPAL_PAY_TYPE.LIVE ?
                     PayPalConfiguration.ENVIRONMENT_PRODUCTION : PayPalConfiguration.ENVIRONMENT_SANDBOX)
-            .clientId(BCCache.getInstance(null).paypalClientID)
-            .acceptCreditCards(false);  //取消扫描卡片发起支付，即demo中的“用卡支付”
+            .clientId(BCCache.getInstance(null).paypalClientID);
+            //.acceptCreditCards(false);  //取消扫描卡片发起支付，即demo中的“用卡支付”
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
