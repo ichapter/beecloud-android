@@ -48,7 +48,6 @@ dependencies {
     //QRCode
     libs/zxing-3.2.0.jar
 
-
     //baidu
     Cashier_SDK-v4.2.0.jar
 
@@ -67,7 +66,7 @@ tasks.withType(JavaCompile) {
 //以下用于生成sdk jar
 //gradle makeJar
 task clearJar(type: Delete) {
-    delete fileTree(dir: 'libs' , include: '*.jar')
+    delete fileTree(dir: 'build/libs' , include: 'beecloud*.jar')
 }
 
 task makeJar(type:org.gradle.api.tasks.bundling.Jar) {

@@ -249,6 +249,8 @@ public class BCOfflinePay {
      * @param billNum         商户自定义订单号
      * @param optional        为扩展参数，可以传入任意数量的key/value对来补充对业务逻辑的需求
      * @param authCode        授权码
+     * @param terminalId      机具终端编号, 支付宝条码(ALI_SCAN)的选填参数
+     * @param storeId         商户门店编号, 支付宝条码(ALI_SCAN)的选填参数
      * @param callback        支付完成后的回调函数
      */
     public void reqOfflinePayAsync(final BCReqParams.BCChannelTypes channelType,
@@ -386,7 +388,7 @@ public class BCOfflinePay {
      * @param qrCodeWidth     如果生成, QRCode的宽度, null则使用默认参数
      * @param callback        支付完成后的回调函数
      */
-    public void reqWXQRCodeAsync(final String billTitle, final Integer billTotalFee,
+    public void reqWXNativeQRCodeAsync(final String billTitle, final Integer billTotalFee,
                                  final String billNum, final Map<String, String> optional,
                                  final Boolean genQRCode, final Integer qrCodeWidth,
                                  final BCCallback callback) {

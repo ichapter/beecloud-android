@@ -54,6 +54,9 @@ class BCOrder {
         return channel;
     }
 
+    /**
+     * @return  子渠道类型
+     */
     public String getSubChannel() {
         return sub_channel;
     }

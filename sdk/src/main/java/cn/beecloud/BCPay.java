@@ -808,7 +808,7 @@ public class BCPay {
     }
 
     /**
-     *
+     * used when you would like to know the sync result
      */
     public void addPayPalSyncObserver(BCPayPalSyncObserver observer) {
         BCPay.payPalSyncObserver = observer;

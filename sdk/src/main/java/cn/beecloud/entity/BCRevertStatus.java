@@ -9,6 +9,9 @@ package cn.beecloud.entity;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
+/**
+ * 用于订单撤销状态查询
+ */
 public class BCRevertStatus extends BCRestfulCommonResult {
     private Boolean revert_status;
 
