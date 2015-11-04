@@ -281,7 +281,7 @@ BCCache.executorService.execute(new Runnable() {
 通过`BCOfflinePay`的实例，以`reqOfflinePayAsync`方法通过获取到的付款码发起收款。<br/>
 
 公用参数依次为
-> channelType     BCChannelTypes类型，支持WX_NATIVE，ALI_OFFLINE_QRCODE<br/>
+> channelType     BCChannelTypes类型，二维码支持WX_NATIVE，ALI_OFFLINE_QRCODE，扫码支付支持WX_SCAN, ALI_SCAN<br/>
 > billTitle       商品描述, 32个字节内, 汉字以2个字节计<br/>
 > billTotalFee    支付金额，以分为单位，必须是正整数<br/>
 > billNum         商户自定义订单号<br/>
