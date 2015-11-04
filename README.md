@@ -70,6 +70,7 @@ BeeCloud.setAppIdAndSecret("c5d1cba1-5e3f-4ba0-941d-9b0a371fe719", "39a7a518-9ac
 ```java
 BCPay.initWechatPay(ShoppingCartActivity.this, "wxf1aa465362b4c8f1");
 ```
+<br/>
 >3. 如果用到PayPal，在用到PayPal的Activity的onCreate函数里调用函数，例如
 ```java
 BCPay.initPayPal(
@@ -268,7 +269,7 @@ BCCache.executorService.execute(new Runnable() {
 如果想手动清除未同步订单，调用`BCCache.getInstance(activity).clearUnSyncedPayPalRecords()`
 
 ### 5.线下支付
-请查看`doc`中的`API`，线下支付类`BCOfflinePay`，参照`demo`中`QRCodeEntryActivity`和其关联的activity；一般用于线下门店通过出示二维码由用户扫描付款，或者通过用户出示的付款码收款。<br/>
+请查看`doc`中的`API`，线下支付类`BCOfflinePay`，参照`demo`中`QRCodeEntryActivity`和其关联的activity；一般用于线下门店通过出示二维码由用户扫描付款，或者通过用户出示的付款码收款。<br/><br/>
 线下支付基本流程：
 > 1 通过二维码或者付款码发起支付；<br/>
 > 2 支付结束后调用查询接口确认`BCQuery.getInstance().queryOfflineBillStatusAsync`,请参考查询部分说明。<br/>
