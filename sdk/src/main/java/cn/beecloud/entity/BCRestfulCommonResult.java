@@ -17,7 +17,7 @@ public abstract class BCRestfulCommonResult implements BCResult {
     /**
      * APP内部错误编号
      */
-    public static final Integer APP_INNER_FAIL_NUM = 20;
+    public static final Integer APP_INNER_FAIL_NUM = -1;
     /**
      * APP内部错误
      */
@@ -74,4 +74,5 @@ public abstract class BCRestfulCommonResult implements BCResult {
         this.result_msg = resultMsg;
         this.err_detail = errDetail;
     }
+
 }

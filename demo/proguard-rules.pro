@@ -15,3 +15,25 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
+
+#for paypal
+-dontwarn com.paypal.**
+-dontwarn io.card.payment.**
+
+-keepattributes Signature
+
+#beecloud
+-keep class cn.beecloud.** { *; }
+
+-keep class com.google.** { *; }
+#支付宝
+-keep class com.alipay.** { *; }
+#微信
+-keep class com.tencent.** { *; }
+#银联
+-keep class com.unionpay.** { *; }
+#百度
+-keep class com.baidu.** { *; }
+-keep class com.dianxinos.** { *; }
+#PayPal
+-keep class com.paypal.** { *; }

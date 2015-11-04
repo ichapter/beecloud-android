@@ -102,6 +102,8 @@ public class RefundOrdersAdapter extends BaseAdapter {
                     .findViewById(R.id.txtRefundFee);
             viewHolder.txtChannel = (TextView) convertView
                     .findViewById(R.id.txtChannel);
+            viewHolder.txtSubChannel = (TextView) convertView
+                    .findViewById(R.id.txtSubChannel);
             viewHolder.txtTitle = (TextView) convertView
                     .findViewById(R.id.txtTitle);
             viewHolder.txtRefundFinish = (TextView) convertView
@@ -110,6 +112,8 @@ public class RefundOrdersAdapter extends BaseAdapter {
                     .findViewById(R.id.txtRefundResult);
             viewHolder.txtRefundCreatedTime = (TextView) convertView
                     .findViewById(R.id.txtRefundCreatedTime);
+            viewHolder.txtOptional = (TextView) convertView
+                    .findViewById(R.id.txtOptional);
 
             convertView.setTag(viewHolder);
         } else {
@@ -124,10 +128,12 @@ public class RefundOrdersAdapter extends BaseAdapter {
         viewHolder.txtTotalFee.setText("订单支付金额/元: " + (bcRefundOrder.getTotalFee()/100.0));
         viewHolder.txtRefundFee.setText("订单退款金额/元: " + (bcRefundOrder.getRefundFee()/100.0));
         viewHolder.txtChannel.setText("支付渠道: " + BCReqParams.BCChannelTypes.getTranslatedChannelName(bcRefundOrder.getChannel()));
+        viewHolder.txtSubChannel.setText("支付渠道: " + BCReqParams.BCChannelTypes.getTranslatedChannelName(bcRefundOrder.getSubChannel()));
         viewHolder.txtTitle.setText("订单标题: " + bcRefundOrder.getTitle());
         viewHolder.txtRefundFinish.setText("退款订单是否受理完成: " + (bcRefundOrder.isRefundFinished()?"是":"否"));
         viewHolder.txtRefundResult.setText("是否接受退款并完成退款: " + (bcRefundOrder.getRefundResult()?"是":"否"));
         viewHolder.txtRefundCreatedTime.setText("退款订单生成时间: " + new Date(bcRefundOrder.getRefundCreatedTime()));
+        viewHolder.txtOptional.setText("退款订单生成时间: " + bcRefundOrder.getOptional());
 
         return convertView;
     }
@@ -138,9 +144,11 @@ public class RefundOrdersAdapter extends BaseAdapter {
         public TextView txtTotalFee;
         public TextView txtRefundFee;
         public TextView txtChannel;
+        public TextView txtSubChannel;
         public TextView txtTitle;
         public TextView txtRefundFinish;
         public TextView txtRefundResult;
         public TextView txtRefundCreatedTime;
+        public TextView txtOptional;
     }
 }

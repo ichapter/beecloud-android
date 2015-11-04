@@ -6,6 +6,8 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
+import cn.beecloud.demo.util.DisplayUtils;
+
 public class OrdersEntryActivity extends Activity {
     Button btnQueryBills;
     Button btnQueryRefunds;
@@ -16,6 +18,8 @@ public class OrdersEntryActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_orders_entry);
+
+        DisplayUtils.initBack(this);
 
         btnQueryBills = (Button) findViewById(R.id.btnQueryBills);
         btnQueryBills.setOnClickListener(new View.OnClickListener() {

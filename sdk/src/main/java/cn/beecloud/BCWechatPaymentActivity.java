@@ -76,17 +76,21 @@ public class BCWechatPaymentActivity extends Activity implements IWXAPIEventHand
         //Log.i(TAG, "onPayFinish, result code = " + baseResp.errCode);
 
         String result = BCPayResult.RESULT_FAIL;
-        String errMag = BCPayResult.FAIL_ERR_FROM_CHANNEL;
+        int errCode = BCPayResult.APP_INTERNAL_THIRD_CHANNEL_ERR_CODE;
+        String errMsg = BCPayResult.FAIL_ERR_FROM_CHANNEL;
+
         String detailInfo = "WECHAT_PAY: ";
         switch (baseResp.errCode) {
             case BaseResp.ErrCode.ERR_OK:
                 result = BCPayResult.RESULT_SUCCESS;
-                errMag = BCPayResult.RESULT_SUCCESS;
+                errCode = BCPayResult.APP_PAY_SUCC_CODE;
+                errMsg = BCPayResult.RESULT_SUCCESS;
                 detailInfo += "用户支付已成功";
                 break;
             case BaseResp.ErrCode.ERR_USER_CANCEL:
                 result = BCPayResult.RESULT_CANCEL;
-                errMag = BCPayResult.RESULT_CANCEL;
+                errCode = BCPayResult.APP_PAY_CANCEL_CODE;
+                errMsg = BCPayResult.RESULT_CANCEL;
                 detailInfo += "用户取消";
                 break;
             case BaseResp.ErrCode.ERR_AUTH_DENIED:
@@ -108,7 +112,11 @@ public class BCWechatPaymentActivity extends Activity implements IWXAPIEventHand
         BCPay instance = BCPay.getInstance(BCWechatPaymentActivity.this);
 
         if (instance != null && instance.payCallback != null) {
-            instance.payCallback.done(new BCPayResult(result, errMag, detailInfo));
+            instance.payCallback.done(new BCPayResult(result,
+                    errCode,
+                    errMsg,
+                    detailInfo,
+                    BCCache.getInstance(null).billID));
         }
         this.finish();
     }

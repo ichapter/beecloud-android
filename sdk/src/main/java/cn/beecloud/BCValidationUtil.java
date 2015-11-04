@@ -7,6 +7,9 @@
 package cn.beecloud;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Map;
+
+import cn.beecloud.entity.BCPayReqParams;
 
 /**
  * 校验类
@@ -86,5 +89,40 @@ class BCValidationUtil {
         }
 
         return res;
+    }
+
+    /**
+     * 校验bill参数
+     * 设置公用参数
+     *
+     * @param billTitle       商品描述, 32个字节内, 汉字以2个字节计
+     * @param billTotalFee    支付金额，以分为单位，必须是正整数
+     * @param billNum         商户自定义订单号
+     * @param parameters      用于存储公用信息
+     * @param optional        为扩展参数，可以传入任意数量的key/value对来补充对业务逻辑的需求
+     * @return                返回校验失败信息, 为null则表明校验通过
+     */
+    public static String prepareParametersForPay(final String billTitle, final Integer billTotalFee,
+                                           final String billNum, final Map<String, String> optional,
+                                           BCPayReqParams parameters) {
+
+        if (!BCValidationUtil.isValidBillTitleLength(billTitle)) {
+            return "parameters: 不合法的参数-订单标题长度不合法, 32个字节内, 汉字以2个字节计";
+        }
+
+        if (!BCValidationUtil.isValidBillNum(billNum))
+            return "parameters: 订单号必须是长度8~32位字母和/或数字组合成的字符串";
+
+        if (billTotalFee < 0) {
+            return "parameters: billTotalFee " + billTotalFee +
+                    " 格式不正确, 必须是以分为单位的正整数, 比如100表示1元";
+        }
+
+        parameters.title = billTitle;
+        parameters.totalFee = billTotalFee;
+        parameters.billNum = billNum;
+        parameters.optional = optional;
+
+        return null;
     }
 }

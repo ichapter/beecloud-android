@@ -14,6 +14,8 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import cn.beecloud.demo.util.DisplayUtils;
+
 /**
  * 用于展示Ali内嵌二维码
  */
@@ -27,6 +29,7 @@ public class ALIQRCodeActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_aliqrcode);
 
+        DisplayUtils.initBack(this);
 
         aliQRCode = (WebView) findViewById(R.id.aliQRCode);
         WebSettings webSettings = aliQRCode.getSettings();

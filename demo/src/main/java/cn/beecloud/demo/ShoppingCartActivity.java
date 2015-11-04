@@ -14,6 +14,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -22,28 +23,30 @@ import android.widget.Toast;
 
 import com.unionpay.UPPayAssistEx;
 
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 
 import cn.beecloud.BCPay;
+import cn.beecloud.BCQuery;
 import cn.beecloud.BeeCloud;
 import cn.beecloud.async.BCCallback;
+import cn.beecloud.async.BCPayPalSyncObserver;
 import cn.beecloud.async.BCResult;
+import cn.beecloud.demo.util.BillUtils;
+import cn.beecloud.entity.BCBillOrder;
 import cn.beecloud.entity.BCPayResult;
+import cn.beecloud.entity.BCQueryBillResult;
 import cn.beecloud.entity.BCReqParams;
 
 
 public class ShoppingCartActivity extends Activity {
+    private static final String TAG = "ShoppingCartActivity";
 
     Button btnQueryOrders;
 
     private ProgressDialog loadingDialog;
     private ListView payMethod;
-
-    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMddHHmmssSSS", Locale.CHINA);
 
     //支付结果返回入口
     BCCallback bcCallback = new BCCallback() {
@@ -53,8 +56,8 @@ public class ShoppingCartActivity extends Activity {
             //此处关闭loading界面
             loadingDialog.dismiss();
 
-            //如果想通过Toast通知用户结果，请使用如下方式，
-            // 直接makeText有可能会造成java.lang.RuntimeException: Can't create handler inside thread that has not called Looper.prepare()
+            //根据你自己的需求处理支付结果
+            //需要注意的是，此处如果涉及到UI的更新，请在UI主进程或者Handler操作
             ShoppingCartActivity.this.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -63,18 +66,14 @@ public class ShoppingCartActivity extends Activity {
 
                     /*
                       注意！
-                      所有支付渠道建议以服务端的状态为准，此处返回的RESULT_SUCCESS仅仅代表手机端支付成功，
-                      该操作并非强制性要求，虽然属于小概率事件，但渠道官方推荐以防止欺诈手段
-
-                        对于PayPal的每一次支付，sdk会自动帮你与服务端同步，
-                        如果与服务端同步失败，记录会被自动保存，此时你可以调用batchSyncPayPalPayment方法手动同步
-                        虽然这种情况比较少，但是建议参考PayPalUnSyncedListActivity做好同步，否则服务器将无法查阅到订单
+                      所有支付渠道建议以服务端的状态金额为准，此处返回的RESULT_SUCCESS仅仅代表手机端支付成功
                     */
-                    if (result.equals(BCPayResult.RESULT_SUCCESS))
+                    if (result.equals(BCPayResult.RESULT_SUCCESS)) {
                         Toast.makeText(ShoppingCartActivity.this, "用户支付成功", Toast.LENGTH_LONG).show();
-                    else if (result.equals(BCPayResult.RESULT_CANCEL))
+
+                    } else if (result.equals(BCPayResult.RESULT_CANCEL))
                         Toast.makeText(ShoppingCartActivity.this, "用户取消支付", Toast.LENGTH_LONG).show();
-                    else if(result.equals(BCPayResult.RESULT_FAIL)) {
+                    else if (result.equals(BCPayResult.RESULT_FAIL)) {
                         Toast.makeText(ShoppingCartActivity.this, "支付失败, 原因: " + bcPayResult.getErrMsg()
                                 + ", " + bcPayResult.getDetailInfo(), Toast.LENGTH_LONG).show();
 
@@ -88,8 +87,16 @@ public class ShoppingCartActivity extends Activity {
                     } else if (result.equals(BCPayResult.RESULT_UNKNOWN)) {
                         //可能出现在支付宝8000返回状态
                         Toast.makeText(ShoppingCartActivity.this, "订单状态未知", Toast.LENGTH_LONG).show();
-                    } else{
+                    } else {
                         Toast.makeText(ShoppingCartActivity.this, "invalid return", Toast.LENGTH_LONG).show();
+                    }
+
+                    if (bcPayResult.getId() != null) {
+                        //你可以把这个id存到你的订单中，下次直接通过这个id查询订单
+                        Log.w(TAG, "bill id retrieved : " + bcPayResult.getId());
+
+                        //根据ID查询
+                        getBillInfoByID(bcPayResult.getId());
                     }
                 }
             });
@@ -144,13 +151,14 @@ public class ShoppingCartActivity extends Activity {
 
         // 推荐在主Activity里的onCreate函数中初始化BeeCloud.
         BeeCloud.setAppIdAndSecret("c5d1cba1-5e3f-4ba0-941d-9b0a371fe719", "39a7a518-9ac8-4a9e-87bc-7885f33cf18c");
-        
+
         // 如果用到微信支付，在用到微信支付的Activity的onCreate函数里调用以下函数.
         // 第二个参数需要换成你自己的微信AppID.
         BCPay.initWechatPay(ShoppingCartActivity.this, "wxf1aa465362b4c8f1");
 
         // 如果使用PayPal需要在支付之前设置client id和应用secret
         // BCPay.PAYPAL_PAY_TYPE.SANDBOX用于测试，BCPay.PAYPAL_PAY_TYPE.LIVE用于生产环境
+        //最后一个参数表示是否在paypal支付页面显示收货地址，如果地址不合法有可能造成无法支付
         BCPay.initPayPal("AVT1Ch18aTIlUJIeeCxvC7ZKQYHczGwiWm8jOwhrREc4a5FnbdwlqEB4evlHPXXUA67RAAZqZM0H8TCR",
                 "EL-fkjkEUyxrwZAmrfn46awFXlX-h2nRkyCVhhpeVdlSRuhPJKXx3ZvUTTJqPQuAeomXA8PZ2MkX24vF",
                 BCPay.PAYPAL_PAY_TYPE.SANDBOX, Boolean.FALSE);
@@ -183,17 +191,18 @@ public class ShoppingCartActivity extends Activity {
                         //这个是微信自身存在的问题
                         Map<String, String> mapOptional = new HashMap<String, String>();
 
-                        mapOptional.put("testkey1", "测试value值1");   //map的key暂时不支持中文
+                        mapOptional.put("testkey1", "测试value值1");
 
                         if (BCPay.isWXAppInstalledAndSupported() &&
                                 BCPay.isWXPaySupported()) {
 
                             BCPay.getInstance(ShoppingCartActivity.this).reqWXPaymentAsync(
-                                    "微信支付测试",               //订单标题
+                                    "安卓微信支付测试",               //订单标题
                                     1,                           //订单金额(分)
-                                    genBillNum(),  //订单流水号
+                                    BillUtils.genBillNum(),  //订单流水号
                                     mapOptional,            //扩展参数(可以null)
                                     bcCallback);            //支付完成后回调入口
+
                         }
                         break;
 
@@ -201,34 +210,60 @@ public class ShoppingCartActivity extends Activity {
                         loadingDialog.show();
 
                         mapOptional = new HashMap<String, String>();
-                        mapOptional.put("paymentid", "");
+                        mapOptional.put("客户端", "安卓");
                         mapOptional.put("consumptioncode", "consumptionCode");
                         mapOptional.put("money", "2");
 
-                        BCPay.getInstance(ShoppingCartActivity.this).reqAliPaymentAsync("支付宝支付测试",
+                        BCPay.getInstance(ShoppingCartActivity.this).reqAliPaymentAsync(
+                                "支付宝支付测试",
                                 1,
-                                genBillNum(),
-                                mapOptional, bcCallback);
+                                BillUtils.genBillNum(),
+                                mapOptional,
+                                bcCallback);
+
                         break;
 
                     case 2: //银联支付
                         loadingDialog.show();
 
+                        /*
                         BCPay.getInstance(ShoppingCartActivity.this).reqUnionPaymentAsync("银联支付测试",
                                 1,
-                                genBillNum(),
+                                BillUtils.genBillNum(),
                                 null,
+                                bcCallback);*/
+
+
+                        BCPay.PayParams payParam = new BCPay.PayParams();
+
+                        payParam.channelType = BCReqParams.BCChannelTypes.UN_APP;
+
+                        //商品描述, 32个字节内, 汉字以2个字节计
+                        payParam.billTitle = "安卓银联支付测试";
+
+                        //支付金额，以分为单位，必须是正整数
+                        payParam.billTotalFee = 1;
+
+                        //商户自定义订单号
+                        payParam.billNum = BillUtils.genBillNum();
+
+                        BCPay.getInstance(ShoppingCartActivity.this).reqPaymentAsync(payParam,
                                 bcCallback);
+
+
                         break;
                     case 3: //通过百度钱包支付
                         loadingDialog.show();
 
-                        HashMap<String, String> hashMapOptional = new HashMap<String, String>();
-                        hashMapOptional.put("goods desc", "商品详细描述");
+                        mapOptional = new HashMap<String, String>();
+                        mapOptional.put("goods desc", "商品详细描述");
+
+                        Map<String, String> analysis;
 
                         //通过创建PayParam的方式发起支付
                         //你也可以通过reqBaiduPaymentAsync的方式支付
-                        BCPay.PayParam payParam = new BCPay.PayParam();
+                        //BCPay.PayParam
+                        payParam = new BCPay.PayParams();
                         /*
                         *  支付渠道，此处以百度钱包为例，实际支付允许
                         *  BCReqParams.BCChannelTypes.WX_APP，
@@ -247,33 +282,63 @@ public class ShoppingCartActivity extends Activity {
                         payParam.billTotalFee = 1;
 
                         //商户自定义订单号
-                        payParam.billNum = genBillNum();
+                        payParam.billNum = BillUtils.genBillNum();
 
-                        //订单超时时间，以秒为单位，可以为null
-                        payParam.billTimeout = 120;
+                        //订单超时时间，以秒为单位，建议最小300，可以为null
+                        payParam.billTimeout = 300;
 
                         //扩展参数，可以传入任意数量的key/value对来补充对业务逻辑的需求，可以为null
-                        payParam.optional = hashMapOptional;
+                        payParam.optional = mapOptional;
+
+                        //扩展参数，用于后期分析，目前只支持key为category的分类分析，可以为null
+                        analysis = new HashMap<String, String>();
+                        analysis.put("category", "BD");
+                        payParam.analysis = analysis;
 
                         BCPay.getInstance(ShoppingCartActivity.this).reqPaymentAsync(payParam,
                                 bcCallback);
                         break;
                     case 4: //通过PayPal支付
+                        /*
+                         对于PayPal的每一次支付，sdk会自动帮你与服务端同步，
+                         如果与服务端同步失败，记录会被自动保存，此时你可以调用batchSyncPayPalPayment方法手动同步
+                         虽然这种情况比较少，但是建议参考PayPalUnSyncedListActivity做好同步，否则服务器将无法查阅到订单
+                         */
                         loadingDialog.show();
 
-                        hashMapOptional = new HashMap<String, String>();
+                        HashMap<String, String> hashMapOptional = new HashMap<String, String>();
                         hashMapOptional.put("PayPal key1", "PayPal value1");
                         hashMapOptional.put("PayPal key2", "PayPal value2");
 
+                        BCPay bcPay = BCPay.getInstance(ShoppingCartActivity.this);
+
+                        //this is only required if you want to get the bill id
+                        //or you want to know the sync result
+                        bcPay.addPayPalSyncObserver(new BCPayPalSyncObserver(){
+
+                            @Override
+                            public void onSyncSucceed(String id) {
+                                Log.w(TAG, "paypal bill id retrieved: " + id);
+                                getBillInfoByID(id);
+                            }
+
+                            @Override
+                            public boolean onSyncFailed(String billInfo, String failInfo) {
+                                Log.w(TAG, "billInfo: " + billInfo +
+                                    "#failInfo: "+failInfo);
+                                return false;
+                            }
+                        });
+
                         BCPay.getInstance(ShoppingCartActivity.this).reqPayPalPaymentAsync(
                                 "PayPal payment test",  //bill title
-                                231,                      //bill amount(use cents)
+                                1,                      //bill amount(use cents)
                                 "USD",                  //bill currency
                                 hashMapOptional,        //optional info
                                 bcCallback);
                         break;
                     default:
-                        Intent intent = new Intent(ShoppingCartActivity.this, GenQRCodeActivity.class);
+                        Intent intent = new Intent(ShoppingCartActivity.this, QRCodeEntryActivity.class);
                         startActivity(intent);
                 }
             }
@@ -289,7 +354,44 @@ public class ShoppingCartActivity extends Activity {
         });
     }
 
-    String genBillNum() {
-        return simpleDateFormat.format(new Date());
+    void getBillInfoByID(String id) {
+
+        BCQuery.getInstance().queryBillByIDAsync(id,
+                new BCCallback() {
+                    @Override
+                    public void done(BCResult result) {
+                        BCQueryBillResult billResult = (BCQueryBillResult) result;
+
+                        Log.d(TAG, "------ response info ------");
+                        Log.d(TAG, "------getResultCode------" + billResult.getResultCode());
+                        Log.d(TAG, "------getResultMsg------" + billResult.getResultMsg());
+                        Log.d(TAG, "------getErrDetail------" + billResult.getErrDetail());
+
+                        Log.d(TAG, "------- bill info ------");
+                        BCBillOrder billOrder = billResult.getBill();
+                        Log.d(TAG, "订单号:" + billOrder.getBillNum());
+                        Log.d(TAG, "订单金额, 单位为分:" + billOrder.getTotalFee());
+                        Log.d(TAG, "渠道类型:" + BCReqParams.BCChannelTypes.getTranslatedChannelName(billOrder.getChannel()));
+                        Log.d(TAG, "子渠道类型:" + BCReqParams.BCChannelTypes.getTranslatedChannelName(billOrder.getSubChannel()));
+
+                        Log.d(TAG, "订单是否成功:" + billOrder.getPayResult());
+
+                        if (billOrder.getPayResult())
+                            Log.d(TAG, "渠道返回的交易号，未支付成功时，是不含该参数的:" + billOrder.getTradeNum());
+                        else
+                            Log.d(TAG, "订单是否被撤销，该参数仅在线下产品（例如二维码和扫码支付）有效:"
+                                    + billOrder.getRevertResult());
+
+                        Log.d(TAG, "订单创建时间:" + new Date(billOrder.getCreatedTime()));
+                        Log.d(TAG, "扩展参数:" + billOrder.getOptional());
+                    }
+                });
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        //清理当前的activity引用
+        BCPay.detach();
     }
 }

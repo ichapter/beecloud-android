@@ -15,8 +15,22 @@ public class BCBillOrder extends BCOrder{
      * 以便于Gson反序列化
      * 请忽略命名规则
      */
+
+    //渠道返回的交易号，未支付成功时，是不含该参数的
+    private String trade_no;
+
     //订单是否成功
     private Boolean spay_result;
+
+    //订单是否被撤销
+    private Boolean revert_result;
+
+    /**
+     * @return  渠道返回的交易号，未支付成功时，无效
+     */
+    public String getTradeNum() {
+        return trade_no;
+    }
 
     /**
      * @return  true表示订单支付成功, false表示尚未支付
@@ -26,9 +40,17 @@ public class BCBillOrder extends BCOrder{
     }
 
     /**
+     * 用于线下产品,订单是否被撤销
+     * @return  true表示订单已经被撤销
+     */
+    public Boolean getRevertResult() {
+        return revert_result;
+    }
+
+    /**
      * @return  订单创建时间, 毫秒时间戳, 13位
      */
     public Long getCreatedTime() {
-        return created_time;
+        return create_time;
     }
 }

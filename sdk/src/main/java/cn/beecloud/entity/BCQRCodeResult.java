@@ -15,8 +15,8 @@ public class BCQRCodeResult extends BCRestfulCommonResult {
     public static final int DEFAULT_QRCODE_HEIGHT = 360;
     public static final int DEFAULT_QRCODE_WIDTH = 360;
 
-    private int qrCodeHeight = BCQRCodeResult.DEFAULT_QRCODE_HEIGHT;
-    private int qrCodeWidth = BCQRCodeResult.DEFAULT_QRCODE_WIDTH;
+    private Integer qrCodeHeight = BCQRCodeResult.DEFAULT_QRCODE_HEIGHT;
+    private Integer qrCodeWidth = BCQRCodeResult.DEFAULT_QRCODE_WIDTH;
 
     private String qrCodeRawContent;
     private Bitmap qrCodeBitmap;

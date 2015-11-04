@@ -70,12 +70,6 @@ public class BCQueryReqParams extends BCReqParams {
     public Integer limit;
 
     /**
-     * 线下扫码订单修改的方法
-     * 目前仅用于支付宝线下扫码订单状态查询, 更新
-     */
-    public String offlineMethod;
-
-    /**
      * 构造函数
      * @param channel       支付渠道类型
      * @throws BCException  父类构造有可能抛出异常
@@ -98,13 +92,8 @@ public class BCQueryReqParams extends BCReqParams {
         if (channel != BCChannelTypes.ALL)
             params.put("channel", channel.name());
 
-        //针对支付宝线下扫码的特殊处理
-        if (offlineMethod != null)
-            params.put("method", offlineMethod);
-        else {  //普通查询offlineMethod是null
-            if (billNum != null)
-                params.put("bill_no", billNum);
-        }
+        if (billNum != null)
+            params.put("bill_no", billNum);
 
         if (refundNum != null)
             params.put("refund_no", refundNum);

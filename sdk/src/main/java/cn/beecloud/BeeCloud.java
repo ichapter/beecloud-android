@@ -14,7 +14,7 @@ public class BeeCloud {
     /**
      * BeeCloud Android SDK 版本
      */
-    public static final String BEECLOUD_ANDROID_SDK_VERSION = "1.6";
+    public static final String BEECLOUD_ANDROID_SDK_VERSION = "2.0.1";
 
     /**
      * 设置AppId和AppSecret(从BeeCloud网站的控制台获得), 并进行一系列异步的初始化
@@ -32,9 +32,9 @@ public class BeeCloud {
     /**
      * 修改所有网络请求的超时时间，单位是毫秒，默认为10秒.
      *
-     * @param networkTimeout 超时时间，单位为毫秒，例如5000表示5秒.
+     * @param connectTimeout 超时时间，单位为毫秒，例如5000表示5秒.
      */
-    public static void setNetworkTimeout(Integer networkTimeout) {
-        BCCache.getInstance(null).networkTimeout = networkTimeout;
+    public static void setConnectTimeout(Integer connectTimeout) {
+        BCCache.getInstance(null).connectTimeout = connectTimeout;
     }
 }

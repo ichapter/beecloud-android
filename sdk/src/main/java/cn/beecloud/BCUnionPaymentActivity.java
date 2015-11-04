@@ -55,7 +55,8 @@ public class BCUnionPaymentActivity extends Activity {
 
                 if (instance != null && instance.payCallback != null) {
                     instance.payCallback.done(new BCPayResult(BCPayResult.RESULT_FAIL,
-                         (retPay==-1)? BCPayResult.FAIL_PLUGIN_NOT_INSTALLED:BCPayResult.FAIL_PLUGIN_NEED_UPGRADE,
+                            BCPayResult.APP_INTERNAL_THIRD_CHANNEL_ERR_CODE,
+                            (retPay == -1)? BCPayResult.FAIL_PLUGIN_NOT_INSTALLED:BCPayResult.FAIL_PLUGIN_NEED_UPGRADE,
                          "银联插件问题, 需重新安装或升级"));
                 } else {
                     Log.e("BCUnionPaymentActivity", "BCPay instance or payCallback NPE");
@@ -76,6 +77,7 @@ public class BCUnionPaymentActivity extends Activity {
         }
 
         String result = null;
+        int errCode = -99;
         String errMsg = null;
         String detailInfo = "银联支付:";
         /*
@@ -84,19 +86,23 @@ public class BCUnionPaymentActivity extends Activity {
         String str = data.getExtras().getString("pay_result");
         if (str == null) {
             result = BCPayResult.RESULT_FAIL;
+            errCode = BCPayResult.APP_INTERNAL_THIRD_CHANNEL_ERR_CODE;
             errMsg = BCPayResult.FAIL_ERR_FROM_CHANNEL;
             detailInfo += "invalid pay_result";
         } else {
             if (str.equalsIgnoreCase("success")) {
                 result = BCPayResult.RESULT_SUCCESS;
+                errCode = BCPayResult.APP_PAY_SUCC_CODE;
                 errMsg = BCPayResult.RESULT_SUCCESS;
                 detailInfo += "支付成功！";
             } else if (str.equalsIgnoreCase("fail")) {
                 result = BCPayResult.RESULT_FAIL;
+                errCode = BCPayResult.APP_INTERNAL_THIRD_CHANNEL_ERR_CODE;
                 errMsg = BCPayResult.RESULT_FAIL;
                 detailInfo += "支付失败！";
             } else if (str.equalsIgnoreCase("cancel")) {
                 result = BCPayResult.RESULT_CANCEL;
+                errCode = BCPayResult.APP_PAY_CANCEL_CODE;
                 errMsg = BCPayResult.RESULT_CANCEL;
                 detailInfo += "用户取消了支付";
             }
@@ -105,7 +111,8 @@ public class BCUnionPaymentActivity extends Activity {
         BCPay instance = BCPay.getInstance(BCUnionPaymentActivity.this);
 
         if (instance != null && instance.payCallback != null) {
-            instance.payCallback.done(new BCPayResult(result, errMsg, detailInfo));
+            instance.payCallback.done(new BCPayResult(result, errCode, errMsg,
+                    detailInfo, BCCache.getInstance(null).billID));
         }
 
         this.finish();

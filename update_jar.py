@@ -19,7 +19,15 @@ if rc != 0:
 print('copying...')
 
 import shutil
-shutil.copy('build/libs/beecloud.jar', '../demo_eclipse/libs')
-shutil.copy('build/libs/beecloud.jar', '.')
+import glob
+
+if len(glob.glob('beecloud*.jar')) > 0:
+	os.remove(glob.glob('beecloud*.jar')[0])
+
+if len(glob.glob('../demo_eclipse/libs/beecloud*.jar')) > 0 :
+	os.remove(glob.glob('../demo_eclipse/libs/beecloud*.jar')[0])
+	
+shutil.copy(glob.glob('build/libs/beecloud*.jar')[0], '../demo_eclipse/libs')
+shutil.copy(glob.glob('build/libs/beecloud*.jar')[0], '.')
 
 print('done')

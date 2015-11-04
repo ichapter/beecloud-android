@@ -21,11 +21,17 @@ class BCOrder {
     //渠道类型
     private String channel;
 
+    //子渠道类型
+    private String sub_channel;
+
     //订单标题
     private String title;
 
     //订单创建时间, 毫秒时间戳, 13位
-    protected Long created_time;
+    protected Long create_time;
+
+    //扩展参数
+    private String optional;
 
     /**
      * @return  订单号
@@ -49,9 +55,23 @@ class BCOrder {
     }
 
     /**
+     * @return  子渠道类型
+     */
+    public String getSubChannel() {
+        return sub_channel;
+    }
+
+    /**
      * @return  订单标题
      */
     public String getTitle() {
         return title;
+    }
+
+    /**
+     * @return  扩展参数
+     */
+    public String getOptional() {
+        return optional;
     }
 }

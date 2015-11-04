@@ -5,13 +5,13 @@ android {
         config {
         }
     }
-    compileSdkVersion 21
-    buildToolsVersion "22.0.0"
+    compileSdkVersion 22
+    buildToolsVersion "22.0.1"
     defaultConfig {
-        minSdkVersion 9
-        targetSdkVersion 21
-        versionCode 1
-        versionName "1.0"
+        minSdkVersion 9 //upgrade to 10 if you require PayPal for safety
+        targetSdkVersion 22
+        versionCode 11
+        versionName "2.0.1"
     }
     compileOptions {
         encoding "UTF-8"
@@ -27,7 +27,7 @@ android {
 }
 
 dependencies {
-    compile 'com.android.support:appcompat-v7:21.+'
+    compile 'com.android.support:appcompat-v7:22.2.1'
     compile fileTree(dir: 'libs', include: ['*.jar'])
     /*  以下标识
     //must gson
@@ -48,7 +48,6 @@ dependencies {
     //QRCode
     libs/zxing-3.2.0.jar
 
-
     //baidu
     Cashier_SDK-v4.2.0.jar
 
@@ -67,12 +66,12 @@ tasks.withType(JavaCompile) {
 //以下用于生成sdk jar
 //gradle makeJar
 task clearJar(type: Delete) {
-    delete 'libs/beecloud.jar'
+    delete fileTree(dir: 'build/libs' , include: 'beecloud*.jar')
 }
 
 task makeJar(type:org.gradle.api.tasks.bundling.Jar) {
     //指定生成的jar名
-    baseName 'beecloud'
+    baseName 'beecloud-2.0.1'
     //从哪里打包class文件
     from('build/intermediates/classes/release/cn/beecloud')
     //打包到jar后的目录结构
@@ -83,7 +82,7 @@ task makeJar(type:org.gradle.api.tasks.bundling.Jar) {
     exclude{ it.name.startsWith('R$');}
 }
 
-makeJar.dependsOn(clearJar, build)
+//makeJar.dependsOn(clearJar, build)
 
 //以下用于生成javadoc
 //gradle generateReleaseJavaDoc --info
