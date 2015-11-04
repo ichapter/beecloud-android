@@ -9,7 +9,23 @@
 本SDK是根据[BeeCloud Rest API](https://github.com/beecloud/beecloud-rest-api) 开发的 Android SDK。目前已经包含微信支付、支付宝支付、银联在线支付、百度钱包支付、PayPal支付和生成二维码方式支付，以及支付订单和退款订单的查询功能，可以作为调用BeeCloud Rest API的示例或者直接用于生产。
 
 ## 流程
+
+下图为整个支付的流程:
 ![pic](http://7xavqo.com1.z0.glb.clouddn.com/UML.png)
+
+其中需要开发者开发的只有：
+
+步骤1：**（在App端）发送支付要素**
+
+做完这一步之后就会跳到相应的支付页面（如微信app中），让用户继续后续的支付步骤
+
+步骤5：**（在App端）处理同步回调结果**
+
+付款完成或取消之后，会回到客户app中，需要做相应界面展示的更新（比如弹出框告诉用户"支付成功"或"支付失败")。非常不推荐用同步回调的结果来作为最终的支付结果，因为同步回调可能（虽然可能性不大）出现结果不准确的情况，最终支付结果应以下面的异步回调为准。
+
+步骤7：**（在客户服务端）处理异步回调结果（[Webhook](https://beecloud.cn/doc/?index=8)）**
+ 
+付款完成之后，根据客户在BeeCloud后台的设置，BeeCloud会向客户服务端发送一个Webhook请求，里面包括了数字签名，订单号，订单金额等一系列信息。客户需要在服务端依据规则要验证**数字签名是否正确，购买的产品与订单金额是否匹配，这两个验证缺一不可**。验证结束后即可开始走支付完成后的逻辑。
 
 ## 安装
 1. 添加依赖<br/>
@@ -132,6 +148,9 @@ BCPay.initPayPal(
 <activity android:name="com.paypal.android.sdk.payments.LoginActivity" />
 <activity android:name="com.paypal.android.sdk.payments.PaymentMethodActivity" />
 <activity android:name="com.paypal.android.sdk.payments.PaymentConfirmActivity" />
+<activity android:name="io.card.payment.CardIOActivity"
+            android:configChanges="keyboardHidden|orientation" />
+<activity android:name="io.card.payment.DataEntryActivity" />
 <activity
     android:name="cn.beecloud.BCPayPalPaymentActivity"
     android:configChanges="orientation|keyboardHidden"
@@ -162,7 +181,7 @@ BCPay.initPayPal(
 > optional        为扩展参数，可以传入任意数量的key/value对来补充对业务逻辑<br/>
 > callback        支付完成后的回调入口
 
-或者，通过`BCPay`的实例，以`reqPaymentAsync`方法发起所有支持的支付请求，该方法的调用请参考demo中百度钱包的支付调用，或者参阅[API](https://beecloud.cn/doc/api/beecloud-android/)。<br/>
+或者，通过`BCPay`的实例，以`reqPaymentAsync`方法发起所有支持的支付请求，该方法的调用请参考demo中百度钱包的支付调用，BCPay.PayParam参数请参阅[API](https://beecloud.cn/doc/api/beecloud-android/cn/beecloud/BCPay.PayParam.html)。<br/>
 参数依次为
 > payParam        BCPay.PayParam类型<br/>
 > callback        支付完成后的回调入口
@@ -192,6 +211,14 @@ BCCallback bcCallback = new BCCallback() {
                     case BCPayResult.RESULT_FAIL:
                         Toast.makeText(ShoppingCartActivity.this, "支付失败, 原因: " + bcPayResult.getErrMsg()
                                 + ", " + bcPayResult.getDetailInfo(), Toast.LENGTH_LONG).show();
+                }
+                
+                if (bcPayResult.getId() != null) {
+                    //你可以把这个id存到你的订单中，下次直接通过这个id查询订单
+                    Log.w(TAG, "bill id retrieved : " + bcPayResult.getId());
+
+                    //根据ID查询，详细请查看demo
+                    getBillInfoByID(bcPayResult.getId());
                 }
             }
         });
@@ -240,79 +267,139 @@ BCCache.executorService.execute(new Runnable() {
 ```
 如果想手动清除未同步订单，调用`BCCache.getInstance(activity).clearUnSyncedPayPalRecords()`
 
-### 5.生成支付二维码
-请查看`doc`中的`API`，支付类`BCPay`，参照`demo`中`GenQRCodeActivity`
+### 5.线下支付
+请查看`doc`中的`API`，线下支付类`BCOfflinePay`，参照`demo`中`QRCodeEntryActivity`和其关联的activity；一般用于线下门店通过出示二维码由用户扫描付款，或者通过用户出示的付款码收款。
+线下支付基本流程：
+>1 通过二维码或者付款码发起支付；
+>2 支付结束后调用查询接口确认`BCQuery.getInstance().queryOfflineBillStatusAsync`,请参考查询部分说明。
+第二步必不可少。
 
 **原型：** 
  
-通过`BCPay`的实例，以`reqWXQRCodeAsync`方法请求生成微信支付二维码。 <br/>
-通过`BCPay`的实例，以`reqAliQRCodeAsync`方法请求生成支付宝内嵌支付二维码。<br/>
+通过`BCOfflinePay`的实例，以`reqQRCodeAsync`方法请求生成支付二维码。 <br/>
+通过`BCOfflinePay`的实例，以`reqOfflinePayAsync`方法通过获取到的付款码发起收款。<br/>
 
 公用参数依次为
+> channelType     BCChannelTypes类型，支持WX_NATIVE，ALI_OFFLINE_QRCODE
 > billTitle       商品描述, 32个字节内, 汉字以2个字节计<br/>
 > billTotalFee    支付金额，以分为单位，必须是正整数<br/>
 > billNum         商户自定义订单号<br/>
 > optional        为扩展参数，可以传入任意数量的key/value对来补充对业务逻辑<br/>
 > callback        支付完成后的回调入口
 
-请求生成微信支付二维码
+请求生成支付二维码的额外参数
 > genQRCode       是否生成QRCode Bitmap
 >>如果为false，请自行根据getQrCodeRawContent返回的URL，使用BCPay.generateBitmap方法生成支付二维码，你也可以使用自己熟悉的二维码生成工具
 
 > qrCodeWidth     如果生成二维码(genQRCode为true), QRCode的宽度(以px为单位), null则使用默认参数360px
 
-请求生成支付宝内嵌支付二维码的特有参数
+请求通过获取到的付款码发起收款的额外参数
+> authCode        用户出示的收款码
+> terminalId      机具终端编号，支付宝扫码(ALI_SCAN)的选填参数
+> storeId         商户门店编号，支付宝扫码(ALI_SCAN)的选填参数
+
+对于生成二维码的请求，在回调函数中将`BCResult`转化成`BCQRCodeResult`之后做后续处理<br/>
+**调用：**
+```java
+BCOfflinePay.getInstance(GenQRCodeActivity.this).reqQRCodeAsync(
+        channelType,		//渠道类型
+        billTitle,  		//商品描述
+        1,          		//总金额, 以分为单位, 必须是正整数
+        billNum,          	//流水号
+        optional,           //扩展参数
+        true,               //是否生成二维码的bitmap
+        380,                //二维码的尺寸, 以px为单位, 如果为null则默认为360
+        new BCCallback() {
+            @Override
+            public void done(BCResult bcResult) {
+
+                final BCQRCodeResult bcqrCodeResult = (BCQRCodeResult) bcResult;
+
+                //resultCode为0表示请求成功
+                if (bcqrCodeResult.getResultCode() == 0) {
+                    //如果你设置了生成二维码参数为true那么此处可以获取二维码
+                    qrCodeBitMap = bcqrCodeResult.getQrCodeBitmap();
+
+                    //否则通过 bcqrCodeResult.getQrCodeRawContent() 获取二维码的内容，自己去生成对应的二维码
+
+                    msg.what = REQ_QRCODE_CODE;
+                } else {
+                    errMsg = "err code:" + bcqrCodeResult.getResultCode() +
+                            "; err msg: " + bcqrCodeResult.getResultMsg() +
+                            "; err detail: " + bcqrCodeResult.getErrDetail();
+                    //work with err msg
+                }
+            }
+        });
+```
+
+对于通过用户出示的付款码收款，在回调函数中将`BCResult`转化成`BCPayResult`之后做后续处理<br/>
+**调用：**
+```java
+BCOfflinePay.getInstance(PayViaAuthCodeActivity.this).reqOfflinePayAsync(
+        channelType,
+        billTitle, //商品描述
+        1,                 			//总金额, 以分为单位, 必须是正整数
+        billNum,          			//流水号
+        optional,            		//扩展参数
+        authCode,           		//付款码
+        "fake-terminalId",  		//若机具商接入terminalId(机具终端编号)必填
+        null,               		//若系统商接入，storeId(商户门店编号)必填
+        new BCCallback() {     	//回调入口
+            @Override
+            public void done(BCResult bcResult) {
+
+                final BCPayResult payResult = (BCPayResult) bcResult;
+
+                //RESULT_SUCCESS表示请求成功，任然需要查询支付结果
+                if (payResult.getResult().equals(BCPayResult.RESULT_SUCCESS)) {
+                	//TODO
+                } else {
+
+                    errMsg = "支付失败，请重试；错误信息：" +
+                            "err code:" + payResult.getResult() +
+                            "; err msg: " + payResult.getErrMsg() +
+                            "; err detail: " + payResult.getDetailInfo();
+                }
+            }
+        });
+```
+
+**关于订单的撤销**
+支持WX_SCAN, ALI_OFFLINE_QRCODE, ALI_SCAN
+订单撤销后，用户将不能继续支付，这和退款是不同的操作，具体请参考`GenQRCodeActivity`
+```java
+BCOfflinePay.getInstance(GenQRCodeActivity.this).reqRevertBillAsync(
+    channelType,
+    billNum,        //需要撤销的订单号
+    callback)
+```
+
+**关于支付宝内嵌二维码**
+支付宝内嵌二维码属于线上产品，支付结果会及时反馈，并不需要额外的查询操作，具体可以参考`QRCodeEntryActivity`和`ALIQRCodeActivity`，注意需要通过`BCPay`调用
+```java
+BCPay.getInstance(QRCodeEntryActivity.this).reqAliInlineQRCodeAsync(
+		"支付宝内嵌二维码支付测试",   	//商品描述
+        1,                            	//总金额, 以分为单位, 必须是正整数
+        billNum,      	                //流水号
+        mapOptional,                    //扩展参数
+        "https://beecloud.cn/",  		//returnUrl，支付成功之后的返回url
+        "1",                          	//qrPayMode，二维码类型
+        callback);
+```
+请求生成支付宝内嵌支付二维码的特有参数说明
 > returnUrl       支付成功后的同步跳转页面, 必填<br/>
 > qrPayMode       支付宝内嵌二维码类型
->>>null则支付宝生成默认类型, 不建议<br/>
+>>>可选项<br/>
    "0": 订单码-简约前置模式, 对应 iframe 宽度不能小于 600px, 高度不能小于 300px<br/>
    "1": 订单码-前置模式, 对应 iframe 宽度不能小于 300px, 高度不能小于 600px<br/>
    "3": 订单码-迷你前置模式, 对应 iframe 宽度不能小于 75px, 高度不能小于 75px<br/>
-
-在回调函数中将`BCResult`转化成`BCQRCodeResult`之后做后续处理<br/>
-**调用：（以微信为例）**
-```java
-BCPay.getInstance(GenQRCodeActivity.this).reqWXQRCodeAsync("微信二维码支付测试",                     //商品描述
-    1,                      //订单金额
-    UUID.randomUUID().toString().replace("-", ""),  //订单流水号
-    mapOptional,            //扩展参数，可以null
-    true,                   //是否生成二维码的bitmap,
-                            //如果为false，请自行根据getQrCodeRawContent返回的结果
-                            //使用BCPay.generateBitmap方法生成支付二维码
-                            //你也可以使用自己熟悉的二维码生成工具
-    300,                   //二维码的尺寸, 以px为单位, 如果为null则默认为360
-    new BCCallback() {     //回调入口
-        @Override
-        public void done(BCResult bcResult) {
-
-            final BCQRCodeResult bcqrCodeResult = (BCQRCodeResult) bcResult;
-
-            //resultCode为0表示请求成功
-            if (bcqrCodeResult.getResultCode() == 0) {
-                wxQRBitmap = bcqrCodeResult.getQrCodeBitmap();
-                Log.w(Tag, "weixin qrcode url: " + bcqrCodeResult.getQrCodeRawContent());
-
-            } else {
-
-                GenQRCodeActivity.this.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(GenQRCodeActivity.this, "err code:" + bcqrCodeResult.getResultCode() +
-                                "; err msg: " + bcqrCodeResult.getResultMsg() +
-                                "; err detail: " + bcqrCodeResult.getErrDetail(), Toast.LENGTH_LONG).show();
-                    }
-                });
-
-            }
-        }
-    });
-```
-
+   
 ### 6.查询
 
 * **查询支付订单**
 
-请查看`doc`中的`API`，支付类`BCQuery`，参照`demo`中`BillListActivity`
+请查看`doc`中的`API`，查询类`BCQuery`，参照`demo`中`BillListActivity`
 
 **原型：**
 
@@ -363,7 +450,7 @@ BCQuery.getInstance().queryBillsAsync(
 ```
 * **查询退款订单**
 
-请查看`doc`中的`API`，支付类`BCQuery`，参照`demo`中`RefundOrdersActivity`
+请查看`doc`中的`API`，查询类`BCQuery`，参照`demo`中`RefundOrdersActivity`
 
 **原型：**
 
@@ -384,7 +471,7 @@ BCQuery.getInstance().queryRefundsAsync(
 ```
 * **查询订单退款状态**
 
-请查看`doc`中的`API`，支付类`BCQuery`，参照`demo`中`RefundStatusActivity`
+请查看`doc`中的`API`，查询类`BCQuery`，参照`demo`中`RefundStatusActivity`
 
 **原型：**
 
@@ -398,13 +485,62 @@ BCQuery.getInstance().queryRefundStatusAsync(
     "20150520refund001",                   //退款单号
     bcCallback);                           //回调入口
 ```
+
+* **根据ID查询订单**
+
+请查看`doc`中的`API`，查询类`BCQuery`，注意此处的ID不是订单号，是在发起支付或者退款的时候返回的唯一标识符。
+
+**原型：**
+
+通过`BCQuery`的实例，以`queryBillByIDAsync`方法发起支付订单查询，查询结果转化成`BCQueryBillResult`做后续处理，请参照`demo`中`ShoppingCartActivity`。 <br/>
+通过`BCQuery`的实例，以`queryRefundByIDAsync`方法发起退款订单查询，查询结果转化成`BCQueryRefundResult`做后续处理，请参照`demo`中`RefundOrdersActivity`。<br/>
+
+**调用：**<br/>
+同上，首先初始化回调入口BCCallback
+```java
+BCQuery.getInstance().queryBillByIDAsync(
+                id,
+                new BCCallback(){...});
+```
+
+* **查询线下订单状态**
+
+请查看`doc`中的`API`，查询类`BCQuery`，参照`demo`中`GenQRCodeActivity`
+
+**原型：**
+
+通过`BCQuery`的实例，以`queryOfflineBillStatusAsync`方法发起支付订单查询，查询结果转化成`BCBillStatus`做后续处理，请参照`demo`中`ShoppingCartActivity`。 <br/>
+
+**调用：**<br/>
+同上，首先初始化回调入口BCCallback
+```java
+BCQuery.getInstance().queryOfflineBillStatusAsync(
+        channelType,		//渠道类型
+        billNum,			//支付订单号
+        new BCCallback() {
+            @Override
+            public void done(BCResult result) {
+
+                BCBillStatus billStatus = (BCBillStatus) result;
+
+                //表示支付成功
+                if (billStatus.getResultCode() == 0 &&
+                        billStatus.getPayResult()) {
+                    //TODO
+                } else {
+                    errMsg = "支付失败：" + billStatus.getResultCode() + " # " +
+                                    billStatus.getResultMsg() + " # " +
+                                    billStatus.getErrDetail();
+                }
+            }
+        }
+);
+```
+
 ## Demo
 考虑到个人的开发习惯，本项目提供了`Android Studio`和`Eclipse ADT`两种工程的`demo`，为了使demo顺利运行，请注意以下细节
 >1. 对于使用`Android Studio`的开发人员，下载源码后可以将`demo_eclipse`移除，`Import Project`的时候选择`beecloud-android`，`sdk`为`demo`的依赖`model`，`gradle`会自动关联。
 >2. 对于使用`Eclipse ADT`的开发人员，`Import Project`的时候选择`beecloud-android`下的`demo_eclipse`，该`demo`下面已经添加所有需要的`jar`。
-
-## 测试
-TODO
 
 ## 常见问题
 * 微信支付返回`一般错误`，可能的原因：签名错误、未注册APPID、项目设置APPID不正确、注册的APPID与设置的不匹配、其他异常等，请按如下方法依次排查<br/>

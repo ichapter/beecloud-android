@@ -169,6 +169,11 @@ class BCHttpClientUtil {
             response = new Response();
             response.content = e.getMessage();
             response.code = -1;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            response = new Response();
+            response.content = ex.getMessage();
+            response.code = -1;
         } finally {
             if (httpsURLConnection != null)
                 httpsURLConnection.disconnect();
@@ -320,6 +325,11 @@ class BCHttpClientUtil {
 
             response = new Response();
             response.content = e.getMessage();
+            response.code = -1;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            response = new Response();
+            response.content = ex.getMessage();
             response.code = -1;
         } finally {
             if (httpsURLConnection != null)

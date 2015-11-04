@@ -95,16 +95,22 @@ public class BillListAdapter extends BaseAdapter {
 
             viewHolder.txtBillNum = (TextView) convertView
                     .findViewById(R.id.txtBillNum);
+            viewHolder.txtTradeNum = (TextView) convertView
+                    .findViewById(R.id.txtTradeNum);
             viewHolder.txtTotalFee = (TextView) convertView
                     .findViewById(R.id.txtTotalFee);
             viewHolder.txtChannel = (TextView) convertView
                     .findViewById(R.id.txtChannel);
+            viewHolder.txtSubChannel = (TextView) convertView
+                    .findViewById(R.id.txtSubChannel);
             viewHolder.txtTitle = (TextView) convertView
                     .findViewById(R.id.txtTitle);
             viewHolder.txtPayResult = (TextView) convertView
                     .findViewById(R.id.txtPayResult);
             viewHolder.txtCreatedTime = (TextView) convertView
                     .findViewById(R.id.txtCreatedTime);
+            viewHolder.txtOptional = (TextView) convertView
+                    .findViewById(R.id.txtOptional);
 
             convertView.setTag(viewHolder);
         } else {
@@ -114,20 +120,26 @@ public class BillListAdapter extends BaseAdapter {
         BCBillOrder bcBillOrder = bills.get(position);
 
         viewHolder.txtBillNum.setText("订单号: " + bcBillOrder.getBillNum());
+        viewHolder.txtTradeNum.setText("渠道商的订单号: " + bcBillOrder.getTradeNum());
         viewHolder.txtTotalFee.setText("订单金额/元: " + (bcBillOrder.getTotalFee()/100.0));
         viewHolder.txtChannel.setText("支付渠道: " + BCReqParams.BCChannelTypes.getTranslatedChannelName(bcBillOrder.getChannel()));
+        viewHolder.txtSubChannel.setText("子渠道: " + BCReqParams.BCChannelTypes.getTranslatedChannelName(bcBillOrder.getSubChannel()));
         viewHolder.txtTitle.setText("订单标题: " + bcBillOrder.getTitle());
         viewHolder.txtPayResult.setText("订单是否支付完成: " + (bcBillOrder.getPayResult()?"是":"否"));
         viewHolder.txtCreatedTime.setText("订单生成时间: " + new Date(bcBillOrder.getCreatedTime()));
+        viewHolder.txtOptional.setText("扩展参数: " + bcBillOrder.getOptional());
         return convertView;
     }
 
     private class ViewHolder {
         public TextView txtBillNum;
+        public TextView txtTradeNum;
         public TextView txtTotalFee;
         public TextView txtChannel;
+        public TextView txtSubChannel;
         public TextView txtTitle;
         public TextView txtPayResult;
         public TextView txtCreatedTime;
+        public TextView txtOptional;
     }
 }

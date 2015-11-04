@@ -13,8 +13,10 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import java.text.ParseException;
@@ -25,8 +27,9 @@ import java.util.List;
 import cn.beecloud.BCQuery;
 import cn.beecloud.async.BCCallback;
 import cn.beecloud.async.BCResult;
+import cn.beecloud.demo.util.DisplayUtils;
 import cn.beecloud.entity.BCBillOrder;
-import cn.beecloud.entity.BCQueryBillOrderResult;
+import cn.beecloud.entity.BCQueryBillsResult;
 import cn.beecloud.entity.BCReqParams;
 
 /**
@@ -35,18 +38,71 @@ import cn.beecloud.entity.BCReqParams;
 public class BillListActivity extends Activity {
     public static final String TAG = "BillListActivity";
 
-    Button btnWeChatOrder;
-    Button btnAliPayOrder;
-    Button btnUNPayOrder;
-    Button btnBDPayOrder;
-    Button btnPayPalPayOrder;
-    Button btnAllPayOrder;
+    Spinner channelChooser;
     ListView listViewOrder;
 
-    private Handler mHandler;
+    private Handler mHandler = new Handler(new Handler.Callback() {
+        /**
+         * Callback interface you can use when instantiating a Handler to
+         * avoid having to implement your own subclass of Handler.
+         *
+         * handleMessage() defines the operations to perform when the
+         * Handler receives a new Message to process.
+         */
+        @Override
+        public boolean handleMessage(Message msg) {
+            if (msg.what == 1) {
+
+                BillListAdapter adapter = new BillListAdapter(
+                        BillListActivity.this, bills);
+                listViewOrder.setAdapter(adapter);
+            }
+            return true;
+        }
+    });
     private List<BCBillOrder> bills;
 
     private ProgressDialog loadingDialog;
+
+    //回调入口
+    final BCCallback bcCallback = new BCCallback() {
+        @Override
+        public void done(BCResult bcResult) {
+
+            //此处关闭loading界面
+            loadingDialog.dismiss();
+
+            final BCQueryBillsResult bcQueryResult = (BCQueryBillsResult) bcResult;
+
+            //resultCode为0表示请求成功
+            //count包含返回的订单个数
+            if (bcQueryResult.getResultCode() == 0) {
+
+                //订单列表
+                bills = bcQueryResult.getBills();
+
+                Log.i(BillListActivity.TAG, "bill count: " + bcQueryResult.getCount());
+
+            } else {
+                //订单列表
+                bills = null;
+
+                BillListActivity.this.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(BillListActivity.this, "err code:" + bcQueryResult.getResultCode() +
+                                "; err msg: " + bcQueryResult.getResultMsg() +
+                                "; err detail: " + bcQueryResult.getErrDetail(), Toast.LENGTH_LONG).show();
+                    }
+                });
+
+            }
+
+            Message msg = mHandler.obtainMessage();
+            msg.what = 1;
+            mHandler.sendMessage(msg);
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,167 +114,112 @@ public class BillListActivity extends Activity {
         loadingDialog.setIndeterminate(true);
         loadingDialog.setCancelable(true);
 
-        // Defines a Handler object that's attached to the UI thread.
-        // 通过Handler.Callback()可消除内存泄漏警告
-        mHandler = new Handler(new Handler.Callback() {
-            /**
-             * Callback interface you can use when instantiating a Handler to
-             * avoid having to implement your own subclass of Handler.
-             *
-             * handleMessage() defines the operations to perform when the
-             * Handler receives a new Message to process.
-             */
-            @Override
-            public boolean handleMessage(Message msg) {
-                if (msg.what == 1) {
-
-                    BillListAdapter adapter = new BillListAdapter(
-                            BillListActivity.this, bills);
-                    listViewOrder.setAdapter(adapter);
-                }
-                return true;
-            }
-        });
-
+        DisplayUtils.initBack(this);
 
         listViewOrder = (ListView) findViewById(R.id.listViewOrder);
 
-        //回调入口
-        final BCCallback bcCallback = new BCCallback() {
+        initSpinner();
+    }
+
+    void initSpinner() {
+        channelChooser = (Spinner) this.findViewById(R.id.channelChooser);
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(
+                this,android.R.layout.simple_spinner_item,
+                new String[]{"微信", "支付宝", "银联", "百度", "PayPal", "全渠道"});
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        channelChooser.setAdapter(adapter);
+
+        channelChooser.setSelected(false);
+
+        channelChooser.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
-            public void done(BCResult bcResult) {
-
-                //此处关闭loading界面
-                loadingDialog.dismiss();
-
-                final BCQueryBillOrderResult bcQueryResult = (BCQueryBillOrderResult) bcResult;
-
-                //resultCode为0表示请求成功
-                //count包含返回的订单个数
-                if (bcQueryResult.getResultCode() == 0) {
-
-                    //订单列表
-                    bills = bcQueryResult.getBills();
-
-                    Log.i(BillListActivity.TAG, "bill count: " + bcQueryResult.getCount());
-
-                } else {
-                    //订单列表
-                    bills = null;
-
-                    BillListActivity.this.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(BillListActivity.this, "err code:" + bcQueryResult.getResultCode() +
-                                    "; err msg: " + bcQueryResult.getResultMsg() +
-                                    "; err detail: " + bcQueryResult.getErrDetail(), Toast.LENGTH_LONG).show();
-                        }
-                    });
-
-                }
-
-                Message msg = mHandler.obtainMessage();
-                msg.what = 1;
-                mHandler.sendMessage(msg);
-            }
-        };
-
-        btnWeChatOrder = (Button) findViewById(R.id.btnWeChatOrder);
-        btnWeChatOrder.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 // 如果调起支付太慢，可以在这里开启动画，表示正在loading
                 //以progressdialog为例
-                loadingDialog.show();
-
-                BCQuery.getInstance().queryBillsAsync(
-                        BCReqParams.BCChannelTypes.WX_APP,  //此处表示微信app端支付的查询
-                        bcCallback);
-            }
-        });
-
-        btnAliPayOrder = (Button) findViewById(R.id.btnAliPayOrder);
-        btnAliPayOrder.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                loadingDialog.show();
-
-                BCQuery.getInstance().queryBillsAsync(
-                        BCReqParams.BCChannelTypes.ALI_APP, //渠道
-                        "20150820102712150", //订单号
-                        bcCallback);
-            }
-        });
-
-        btnUNPayOrder = (Button) findViewById(R.id.btnUNPayOrder);
-        btnUNPayOrder.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
                 loadingDialog.show();
 
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 
                 Date startTime, endTime;
                 try {
-                    startTime = sdf.parse("2015-08-01 00:00");
-                    endTime = sdf.parse("2015-08-31 23:59");
+                    startTime = sdf.parse("2015-10-01 00:00");
+                    endTime = sdf.parse("2015-10-31 23:59");
                 } catch (ParseException e) {
                     startTime = new Date();
                     endTime = new Date();
                     e.printStackTrace();
                 }
 
-                BCQuery.getInstance().queryBillsAsync(
-                        BCReqParams.BCChannelTypes.UN,          //渠道, 此处表示所有的银联支付
-                        null,                                   //订单号
-                        startTime.getTime(),                    //订单生成时间
-                        endTime.getTime(),                      //订单完成时间
-                        2,                                      //忽略满足条件的前2条数据
-                        15,                                      //只返回满足条件的15条数据
-                        bcCallback);
+                BCQuery.QueryParams params;
+
+                switch (position) {
+                    case 0: //微信
+                        BCQuery.getInstance().queryBillsAsync(
+                                BCReqParams.BCChannelTypes.WX,  //此处表示微信支付的查询
+                                bcCallback);
+                        break;
+                    case 1: //支付宝
+                        BCQuery.getInstance().queryBillsAsync(
+                                BCReqParams.BCChannelTypes.ALI_APP, //渠道，此处表示ALI客户端渠道
+                                "20150820102712150", //此处表示限制订单号
+                                bcCallback);
+                        break;
+                    case 2: //银联
+
+                        BCQuery.getInstance().queryBillsAsync(
+                                BCReqParams.BCChannelTypes.UN_APP,          //渠道, 此处表示银联手机APP客户端支付
+                                null,                                   //订单号
+                                startTime.getTime(),                    //起始时间
+                                endTime.getTime(),                      //结束时间
+                                2,                                      //跳过满足条件的前2条数据
+                                15,                                     //最多返回满足条件的15条数据
+                                bcCallback);
+                        break;
+                    case 3: //百度
+                        //以下演示通过PayParams发起请求
+                        params = new BCQuery.QueryParams();
+                        params.channel = BCReqParams.BCChannelTypes.BD;
+
+                        //以下参数按需设置，都是‘且’的关系
+
+                        //限制支付订单号
+                        //params.billNum = null;
+
+                        //限制起始时间
+                        params.startTime = startTime.getTime();
+
+                        //限制结束时间
+                        params.endTime = endTime.getTime();
+
+                        //跳过满足条件的数目
+                        params.skip = 10;
+
+                        //最多返回的数目
+                        params.limit = 20;
+
+                        BCQuery.getInstance().queryBillsAsync(params,
+                                bcCallback);
+
+                        break;
+                    case 4: //PayPal
+                        params = new BCQuery.QueryParams();
+                        params.channel = BCReqParams.BCChannelTypes.PAYPAL;
+                        BCQuery.getInstance().queryBillsAsync(params,
+                                bcCallback);
+
+                        break;
+                    case 5: //全部的渠道类型
+                        params = new BCQuery.QueryParams();
+                        params.channel = BCReqParams.BCChannelTypes.ALL;
+                        BCQuery.getInstance().queryBillsAsync(params,
+                                bcCallback);
+                }
             }
-        });
 
-        btnBDPayOrder = (Button) findViewById(R.id.btnBDPayOrder);
-        btnBDPayOrder.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                // 如果调起支付太慢，可以在这里开启动画，表示正在loading
-                //以progressdialog为例
-                loadingDialog.show();
+            public void onNothingSelected(AdapterView<?> parent) {
 
-                BCQuery.getInstance().queryBillsAsync(
-                        BCReqParams.BCChannelTypes.BD,  //此处表示百度钱包支付的查询
-                        bcCallback);
-            }
-        });
-
-        btnPayPalPayOrder = (Button) findViewById(R.id.btnPayPalPayOrder);
-        btnPayPalPayOrder.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // 如果调起支付太慢，可以在这里开启动画，表示正在loading
-                //以progressdialog为例
-                loadingDialog.show();
-
-                BCQuery.getInstance().queryBillsAsync(
-                        BCReqParams.BCChannelTypes.PAYPAL,  //此处表示PAYPAL支付的查询
-                        bcCallback);
-            }
-        });
-
-        btnAllPayOrder = (Button) findViewById(R.id.btnAllPayOrder);
-        btnAllPayOrder.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                loadingDialog.show();
-
-                BCQuery.getInstance().queryBillsAsync(
-                        BCReqParams.BCChannelTypes.ALL, //全渠道查询
-                        bcCallback);
             }
         });
     }

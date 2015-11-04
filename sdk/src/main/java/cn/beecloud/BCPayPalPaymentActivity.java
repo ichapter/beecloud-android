@@ -116,8 +116,7 @@ public class BCPayPalPaymentActivity extends Activity {
                                     billTitle, billTotalFee, billNum, currency,
                                     optional, BCCache.getInstance(null).paypalPayType, null);
 
-                            Log.w(TAG, remoteRes[0] + " # " + remoteRes[1]);
-
+                            //Log.w(TAG, remoteRes[0] + " # " + remoteRes[1]);
 
                             if (remoteRes[0].equals(BCPayResult.RESULT_SUCCESS)) {
                                 //verify successful, notify the observer

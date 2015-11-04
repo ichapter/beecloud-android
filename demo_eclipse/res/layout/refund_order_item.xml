@@ -9,7 +9,7 @@
         android:paddingBottom="5dp"
         android:paddingLeft="16dp"
         android:paddingRight="16dp"
-        android:paddingTop="15dp"
+        android:paddingTop="10dp"
         android:text="TITLE"
         android:textSize="16sp"
         android:textColor="@color/fontgrey"/>
@@ -21,7 +21,7 @@
         android:paddingBottom="5dp"
         android:paddingLeft="16dp"
         android:paddingRight="16dp"
-        android:paddingTop="15dp"
+        android:paddingTop="5dp"
         android:textSize="16sp"
         android:textColor="@color/fontgrey"/>
 
@@ -49,6 +49,17 @@
 
     <TextView
         android:id="@+id/txtChannel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="5dp"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:paddingTop="10dp"
+        android:textSize="12sp"
+        android:textColor="@color/fontgrey"/>
+
+    <TextView
+        android:id="@+id/txtSubChannel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingBottom="5dp"
@@ -102,4 +113,14 @@
         android:textSize="12sp"
         android:textColor="@color/fontgrey"/>
 
+    <TextView
+        android:id="@+id/txtOptional"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="5dp"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:paddingTop="10dp"
+        android:textSize="12sp"
+        android:textColor="@color/fontgrey"/>
 </LinearLayout>

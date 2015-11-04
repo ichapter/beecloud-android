@@ -1,5 +1,20 @@
 BeeCloud Android SDK Changelog
 ==========================
+v2.0.1 2015年11年04日
+支付部分：
+和RestFul API统一错误码
+返回id作为查询订单的唯一标识符
+提供analysis参数用于后期统计，目前key只可以是category
+增加线下支付API
+
+查询部分:
+增加根据ID查询
+增加线下支付订单结果查询
+
+网络请求部分：
+由HttpClient切换至HttpURLConnection，以兼容API23
+基于Restful API V2版本
+
 v1.6 2015年09年16日
 集成百度钱包支付
 增加订单超时时间设置，该设置需要通过BCPay新方法reqPaymentAsync(BCPay.PayParam payParam, BCCallback callback)发起支付

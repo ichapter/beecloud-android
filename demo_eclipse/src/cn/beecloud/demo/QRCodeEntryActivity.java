@@ -24,6 +24,7 @@ import java.util.UUID;
 import cn.beecloud.BCPay;
 import cn.beecloud.async.BCCallback;
 import cn.beecloud.async.BCResult;
+import cn.beecloud.demo.util.BillUtils;
 import cn.beecloud.demo.util.DisplayUtils;
 import cn.beecloud.entity.BCQRCodeResult;
 
@@ -85,7 +86,7 @@ public class QRCodeEntryActivity extends Activity {
                 mapOptional.put("testalikey1", "测试value值1");
                 BCPay.getInstance(QRCodeEntryActivity.this).reqAliInlineQRCodeAsync("支付宝内嵌二维码支付测试",   //商品描述
                         1,                                                  //总金额, 以分为单位, 必须是正整数
-                        UUID.randomUUID().toString().replace("-", ""),      //流水号
+                        BillUtils.genBillNum(),      //流水号
                         mapOptional,                                        //扩展参数
                         "https://beecloud.cn/",  //支付成功之后的返回url
                         "1",                          /* 注： 二维码类型含义

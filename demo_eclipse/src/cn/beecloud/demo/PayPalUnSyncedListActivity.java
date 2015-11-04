@@ -24,6 +24,7 @@ import java.util.Map;
 
 import cn.beecloud.BCCache;
 import cn.beecloud.BCPay;
+import cn.beecloud.demo.util.DisplayUtils;
 import cn.beecloud.entity.BCPayResult;
 
 public class PayPalUnSyncedListActivity extends Activity {
@@ -60,6 +61,8 @@ public class PayPalUnSyncedListActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_paypal_unsynced_list);
+
+        DisplayUtils.initBack(this);
 
         syncTip = (TextView) findViewById(R.id.syncTip);
         unSyncedListView = (ListView)findViewById(R.id.unSyncedListView);
