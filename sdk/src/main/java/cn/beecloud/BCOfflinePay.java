@@ -227,7 +227,7 @@ public class BCOfflinePay {
      * @param payParam        支付要素
      * @param callback        支付完成后的回调函数
      */
-    public void reqQRCodeAsync(final PayParam payParam,
+    public void reqQRCodeAsync(final PayParams payParam,
                                final BCCallback callback) {
         reqQRCodeAsync(payParam.channelType,
                 payParam.billTitle,
@@ -366,7 +366,7 @@ public class BCOfflinePay {
      * @param payParam       支付要素
      * @param callback        支付完成后的回调函数
      */
-    public void reqOfflinePayAsync(final PayParam payParam,final BCCallback callback) {
+    public void reqOfflinePayAsync(final PayParams payParam,final BCCallback callback) {
         reqOfflinePayAsync(payParam.channelType,
                 payParam.billTitle,
                 payParam.billTotalFee,
@@ -480,7 +480,7 @@ public class BCOfflinePay {
     /**
      * 外部支付参数实例
      */
-    public static class PayParam {
+    public static class PayParams {
         /**
          *  只允许
          *  BCReqParams.BCChannelTypes.WX_NATIVE，

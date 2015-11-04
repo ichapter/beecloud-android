@@ -182,7 +182,7 @@ BCPay.initPayPal(
 > optional        为扩展参数，可以传入任意数量的key/value对来补充对业务逻辑<br/>
 > callback        支付完成后的回调入口
 
-或者，通过`BCPay`的实例，以`reqPaymentAsync`方法发起所有支持的支付请求，该方法的调用请参考demo中百度钱包的支付调用，BCPay.PayParam参数请参阅[API](https://beecloud.cn/doc/api/beecloud-android/cn/beecloud/BCPay.PayParam.html)。<br/>
+或者，通过`BCPay`的实例，以`reqPaymentAsync`方法发起所有支持的支付请求，该方法的调用请参考demo中百度钱包的支付调用，BCPay.PayParam参数请参阅[API](https://beecloud.cn/doc/api/beecloud-android/cn/beecloud/BCPay.PayParams.html)。<br/>
 参数依次为
 > payParam        BCPay.PayParam类型<br/>
 > callback        支付完成后的回调入口
@@ -632,3 +632,4 @@ Pull Request要求
 
 ## 代码许可
 The MIT License (MIT).
+

@@ -166,7 +166,7 @@ public class GenQRCodeActivity extends Activity {
                     380,                   //二维码的尺寸, 以px为单位, 如果为null则默认为360
                     callback);
         } else {
-            BCOfflinePay.PayParam payParam = new BCOfflinePay.PayParam();
+            BCOfflinePay.PayParams payParam = new BCOfflinePay.PayParams();
 
             payParam.channelType = channelType;
             payParam.billTitle = billTitle; //商品描述

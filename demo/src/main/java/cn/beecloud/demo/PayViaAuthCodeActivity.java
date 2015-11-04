@@ -165,7 +165,7 @@ public class PayViaAuthCodeActivity extends Activity {
 
                         Message msg = mHandler.obtainMessage();
 
-                        //resultCode为0表示请求成功
+                        //RESULT_SUCCESS表示请求成功
                         if (payResult.getResult().equals(BCPayResult.RESULT_SUCCESS)) {
                             msg.what = REQ_OFF_PAY_SUCC;
                         } else {
@@ -196,7 +196,7 @@ public class PayViaAuthCodeActivity extends Activity {
                             null,               //若系统商接入，storeId(商户门店编号)必填
                             callback);
                 } else {
-                    BCOfflinePay.PayParam payParam = new BCOfflinePay.PayParam();
+                    BCOfflinePay.PayParams payParam = new BCOfflinePay.PayParams();
                     payParam.channelType = channelType;
                     payParam.billTitle = "安卓支付宝扫码方法支付测试";  //商品描述
                     payParam.billTotalFee = 1;  //总金额, 以分为单位, 必须是正整数
