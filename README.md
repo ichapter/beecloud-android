@@ -236,7 +236,7 @@ mapOptional.put(optionalKey, optionalValue);
 BCPay.getInstance(ShoppingCartActivity.this).reqWXPaymentAsync(
     "微信支付测试",               //订单标题
     1,                           //订单金额(分)
-    UUID.randomUUID().toString().replace("-", ""),  //订单流水号
+    billNum,  //订单流水号
     mapOptional,            //扩展参数(可以null)
     bcCallback);            //支付完成后回调入口
 ```
@@ -294,8 +294,8 @@ BCCache.executorService.execute(new Runnable() {
 > qrCodeWidth     如果生成二维码(genQRCode为true), QRCode的宽度(以px为单位), null则使用默认参数360px
 
 请求通过获取到的付款码发起收款的额外参数
-> authCode        用户出示的收款码
-> terminalId      机具终端编号，支付宝扫码(ALI_SCAN)的选填参数
+> authCode        用户出示的收款码<br/>
+> terminalId      机具终端编号，支付宝扫码(ALI_SCAN)的选填参数<br/>
 > storeId         商户门店编号，支付宝扫码(ALI_SCAN)的选填参数
 
 对于生成二维码的请求，在回调函数中将`BCResult`转化成`BCQRCodeResult`之后做后续处理<br/>
@@ -322,7 +322,6 @@ BCOfflinePay.getInstance(GenQRCodeActivity.this).reqQRCodeAsync(
 
                     //否则通过 bcqrCodeResult.getQrCodeRawContent() 获取二维码的内容，自己去生成对应的二维码
 
-                    msg.what = REQ_QRCODE_CODE;
                 } else {
                     errMsg = "err code:" + bcqrCodeResult.getResultCode() +
                             "; err msg: " + bcqrCodeResult.getResultMsg() +
@@ -365,7 +364,7 @@ BCOfflinePay.getInstance(PayViaAuthCodeActivity.this).reqOfflinePayAsync(
         });
 ```
 
-**关于订单的撤销**
+* **关于订单的撤销**
 支持WX_SCAN, ALI_OFFLINE_QRCODE, ALI_SCAN
 订单撤销后，用户将不能继续支付，这和退款是不同的操作，具体请参考`GenQRCodeActivity`
 ```java
@@ -375,7 +374,7 @@ BCOfflinePay.getInstance(GenQRCodeActivity.this).reqRevertBillAsync(
     callback)
 ```
 
-**关于支付宝内嵌二维码**
+* **关于支付宝内嵌二维码**
 支付宝内嵌二维码属于线上产品，支付结果会及时反馈，并不需要额外的查询操作，具体可以参考`QRCodeEntryActivity`和`ALIQRCodeActivity`，注意需要通过`BCPay`调用
 ```java
 BCPay.getInstance(QRCodeEntryActivity.this).reqAliInlineQRCodeAsync(

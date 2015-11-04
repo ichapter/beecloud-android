@@ -19,7 +19,6 @@ import android.widget.Toast;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 import cn.beecloud.BCPay;
 import cn.beecloud.async.BCCallback;
