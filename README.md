@@ -367,7 +367,7 @@ BCOfflinePay.getInstance(PayViaAuthCodeActivity.this).reqOfflinePayAsync(
 
 * **关于订单的撤销**
 <br/>
-支持WX_SCAN, ALI_OFFLINE_QRCODE, ALI_SCAN
+支持WX_SCAN, ALI_OFFLINE_QRCODE, ALI_SCAN <br/>
 订单撤销后，用户将不能继续支付，这和退款是不同的操作，具体请参考`GenQRCodeActivity`
 ```java
 BCOfflinePay.getInstance(GenQRCodeActivity.this).reqRevertBillAsync(
@@ -405,7 +405,7 @@ BCPay.getInstance(QRCodeEntryActivity.this).reqAliInlineQRCodeAsync(
 
 **原型：**
 
-通过构造`BCQuery`的实例，使用`queryBillsAsync`方法发起支付查询，`channel`指代何种支付方式，为`BCReqParams.BCChannelTypes.ALL`时则查询所有的支付渠道订单；在回调函数中将`BCResult`转化成`BCQueryBillOrderResult`之后做后续处理
+通过构造`BCQuery`的实例，使用`queryBillsAsync`方法发起支付查询，`channel`指代何种支付方式，为`BCReqParams.BCChannelTypes.ALL`时则查询所有的支付渠道订单；在回调函数中将`BCResult`转化成`BCQueryBillsResult`之后做后续处理
 
 **调用：**
 
@@ -416,7 +416,7 @@ final BCCallback bcCallback = new BCCallback() {
     public void done(BCResult bcResult) {
     	//根据需求处理结果数据
 
-        final BCQueryBillOrderResult bcQueryResult = (BCQueryBillOrderResult) bcResult;
+        final BCQueryBillsResult bcQueryResult = (BCQueryBillsResult) bcResult;
 
         //resultCode为0表示请求成功
         //count包含返回的订单个数
@@ -456,7 +456,7 @@ BCQuery.getInstance().queryBillsAsync(
 
 **原型：**
 
-通过构造`BCQuery`的实例，使用`queryRefundsAsync`方法发起退款查询，`channel`指代何种支付方式，为`BCReqParams.BCChannelTypes.ALL`时则查询所有的支付渠道退款订单；在回调函数中将`BCResult`转化成`BCQueryRefundOrderResult`之后做后续处理
+通过构造`BCQuery`的实例，使用`queryRefundsAsync`方法发起退款查询，`channel`指代何种支付方式，为`BCReqParams.BCChannelTypes.ALL`时则查询所有的支付渠道退款订单；在回调函数中将`BCResult`转化成`BCQueryRefundsResult`之后做后续处理
 
 **调用：**<br/>
 同上，首先初始化回调入口BCCallback
