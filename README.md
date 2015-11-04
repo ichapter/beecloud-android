@@ -35,14 +35,14 @@
 
 >2. 对于需要以`jar`方式引入的情况<br/>
 添加第三方的支付类，在`beecloud-android\sdk\libs`目录下<br/>
-`gson-2.2.4.jar`为必须引入的jar，<br/>
+`gson-2.4.jar`为必须引入的jar，<br/>
 `zxing-3.2.0.jar`为生成二维码必须引入的jar，<br/>
 微信支付需要引入`libammsdk.jar`，<br/>
 支付宝需要引入`alipaysdk.jar`、`alipayutdid.jar`、`alipaysecsdk.jar`，<br/>
 银联需要引入`UPPayAssistEx.jar`，<br/>
 百度钱包支付需要引入`Cashier_SDK-v4.2.0.jar`，<br/>
-PayPal需要引入`PayPalAndroidSDK-2.9.11.jar`，<br/>
-最后添加`beecloud android sdk`：`beecloud-android\sdk\beecloud.jar`
+PayPal需要引入`PayPalAndroidSDK-2.11.2.jar`，<br/>
+最后添加`beecloud android sdk`：`beecloud-android\sdk\beecloud-2.0.1.jar`
 
 2.对于微信支付，需要注意你的`AndroidManifest.xml`中`package`需要和微信平台创建的移动应用`应用包名`保持一致，关于其`应用签名`请参阅[创建微信应用->B.填写平台信息](https://beecloud.cn/doc/payapply/?index=0)，
 
@@ -227,7 +227,7 @@ BCCallback bcCallback = new BCCallback() {
 
 //调用支付接口
 Map<String, String> mapOptional = new HashMap<>();
-String optionalKey = "testkey1";    //对key暂时不支持中文
+String optionalKey = "testkey1";
 String optionalValue = "测试value值1";
 
 mapOptional.put(optionalKey, optionalValue);
@@ -268,10 +268,10 @@ BCCache.executorService.execute(new Runnable() {
 如果想手动清除未同步订单，调用`BCCache.getInstance(activity).clearUnSyncedPayPalRecords()`
 
 ### 5.线下支付
-请查看`doc`中的`API`，线下支付类`BCOfflinePay`，参照`demo`中`QRCodeEntryActivity`和其关联的activity；一般用于线下门店通过出示二维码由用户扫描付款，或者通过用户出示的付款码收款。
+请查看`doc`中的`API`，线下支付类`BCOfflinePay`，参照`demo`中`QRCodeEntryActivity`和其关联的activity；一般用于线下门店通过出示二维码由用户扫描付款，或者通过用户出示的付款码收款。<br/>
 线下支付基本流程：
->1 通过二维码或者付款码发起支付；
->2 支付结束后调用查询接口确认`BCQuery.getInstance().queryOfflineBillStatusAsync`,请参考查询部分说明。
+> 1 通过二维码或者付款码发起支付；<br/>
+> 2 支付结束后调用查询接口确认`BCQuery.getInstance().queryOfflineBillStatusAsync`,请参考查询部分说明。<br/>
 第二步必不可少。
 
 **原型：** 
@@ -280,7 +280,7 @@ BCCache.executorService.execute(new Runnable() {
 通过`BCOfflinePay`的实例，以`reqOfflinePayAsync`方法通过获取到的付款码发起收款。<br/>
 
 公用参数依次为
-> channelType     BCChannelTypes类型，支持WX_NATIVE，ALI_OFFLINE_QRCODE
+> channelType     BCChannelTypes类型，支持WX_NATIVE，ALI_OFFLINE_QRCODE<br/>
 > billTitle       商品描述, 32个字节内, 汉字以2个字节计<br/>
 > billTotalFee    支付金额，以分为单位，必须是正整数<br/>
 > billNum         商户自定义订单号<br/>
@@ -475,13 +475,13 @@ BCQuery.getInstance().queryRefundsAsync(
 
 **原型：**
 
-通过构造`BCQuery`的实例，使用`queryRefundStatusAsync`方法发起支付查询，该方法所有参数都必填，`channel`指代何种支付方式，目前由于第三方API的限制仅支持微信；在回调函数中将`BCResult`转化成`BCQueryRefundStatusResult`之后做后续处理
+通过构造`BCQuery`的实例，使用`queryRefundStatusAsync`方法发起支付查询，该方法所有参数都必填，`channel`指代何种支付方式，目前由于第三方API的限制仅支持微信、易宝、快钱和百度；在回调函数中将`BCResult`转化成`BCRefundStatus`之后做后续处理
 
 **调用：**<br/>
 同上，首先初始化回调入口BCCallback
 ```java
 BCQuery.getInstance().queryRefundStatusAsync(
-    BCReqParams.BCChannelTypes.WX,     //目前仅支持微信
+    BCReqParams.BCChannelTypes.WX,     //目前仅支持WX、YEE、KUAIQIAN、BD
     "20150520refund001",                   //退款单号
     bcCallback);                           //回调入口
 ```
@@ -542,6 +542,53 @@ BCQuery.getInstance().queryOfflineBillStatusAsync(
 >1. 对于使用`Android Studio`的开发人员，下载源码后可以将`demo_eclipse`移除，`Import Project`的时候选择`beecloud-android`，`sdk`为`demo`的依赖`model`，`gradle`会自动关联。
 >2. 对于使用`Eclipse ADT`的开发人员，`Import Project`的时候选择`beecloud-android`下的`demo_eclipse`，该`demo`下面已经添加所有需要的`jar`。
 
+## ProGuard
+请根据自己引进的jar做增删
+```
+#第三方库的申明，注意在Android Studio中不需要
+#BeeCloud及依赖jar
+-libraryjars libs/beecloud.jar
+-libraryjars libs/gson-2.2.4.jar
+-libraryjars libs/zxing-3.2.0.jar
+#支付宝
+-libraryjars libs/alipaysdk.jar
+-libraryjars libs/alipaysecsdk.jar
+-libraryjars libs/alipayutdid.jar
+#微信
+-libraryjars libs/libammsdk.jar
+#银联
+-libraryjars libs/UPPayAssistEx.jar
+#百度
+-libraryjars libs/Cashier_SDK-v4.2.0.jar
+#PayPal
+-libraryjars libs/PayPalAndroidSDK-2.11.2.jar
+
+#以下是Android Studio和Eclipse都必须的
+#BeeCloud
+-dontwarn cn.beecloud.**
+#PayPal
+-dontwarn com.paypal.**
+-dontwarn io.card.payment.**
+
+#保留类签名声明
+-keepattributes Signature
+#BeeCloud
+-keep class cn.beecloud.** { *; }
+-keep class com.google.** { *; }
+#支付宝
+-keep class com.alipay.** { *; } 
+#微信
+-keep class com.tencent.** { *; } 
+#银联
+-keep class com.unionpay.** { *; } 
+#百度
+-keep class com.baidu.** { *; }
+-keep class com.dianxinos.** { *; }
+#PayPal
+-keep class com.paypal.** { *; }
+-keep class io.card.payment.** { *; }
+```
+
 ## 常见问题
 * 微信支付返回`一般错误`，可能的原因：签名错误、未注册APPID、项目设置APPID不正确、注册的APPID与设置的不匹配、其他异常等，请按如下方法依次排查<br/>
 
@@ -549,6 +596,7 @@ BCQuery.getInstance().queryOfflineBillStatusAsync(
 >2. 订单流水号是否包含横杠`-`，如果有请去除
 >3. 请尝试清除微信数据（设置->应用程序管理->找到微信，点击进入应用程序信息->清除数据），或者删除微信重新安装再试
 >4. 项目签名与微信平台设置的签名是否一致，请到微信官网下载[签名工具](https://open.weixin.qq.com/zh_CN/htmledition/res/dev/download/sdk/Gen_Signature_Android.apk)校验
+>5. 如果所有检查没问题，该错误可在正式发布后消除，而不需要用户清除微信数据
 
 * demo中支付宝支付，跳转到支付后提示“系统繁忙”：  
 由于支付宝对企业账号监控严格，故不再提供支付宝支付的测试功能，请在BeeCloud平台配置正确参数后，使用自行创建的APP的appID和appSecret。给您带来的不便，敬请谅解。
