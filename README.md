@@ -184,7 +184,7 @@ BCPay.initPayPal(
 
 或者，通过`BCPay`的实例，以`reqPaymentAsync`方法发起所有支持的支付请求，该方法的调用请参考demo中百度钱包的支付调用，BCPay.PayParams参数请参阅[API](https://beecloud.cn/doc/api/beecloud-android/cn/beecloud/BCPay.PayParams.html)。<br/>
 参数依次为
-> payParam        BCPay.PayParam类型<br/>
+> payParam        BCPay.PayParams类型<br/>
 > callback        支付完成后的回调入口
 
 在回调函数中将`BCResult`转化成`BCPayResult`之后做后续处理<br/>
