@@ -446,8 +446,8 @@ BCQuery.getInstance().queryBillsAsync(
     null,                                   //订单号
     startTime.getTime(),                    //订单生成时间
     endTime.getTime(),                      //订单完成时间
-    2,                                      //忽略满足条件的前2条数据
-    15,                                     //最低返回满足条件的15条数据
+    2,                                      //跳过满足条件的前2条数据
+    15,                                     //返回满足条件的15条数据
     bcCallback);
 ```
 * **查询退款订单**
@@ -467,8 +467,8 @@ BCQuery.getInstance().queryRefundsAsync(
     null,                                   //商户退款流水号
     startTime.getTime(),                    //退款订单生成时间
     endTime.getTime(),                      //退款订单完成时间
-    1,                                      //忽略满足条件的前1条数据
-    15,                                     //只返回满足条件的15条数据
+    1,                                      //跳过满足条件的前1条数据
+    15,                                     //返回满足条件的15条数据
     bcCallback);
 ```
 * **查询订单退款状态**
