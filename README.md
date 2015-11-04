@@ -365,6 +365,7 @@ BCOfflinePay.getInstance(PayViaAuthCodeActivity.this).reqOfflinePayAsync(
 ```
 
 * **关于订单的撤销**
+<br/>
 支持WX_SCAN, ALI_OFFLINE_QRCODE, ALI_SCAN
 订单撤销后，用户将不能继续支付，这和退款是不同的操作，具体请参考`GenQRCodeActivity`
 ```java
@@ -375,6 +376,7 @@ BCOfflinePay.getInstance(GenQRCodeActivity.this).reqRevertBillAsync(
 ```
 
 * **关于支付宝内嵌二维码**
+<br/>
 支付宝内嵌二维码属于线上产品，支付结果会及时反馈，并不需要额外的查询操作，具体可以参考`QRCodeEntryActivity`和`ALIQRCodeActivity`，注意需要通过`BCPay`调用
 ```java
 BCPay.getInstance(QRCodeEntryActivity.this).reqAliInlineQRCodeAsync(
