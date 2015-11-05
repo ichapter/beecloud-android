@@ -137,6 +137,9 @@ public class BCPay {
         if (mContextActivity != null)
             mContextActivity = null;
 
+        if (payPalSyncObserver != null)
+            payPalSyncObserver = null;
+
         BCCache.getInstance(null).detach();
     }
 
