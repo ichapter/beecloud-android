@@ -42,7 +42,7 @@
 银联需要引入`UPPayAssistEx.jar`，<br/>
 百度钱包支付需要引入`Cashier_SDK-v4.2.0.jar`，<br/>
 PayPal需要引入`PayPalAndroidSDK-2.11.2.jar`，<br/>
-最后添加`beecloud android sdk`：`beecloud-android\sdk\beecloud-2.0.1.jar`
+最后添加`beecloud android sdk`：`beecloud-android\sdk\beecloud-2.0.2.jar`
 
 2.对于微信支付，需要注意你的`AndroidManifest.xml`中`package`需要和微信平台创建的移动应用`应用包名`保持一致，关于其`应用签名`请参阅[创建微信应用->B.填写平台信息](https://beecloud.cn/doc/payapply/?index=0)，
 
