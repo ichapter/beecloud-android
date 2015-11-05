@@ -302,7 +302,7 @@ BCCache.executorService.execute(new Runnable() {
 对于生成二维码的请求，在回调函数中将`BCResult`转化成`BCQRCodeResult`之后做后续处理<br/>
 **调用：**
 ```java
-BCOfflinePay.getInstance(GenQRCodeActivity.this).reqQRCodeAsync(
+BCOfflinePay.getInstance().reqQRCodeAsync(
         channelType,		//渠道类型
         billTitle,  		//商品描述
         1,          		//总金额, 以分为单位, 必须是正整数
@@ -336,7 +336,7 @@ BCOfflinePay.getInstance(GenQRCodeActivity.this).reqQRCodeAsync(
 对于通过用户出示的付款码收款，在回调函数中将`BCResult`转化成`BCPayResult`之后做后续处理<br/>
 **调用：**
 ```java
-BCOfflinePay.getInstance(PayViaAuthCodeActivity.this).reqOfflinePayAsync(
+BCOfflinePay.getInstance().reqOfflinePayAsync(
         channelType,
         billTitle, //商品描述
         1,                 			//总金额, 以分为单位, 必须是正整数
@@ -370,7 +370,7 @@ BCOfflinePay.getInstance(PayViaAuthCodeActivity.this).reqOfflinePayAsync(
 支持WX_SCAN, ALI_OFFLINE_QRCODE, ALI_SCAN <br/>
 订单撤销后，用户将不能继续支付，这和退款是不同的操作，具体请参考`GenQRCodeActivity`
 ```java
-BCOfflinePay.getInstance(GenQRCodeActivity.this).reqRevertBillAsync(
+BCOfflinePay.getInstance().reqRevertBillAsync(
     channelType,
     billNum,        //需要撤销的订单号
     callback)
