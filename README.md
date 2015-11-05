@@ -1,6 +1,6 @@
 ## BeeCloud Android SDK (Open Source)
 
-![pass](https://img.shields.io/badge/Build-pass-green.svg) ![license](https://img.shields.io/badge/license-MIT-brightgreen.svg) ![version](https://img.shields.io/badge/version-v1.6.0-blue.svg)
+![pass](https://img.shields.io/badge/Build-pass-green.svg) ![license](https://img.shields.io/badge/license-MIT-brightgreen.svg) ![version](https://img.shields.io/badge/version-v2.0.2-blue.svg)
 
 ## 简介
 
@@ -42,7 +42,7 @@
 银联需要引入`UPPayAssistEx.jar`，<br/>
 百度钱包支付需要引入`Cashier_SDK-v4.2.0.jar`，<br/>
 PayPal需要引入`PayPalAndroidSDK-2.11.2.jar`，<br/>
-最后添加`beecloud android sdk`：`beecloud-android\sdk\beecloud-2.0.1.jar`
+最后添加`beecloud android sdk`：`beecloud-android\sdk\beecloud-2.0.2.jar`
 
 2.对于微信支付，需要注意你的`AndroidManifest.xml`中`package`需要和微信平台创建的移动应用`应用包名`保持一致，关于其`应用签名`请参阅[创建微信应用->B.填写平台信息](https://beecloud.cn/doc/payapply/?index=0)，
 
@@ -182,9 +182,9 @@ BCPay.initPayPal(
 > optional        为扩展参数，可以传入任意数量的key/value对来补充对业务逻辑<br/>
 > callback        支付完成后的回调入口
 
-或者，通过`BCPay`的实例，以`reqPaymentAsync`方法发起所有支持的支付请求，该方法的调用请参考demo中百度钱包的支付调用，BCPay.PayParam参数请参阅[API](https://beecloud.cn/doc/api/beecloud-android/cn/beecloud/BCPay.PayParams.html)。<br/>
+或者，通过`BCPay`的实例，以`reqPaymentAsync`方法发起所有支持的支付请求，该方法的调用请参考demo中百度钱包的支付调用，BCPay.PayParams参数请参阅[API](https://beecloud.cn/doc/api/beecloud-android/cn/beecloud/BCPay.PayParams.html)。<br/>
 参数依次为
-> payParam        BCPay.PayParam类型<br/>
+> payParam        BCPay.PayParams类型<br/>
 > callback        支付完成后的回调入口
 
 在回调函数中将`BCResult`转化成`BCPayResult`之后做后续处理<br/>
@@ -446,8 +446,8 @@ BCQuery.getInstance().queryBillsAsync(
     null,                                   //订单号
     startTime.getTime(),                    //订单生成时间
     endTime.getTime(),                      //订单完成时间
-    2,                                      //忽略满足条件的前2条数据
-    15,                                     //最低返回满足条件的15条数据
+    2,                                      //跳过满足条件的前2条数据
+    15,                                     //返回满足条件的15条数据
     bcCallback);
 ```
 * **查询退款订单**
@@ -467,8 +467,8 @@ BCQuery.getInstance().queryRefundsAsync(
     null,                                   //商户退款流水号
     startTime.getTime(),                    //退款订单生成时间
     endTime.getTime(),                      //退款订单完成时间
-    1,                                      //忽略满足条件的前1条数据
-    15,                                     //只返回满足条件的15条数据
+    1,                                      //跳过满足条件的前1条数据
+    15,                                     //返回满足条件的15条数据
     bcCallback);
 ```
 * **查询订单退款状态**
