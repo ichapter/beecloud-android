@@ -6,8 +6,6 @@
  */
 package cn.beecloud;
 
-import android.app.Activity;
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Looper;
@@ -39,27 +37,17 @@ import cn.beecloud.entity.BCRevertStatus;
 public class BCOfflinePay {
     private static final String TAG = "BCOfflinePay";
 
-    /**
-     * 保留callback实例
-     */
-    public static BCCallback payCallback;
-
-    private static Activity mContextActivity;
-
     private static BCOfflinePay instance;
 
     private BCOfflinePay() {}
 
     /**
      * 唯一获取BCPay实例的入口
-     * @param context   留存context
      * @return          BCPay实例
      */
-    public synchronized static BCOfflinePay getInstance(Context context) {
-        mContextActivity = (Activity)context;
+    public synchronized static BCOfflinePay getInstance() {
         if (instance == null) {
             instance = new BCOfflinePay();
-            payCallback = null;
         }
         return instance;
     }
