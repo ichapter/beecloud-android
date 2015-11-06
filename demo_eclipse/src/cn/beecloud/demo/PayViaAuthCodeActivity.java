@@ -185,7 +185,7 @@ public class PayViaAuthCodeActivity extends Activity {
                 //你可以任选一种方法请求微信和支付宝二维码
                 //此处的判断只是示例和测试需要，并没有实际的逻辑意义
                 if (channelType == BCReqParams.BCChannelTypes.WX_SCAN) {
-                    BCOfflinePay.getInstance(PayViaAuthCodeActivity.this).reqOfflinePayAsync(
+                    BCOfflinePay.getInstance().reqOfflinePayAsync(
                             channelType,
                             "安卓微信扫码方法支付测试", //商品描述
                             1,                 //总金额, 以分为单位, 必须是正整数
@@ -205,7 +205,7 @@ public class PayViaAuthCodeActivity extends Activity {
                     payParam.authCode = authCode;   //付款码
                     payParam.terminalId = "fake-terminalId";    //若机具商接入terminalId(机具终端编号)必填
 
-                    BCOfflinePay.getInstance(PayViaAuthCodeActivity.this).reqOfflinePayAsync(
+                    BCOfflinePay.getInstance().reqOfflinePayAsync(
                             payParam,
                             callback);
 

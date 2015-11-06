@@ -98,7 +98,7 @@ public class BCPayPalPaymentActivity extends Activity {
 
                 final String billNum = confirm.getProofOfPayment().getPaymentId().substring(4);
 
-                Log.w("BCPayPalPaymentActivity", billNum);
+                //Log.w("BCPayPalPaymentActivity", billNum);
 
                 if (confirm.getProofOfPayment().getState() != null &&
                         confirm.getProofOfPayment().getState().equals("approved")){
@@ -182,5 +182,8 @@ public class BCPayPalPaymentActivity extends Activity {
     public void onDestroy() {
         stopService(new Intent(this, PayPalService.class));
         super.onDestroy();
+        //clear context when exit
+        BCPay.clearContext();
+        BCCache.detach();
     }
 }

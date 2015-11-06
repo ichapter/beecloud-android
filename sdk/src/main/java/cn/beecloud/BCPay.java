@@ -56,6 +56,7 @@ public class BCPay {
     public static IWXAPI wxAPI = null;
 
     public static BCPayPalSyncObserver payPalSyncObserver;
+    private static BaiduPay baiduPay;
 
     private static BCPay instance;
 
@@ -67,16 +68,15 @@ public class BCPay {
      * @return          BCPay实例
      */
     public synchronized static BCPay getInstance(Context context) {
-        mContextActivity = (Activity)context;
+        if (context!=null)
+            mContextActivity = (Activity)context;
+
         if (instance == null) {
             instance = new BCPay();
             payCallback = null;
         }
-        return instance;
-    }
 
-    static Activity getContextActivity() {
-        return mContextActivity;
+        return instance;
     }
 
     /**
@@ -123,6 +123,10 @@ public class BCPay {
         return errMsg;
     }
 
+    static void clearContext() {
+        mContextActivity = null;
+    }
+
     /**
      * detach context
      */
@@ -131,13 +135,16 @@ public class BCPay {
             wxAPI.detach();
         }
 
-        if (payCallback != null)
-            payCallback = null;
+        payCallback = null;
 
-        if (mContextActivity != null)
-            mContextActivity = null;
+        mContextActivity = null;
 
-        BCCache.getInstance(null).detach();
+        payPalSyncObserver = null;
+
+        if (baiduPay != null)
+            baiduPay.finish();
+
+        BCCache.detach();
     }
 
     public enum PAYPAL_PAY_TYPE {
@@ -255,7 +262,7 @@ public class BCPay {
                     Map<String, Object> responseMap = res.fromJson(ret, type);
 
                     //判断后台返回结果
-                    Double resultCode = (Double) responseMap.get("result_code");
+                    Integer resultCode = ((Double) responseMap.get("result_code")).intValue();
                     if (resultCode == 0) {
 
                         if (mContextActivity != null) {
@@ -287,23 +294,15 @@ public class BCPay {
                             callback.done(new BCPayResult(BCPayResult.RESULT_FAIL,
                                     BCPayResult.APP_INTERNAL_EXCEPTION_ERR_CODE,
                                     BCPayResult.FAIL_EXCEPTION,
-                                    "Context-Activity Exception in reqAliPayment"));
+                                    "Context-Activity NP-Exception"));
                         }
                     } else {
                         //返回后端传回的错误信息
-                        int serverCode = BCPayResult.APP_INTERNAL_EXCEPTION_ERR_CODE;
                         String serverMsg = String.valueOf(responseMap.get("result_msg"));
                         String serverDetail = String.valueOf(responseMap.get("err_detail"));
 
-                        try{
-                            serverCode = Integer.valueOf((String)responseMap.get("result_code"));
-                        } catch (Exception e) {
-                            serverMsg = BCPayResult.FAIL_ERR_FROM_SERVER;
-                            serverDetail = e.getMessage();
-                        }
-
                         callback.done(new BCPayResult(BCPayResult.RESULT_FAIL,
-                                serverCode,
+                                resultCode,
                                 serverMsg,
                                 serverDetail));
                     }
@@ -456,7 +455,8 @@ public class BCPay {
         //Log.w(TAG, orderInfo);
 
         Map<String, String> map = new HashMap<String, String>();
-        BaiduPay.getInstance().doPay(mContextActivity, orderInfo, new PayCallBack() {
+        baiduPay = BaiduPay.getInstance();
+        baiduPay.doPay(mContextActivity, orderInfo, new PayCallBack() {
             public void onPayResult(int stateCode, String payDesc) {
                 //Log.w(TAG, "rsult=" + stateCode + "#desc=" + payDesc);
 
@@ -763,7 +763,7 @@ public class BCPay {
         try{
             billTotalFee = Integer.valueOf(syncItem.get("billTotalFee"));
         } catch (Exception e){
-            Log.e(TAG, e.getMessage());
+            Log.e(TAG, e.getMessage()==null ? "Exception" : e.getMessage());
             billTotalFee = -1;
         }
 

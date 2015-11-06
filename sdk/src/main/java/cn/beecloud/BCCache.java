@@ -206,7 +206,7 @@ public class BCCache {
         return joined.toString();
     }
 
-    public void detach() {
+    public static void detach() {
         contextActivity = null;
     }
 }
