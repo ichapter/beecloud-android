@@ -22,7 +22,7 @@ import cn.beecloud.entity.BCPayResult;
  */
 public class BCUnionPaymentActivity extends Activity {
 
-    private static Integer targetVersion = 53;
+    private static final Integer TARGET_VERSION = 53;
     private static final String UN_APK_PACKAGE = "com.unionpay.uppay";
 
     @Override
@@ -42,7 +42,7 @@ public class BCUnionPaymentActivity extends Activity {
             int curVer = getUNAPKVersion();
             if (curVer == -1)
                 retPay = -1;
-            else if (curVer < targetVersion)
+            else if (curVer < TARGET_VERSION)
                 retPay = 2;
             else
                 retPay = UPPayAssistEx.startPay(this, null, null, tn, "00");
@@ -51,7 +51,7 @@ public class BCUnionPaymentActivity extends Activity {
             //插件问题 -1表示没有安装插件，2表示插件需要升级
             if (retPay==-1 || retPay==2) {
 
-                BCPay instance = BCPay.getInstance(BCUnionPaymentActivity.this);
+                BCPay instance = BCPay.getInstance(null);
 
                 if (instance != null && instance.payCallback != null) {
                     instance.payCallback.done(new BCPayResult(BCPayResult.RESULT_FAIL,
@@ -108,7 +108,7 @@ public class BCUnionPaymentActivity extends Activity {
             }
         }
 
-        BCPay instance = BCPay.getInstance(BCUnionPaymentActivity.this);
+        BCPay instance = BCPay.getInstance(null);
 
         if (instance != null && instance.payCallback != null) {
             instance.payCallback.done(new BCPayResult(result, errCode, errMsg,
@@ -126,7 +126,8 @@ public class BCUnionPaymentActivity extends Activity {
             PackageInfo Info=packageManager.getPackageInfo(UN_APK_PACKAGE, 0);
             version = Info.versionCode;
         } catch (PackageManager.NameNotFoundException e) {
-            Log.e("union payment", e.getMessage());
+            Log.e("union payment", e.getMessage()==null ?
+                    "PackageManager.NameNotFoundException":e.getMessage());
         }
 
         return version;

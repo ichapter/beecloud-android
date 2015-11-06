@@ -163,4 +163,10 @@ public class PayPalUnSyncedListActivity extends Activity {
             });
         }
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        BCPay.detach();
+    }
 }
