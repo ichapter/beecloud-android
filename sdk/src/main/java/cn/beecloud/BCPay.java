@@ -105,7 +105,7 @@ public class BCPay {
         // 通过WXAPIFactory工厂，获取IWXAPI的实例
         wxAPI = WXAPIFactory.createWXAPI(context, null);
 
-        BCCache.getInstance(null).wxAppId = wechatAppID;
+        BCCache.getInstance().wxAppId = wechatAppID;
 
         try {
             if (isWXPaySupported()) {
@@ -123,28 +123,30 @@ public class BCPay {
         return errMsg;
     }
 
-    static void clearContext() {
+    /**
+     * 释放BCPay占据的context, callback, observer引用
+     */
+    public static void clearContext() {
         mContextActivity = null;
+        payCallback = null;
+        payPalSyncObserver = null;
     }
 
     /**
-     * detach context
+     * 释放微信占据的context
      */
-    public static void detach() {
+    public static void detachWechat() {
         if (wxAPI != null) {
             wxAPI.detach();
         }
+    }
 
-        payCallback = null;
-
-        mContextActivity = null;
-
-        payPalSyncObserver = null;
-
+    /**
+     * 释放baidu钱包占据的callback引用
+     */
+    public static void detachBaiduPay() {
         if (baiduPay != null)
             baiduPay.finish();
-
-        BCCache.detach();
     }
 
     public enum PAYPAL_PAY_TYPE {
@@ -159,7 +161,7 @@ public class BCPay {
      * @param retrieveShippingAddresses set true then it will enable PayPal Shipping Addresses Retrieval, but it sometimes may cause 'shipping address invalid' error during payment
      */
     public static void initPayPal(String clientId, String secret, PAYPAL_PAY_TYPE type, Boolean retrieveShippingAddresses){
-        BCCache instance = BCCache.getInstance(null);
+        BCCache instance = BCCache.getInstance();
         instance.paypalClientID = clientId;
         instance.paypalSecret = secret;
         instance.paypalPayType = type;
@@ -267,7 +269,7 @@ public class BCPay {
 
                         if (mContextActivity != null) {
 
-                            BCCache.getInstance(null).billID = (String)responseMap.get("id");
+                            BCCache.getInstance().billID = (String)responseMap.get("id");
 
                             //针对不同的支付渠道调用不同的API
                             switch (channelType) {
@@ -426,7 +428,7 @@ public class BCPay {
         }
 
         payCallback.done(new BCPayResult(result, errCode, errMsg,
-                errDetail, BCCache.getInstance(null).billID));
+                errDetail, BCCache.getInstance().billID));
     }
 
     /**
@@ -524,7 +526,7 @@ public class BCPay {
 
                 payCallback.done(new BCPayResult(result, errCode, errMsg,
                         errDetail + "#result=" + stateCode + "#desc=" + payDesc,
-                        BCCache.getInstance(null).billID));
+                        BCCache.getInstance().billID));
             }
 
             public boolean isHideLoadingDialog() {
@@ -618,9 +620,9 @@ public class BCPay {
 
         payCallback = callback;
 
-        if (BCCache.getInstance(null).paypalClientID == null ||
-                BCCache.getInstance(null).paypalSecret == null ||
-                BCCache.getInstance(null).paypalPayType == null) {
+        if (BCCache.getInstance().paypalClientID == null ||
+                BCCache.getInstance().paypalSecret == null ||
+                BCCache.getInstance().paypalPayType == null) {
             callback.done(new BCPayResult(BCPayResult.RESULT_FAIL,
                     BCPayResult.APP_INTERNAL_PARAMS_ERR_CODE,
                     BCPayResult.FAIL_INVALID_PARAMS,
@@ -723,7 +725,7 @@ public class BCPay {
 
             if (resultCode == 0) {
 
-                BCCache.getInstance(null).billID=String.valueOf(responseMap.get("id"));
+                BCCache.getInstance().billID=String.valueOf(responseMap.get("id"));
 
                 return new String[]{BCPayResult.RESULT_SUCCESS,
                         String.valueOf(responseMap.get("id"))};
@@ -774,7 +776,7 @@ public class BCPay {
         if (result[0].equals(BCPayResult.RESULT_SUCCESS)) {
             List<String> syncedRecord = new ArrayList<String>(1);
             syncedRecord.add(syncJson);
-            BCCache.getInstance(mContextActivity).removeSyncedPalPalRecords(syncedRecord);
+            BCCache.getInstance().removeSyncedPalPalRecords(mContextActivity, syncedRecord);
         }
 
         return result[0];
@@ -786,7 +788,7 @@ public class BCPay {
      * @return Map use key "cachedNum" to get the cached total number, use key "syncedNum" to get the successfully synced number(also payments are valid)
      */
     public Map<String, Integer> batchSyncPayPalPayment() {
-        List<String> allRecords = BCCache.getInstance(mContextActivity).getUnSyncedPayPalRecords();
+        List<String> allRecords = BCCache.getInstance().getUnSyncedPayPalRecords(mContextActivity);
 
         Map<String, Integer> result = new HashMap<String, Integer>();
         result.put("cachedNum", allRecords.size());
@@ -802,7 +804,7 @@ public class BCPay {
 
         result.put("syncedNum", syncedRecords.size());
 
-        BCCache.getInstance(mContextActivity).removeSyncedPalPalRecords(syncedRecords);
+        BCCache.getInstance().removeSyncedPalPalRecords(mContextActivity, syncedRecords);
 
         return result;
     }

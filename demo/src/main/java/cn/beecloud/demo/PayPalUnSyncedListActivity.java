@@ -73,7 +73,7 @@ public class PayPalUnSyncedListActivity extends Activity {
         loadingDialog.setIndeterminate(true);
         loadingDialog.setCancelable(true);
 
-        adapterData = BCCache.getInstance(this).getUnSyncedPayPalRecords();
+        adapterData = BCCache.getInstance().getUnSyncedPayPalRecords(this);
 
         if (adapterData == null || adapterData.size() == 0) {
             syncTip.setVisibility(View.VISIBLE);
@@ -147,8 +147,8 @@ public class PayPalUnSyncedListActivity extends Activity {
                                 mHandler.sendMessage(msg);
                             } else {
 
-                                adapterData = new ArrayList<String>(BCCache.getInstance(PayPalUnSyncedListActivity.this).
-                                        getUnSyncedPayPalRecords());
+                                adapterData = new ArrayList<String>(BCCache.getInstance().
+                                        getUnSyncedPayPalRecords(PayPalUnSyncedListActivity.this));
 
                                 Message msg = mHandler.obtainMessage();
                                 msg.what = 1;
@@ -167,6 +167,6 @@ public class PayPalUnSyncedListActivity extends Activity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        BCPay.detach();
+        BCPay.clearContext();
     }
 }

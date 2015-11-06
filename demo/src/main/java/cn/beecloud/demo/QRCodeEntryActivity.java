@@ -180,6 +180,6 @@ public class QRCodeEntryActivity extends Activity {
     protected void onDestroy() {
         super.onDestroy();
         //用到BCPay的activity在结束前，清理context引用
-        BCPay.detach();
+        BCPay.clearContext();
     }
 }

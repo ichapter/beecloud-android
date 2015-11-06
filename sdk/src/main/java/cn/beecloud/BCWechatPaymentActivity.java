@@ -43,8 +43,8 @@ public class BCWechatPaymentActivity extends Activity implements IWXAPIEventHand
 
                 BCPay instance = BCPay.getInstance(null);
 
-                if (instance != null && instance.payCallback != null) {
-                    instance.payCallback.done(
+                if (instance != null && BCPay.payCallback != null) {
+                    BCPay.payCallback.done(
                             new BCPayResult(BCPayResult.RESULT_FAIL,
                                 BCPayResult.APP_INTERNAL_PARAMS_ERR_CODE,
                                 BCPayResult.FAIL_INVALID_PARAMS,
@@ -59,8 +59,8 @@ public class BCWechatPaymentActivity extends Activity implements IWXAPIEventHand
 
             BCPay instance = BCPay.getInstance(null);
 
-            if (instance != null && instance.payCallback != null) {
-                instance.payCallback.done(
+            if (instance != null && BCPay.payCallback != null) {
+                BCPay.payCallback.done(
                         new BCPayResult(BCPayResult.RESULT_FAIL,
                             BCPayResult.APP_INTERNAL_EXCEPTION_ERR_CODE,
                             BCPayResult.FAIL_EXCEPTION,
@@ -84,8 +84,8 @@ public class BCWechatPaymentActivity extends Activity implements IWXAPIEventHand
         } catch (Exception ex) {
             BCPay instance = BCPay.getInstance(null);
 
-            if (instance != null && instance.payCallback != null) {
-                instance.payCallback.done(
+            if (instance != null && BCPay.payCallback != null) {
+                BCPay.payCallback.done(
                         new BCPayResult(BCPayResult.RESULT_FAIL,
                                 BCPayResult.APP_INTERNAL_EXCEPTION_ERR_CODE,
                                 BCPayResult.FAIL_EXCEPTION,
@@ -150,8 +150,8 @@ public class BCWechatPaymentActivity extends Activity implements IWXAPIEventHand
 
         BCPay instance = BCPay.getInstance(null);
 
-        if (instance != null && instance.payCallback != null) {
-            instance.payCallback.done(new BCPayResult(result,
+        if (instance != null && BCPay.payCallback != null) {
+            BCPay.payCallback.done(new BCPayResult(result,
                     errCode,
                     errMsg,
                     detailInfo,
