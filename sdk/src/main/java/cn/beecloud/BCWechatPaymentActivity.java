@@ -34,16 +34,14 @@ public class BCWechatPaymentActivity extends Activity implements IWXAPIEventHand
         Log.i(TAG, "into weixin return activity");
 
         try {
-            String wxAppId = BCCache.getInstance(null).wxAppId;
+            String wxAppId = BCCache.getInstance().wxAppId;
             if (wxAppId != null && wxAppId.length() > 0) {
                 wxAPI = WXAPIFactory.createWXAPI(this, wxAppId);
                 wxAPI.handleIntent(getIntent(), this);
             } else {
                 Log.e(TAG, "Error: wxAppId 不合法 BCWechatPaymentActivity: " + wxAppId);
 
-                BCPay instance = BCPay.getInstance(null);
-
-                if (instance != null && BCPay.payCallback != null) {
+                if (BCPay.payCallback != null) {
                     BCPay.payCallback.done(
                             new BCPayResult(BCPayResult.RESULT_FAIL,
                                 BCPayResult.APP_INTERNAL_PARAMS_ERR_CODE,
@@ -57,9 +55,7 @@ public class BCWechatPaymentActivity extends Activity implements IWXAPIEventHand
         } catch (Exception ex) {
             Log.e(TAG, ex.getMessage()==null ? "未知错误，初始化回调入口失败" : ex.getMessage());
 
-            BCPay instance = BCPay.getInstance(null);
-
-            if (instance != null && BCPay.payCallback != null) {
+            if (BCPay.payCallback != null) {
                 BCPay.payCallback.done(
                         new BCPayResult(BCPayResult.RESULT_FAIL,
                             BCPayResult.APP_INTERNAL_EXCEPTION_ERR_CODE,
@@ -82,9 +78,7 @@ public class BCWechatPaymentActivity extends Activity implements IWXAPIEventHand
                 wxAPI.handleIntent(intent, this);
             }
         } catch (Exception ex) {
-            BCPay instance = BCPay.getInstance(null);
-
-            if (instance != null && BCPay.payCallback != null) {
+            if (BCPay.payCallback != null) {
                 BCPay.payCallback.done(
                         new BCPayResult(BCPayResult.RESULT_FAIL,
                                 BCPayResult.APP_INTERNAL_EXCEPTION_ERR_CODE,
@@ -148,14 +142,12 @@ public class BCWechatPaymentActivity extends Activity implements IWXAPIEventHand
                 detailInfo += "支付失败";
         }
 
-        BCPay instance = BCPay.getInstance(null);
-
-        if (instance != null && BCPay.payCallback != null) {
+        if (BCPay.payCallback != null) {
             BCPay.payCallback.done(new BCPayResult(result,
                     errCode,
                     errMsg,
                     detailInfo,
-                    BCCache.getInstance(null).billID));
+                    BCCache.getInstance().billID));
         }
         this.finish();
     }

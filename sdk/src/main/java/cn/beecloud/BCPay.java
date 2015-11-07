@@ -48,15 +48,15 @@ public class BCPay {
     /**
      * 保留callback实例
      */
-    public static BCCallback payCallback;
+    static BCCallback payCallback;
 
-    private static Activity mContextActivity;
+    static Activity mContextActivity;
 
     // IWXAPI 是第三方app和微信通信的openapi接口
-    public static IWXAPI wxAPI = null;
+    static IWXAPI wxAPI = null;
 
-    public static BCPayPalSyncObserver payPalSyncObserver;
-    private static BaiduPay baiduPay;
+    static BCPayPalSyncObserver payPalSyncObserver;
+    static BaiduPay baiduPay;
 
     private static BCPay instance;
 
@@ -68,13 +68,14 @@ public class BCPay {
      * @return          BCPay实例
      */
     public synchronized static BCPay getInstance(Context context) {
-        if (context!=null)
-            mContextActivity = (Activity)context;
 
         if (instance == null) {
             instance = new BCPay();
             payCallback = null;
         }
+
+        if (context!=null)
+            mContextActivity = (Activity)context;
 
         return instance;
     }
@@ -126,7 +127,7 @@ public class BCPay {
     /**
      * 释放BCPay占据的context, callback, observer引用
      */
-    public static void clearContext() {
+    public static void clear() {
         mContextActivity = null;
         payCallback = null;
         payPalSyncObserver = null;
@@ -813,7 +814,7 @@ public class BCPay {
      * used when you would like to know the sync result
      */
     public void addPayPalSyncObserver(BCPayPalSyncObserver observer) {
-        BCPay.payPalSyncObserver = observer;
+        payPalSyncObserver = observer;
     }
 
     /**

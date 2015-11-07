@@ -51,9 +51,7 @@ public class BCUnionPaymentActivity extends Activity {
             //插件问题 -1表示没有安装插件，2表示插件需要升级
             if (retPay==-1 || retPay==2) {
 
-                BCPay instance = BCPay.getInstance(null);
-
-                if (instance != null && BCPay.payCallback != null) {
+                if (BCPay.payCallback != null) {
                     BCPay.payCallback.done(new BCPayResult(BCPayResult.RESULT_FAIL,
                             BCPayResult.APP_INTERNAL_THIRD_CHANNEL_ERR_CODE,
                             (retPay == -1)? BCPayResult.FAIL_PLUGIN_NOT_INSTALLED:BCPayResult.FAIL_PLUGIN_NEED_UPGRADE,
@@ -108,11 +106,9 @@ public class BCUnionPaymentActivity extends Activity {
             }
         }
 
-        BCPay instance = BCPay.getInstance(null);
-
-        if (instance != null && BCPay.payCallback != null) {
+        if (BCPay.payCallback != null) {
             BCPay.payCallback.done(new BCPayResult(result, errCode, errMsg,
-                    detailInfo, BCCache.getInstance(null).billID));
+                    detailInfo, BCCache.getInstance().billID));
         }
 
         this.finish();

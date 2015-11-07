@@ -6,7 +6,6 @@
 */
 package cn.beecloud;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;

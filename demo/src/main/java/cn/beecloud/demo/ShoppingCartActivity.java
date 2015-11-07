@@ -157,7 +157,6 @@ public class ShoppingCartActivity extends Activity {
         // 如果用到微信支付，在用到微信支付的Activity的onCreate函数里调用以下函数.
         // 第二个参数需要换成你自己的微信AppID.
         BCPay.initWechatPay(ShoppingCartActivity.this, "wxf1aa465362b4c8f1");
-        //BCPay.initWechatPay(ShoppingCartActivity.this, "wx4a1dbb74d8e8a6aa");
 
         // 如果使用PayPal需要在支付之前设置client id和应用secret
         // BCPay.PAYPAL_PAY_TYPE.SANDBOX用于测试，BCPay.PAYPAL_PAY_TYPE.LIVE用于生产环境
@@ -395,6 +394,12 @@ public class ShoppingCartActivity extends Activity {
     protected void onDestroy() {
         super.onDestroy();
         //清理当前的activity引用
-        BCPay.detach();
+        BCPay.clear();
+
+        //使用微信的，在initWechatPay的activity结束时detach
+        BCPay.detachWechat();
+
+        //使用百度支付的，在activity结束时detach
+        BCPay.detachBaiduPay();
     }
 }

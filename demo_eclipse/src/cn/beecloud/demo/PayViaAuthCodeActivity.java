@@ -346,14 +346,14 @@ public class PayViaAuthCodeActivity extends Activity {
 
     private boolean appInstalledOrNot(String uri) {
         PackageManager pm = getPackageManager();
-        boolean app_installed;
+        boolean appInstalled;
         try {
             pm.getPackageInfo(uri, 0);
-            app_installed = true;
+            appInstalled = true;
         }
         catch (PackageManager.NameNotFoundException e) {
-            app_installed = false;
+            appInstalled = false;
         }
-        return app_installed;
+        return appInstalled;
     }
 }
