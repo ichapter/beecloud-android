@@ -41,6 +41,14 @@ with open('README.md', encoding = 'utf-8') as f:
 print("Readme versionCode: " + readme_ver)
 print("Readme jar versionCode: " + readme_jar_ver)
 
+with open('changelog.txt', encoding = 'utf-8') as f:
+	for line in f:
+		if line.startswith('v'):
+			changelog_ver = line[1: line.find(' ')]
+			break;
+
+print("changelog versionCode: " + changelog_ver)
+
 
 import glob
 
@@ -61,7 +69,7 @@ tmp = glob.glob('demo_eclipse/libs/beecloud*.jar')[0]
 demo_jar_ver = tmp[tmp.find('beecloud-') + len('beecloud-') : tmp.find('.jar')]
 print("eclipse demo jar versionCode: " + demo_jar_ver)
 
-if gradle_ver != beecloud_ver or beecloud_ver != readme_ver or readme_ver != readme_jar_ver or readme_jar_ver != sdk_jar_ver or sdk_jar_ver != demo_jar_ver:
+if gradle_ver != beecloud_ver or beecloud_ver != readme_ver or readme_ver != readme_jar_ver or readme_jar_ver != changelog_ver or changelog_ver != sdk_jar_ver or sdk_jar_ver != demo_jar_ver:
 	print("inconsistent version code!!!")
 	exit(-1)
 else:
