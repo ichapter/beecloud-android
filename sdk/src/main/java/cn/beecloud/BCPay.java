@@ -74,7 +74,7 @@ public class BCPay {
             payCallback = null;
         }
 
-        if (context!=null)
+        if (context != null)
             mContextActivity = (Activity)context;
 
         return instance;
@@ -766,7 +766,7 @@ public class BCPay {
         try{
             billTotalFee = Integer.valueOf(syncItem.get("billTotalFee"));
         } catch (Exception e){
-            Log.e(TAG, e.getMessage()==null ? "Exception" : e.getMessage());
+            Log.e(TAG, e.getMessage() == null ? "Exception" : e.getMessage());
             billTotalFee = -1;
         }
 
