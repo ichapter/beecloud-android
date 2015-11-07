@@ -48,14 +48,15 @@ public class BCPay {
     /**
      * 保留callback实例
      */
-    public static BCCallback payCallback;
+    static BCCallback payCallback;
 
-    private static Activity mContextActivity;
+    static Activity mContextActivity;
 
     // IWXAPI 是第三方app和微信通信的openapi接口
-    public static IWXAPI wxAPI = null;
+    static IWXAPI wxAPI = null;
 
-    public static BCPayPalSyncObserver payPalSyncObserver;
+    static BCPayPalSyncObserver payPalSyncObserver;
+    static BaiduPay baiduPay;
 
     private static BCPay instance;
 
@@ -67,16 +68,16 @@ public class BCPay {
      * @return          BCPay实例
      */
     public synchronized static BCPay getInstance(Context context) {
-        mContextActivity = (Activity)context;
+
         if (instance == null) {
             instance = new BCPay();
             payCallback = null;
         }
-        return instance;
-    }
 
-    static Activity getContextActivity() {
-        return mContextActivity;
+        if (context != null)
+            mContextActivity = (Activity)context;
+
+        return instance;
     }
 
     /**
@@ -105,7 +106,7 @@ public class BCPay {
         // 通过WXAPIFactory工厂，获取IWXAPI的实例
         wxAPI = WXAPIFactory.createWXAPI(context, null);
 
-        BCCache.getInstance(null).wxAppId = wechatAppID;
+        BCCache.getInstance().wxAppId = wechatAppID;
 
         try {
             if (isWXPaySupported()) {
@@ -124,23 +125,29 @@ public class BCPay {
     }
 
     /**
-     * detach context
+     * 释放BCPay占据的context, callback, observer引用
      */
-    public static void detach() {
+    public static void clear() {
+        mContextActivity = null;
+        payCallback = null;
+        payPalSyncObserver = null;
+    }
+
+    /**
+     * 释放微信占据的context
+     */
+    public static void detachWechat() {
         if (wxAPI != null) {
             wxAPI.detach();
         }
+    }
 
-        if (payCallback != null)
-            payCallback = null;
-
-        if (mContextActivity != null)
-            mContextActivity = null;
-
-        if (payPalSyncObserver != null)
-            payPalSyncObserver = null;
-
-        BCCache.getInstance(null).detach();
+    /**
+     * 释放baidu钱包占据的callback引用
+     */
+    public static void detachBaiduPay() {
+        if (baiduPay != null)
+            baiduPay.finish();
     }
 
     public enum PAYPAL_PAY_TYPE {
@@ -155,7 +162,7 @@ public class BCPay {
      * @param retrieveShippingAddresses set true then it will enable PayPal Shipping Addresses Retrieval, but it sometimes may cause 'shipping address invalid' error during payment
      */
     public static void initPayPal(String clientId, String secret, PAYPAL_PAY_TYPE type, Boolean retrieveShippingAddresses){
-        BCCache instance = BCCache.getInstance(null);
+        BCCache instance = BCCache.getInstance();
         instance.paypalClientID = clientId;
         instance.paypalSecret = secret;
         instance.paypalPayType = type;
@@ -258,12 +265,12 @@ public class BCPay {
                     Map<String, Object> responseMap = res.fromJson(ret, type);
 
                     //判断后台返回结果
-                    Double resultCode = (Double) responseMap.get("result_code");
+                    Integer resultCode = ((Double) responseMap.get("result_code")).intValue();
                     if (resultCode == 0) {
 
                         if (mContextActivity != null) {
 
-                            BCCache.getInstance(null).billID = (String)responseMap.get("id");
+                            BCCache.getInstance().billID = (String)responseMap.get("id");
 
                             //针对不同的支付渠道调用不同的API
                             switch (channelType) {
@@ -290,23 +297,15 @@ public class BCPay {
                             callback.done(new BCPayResult(BCPayResult.RESULT_FAIL,
                                     BCPayResult.APP_INTERNAL_EXCEPTION_ERR_CODE,
                                     BCPayResult.FAIL_EXCEPTION,
-                                    "Context-Activity Exception in reqAliPayment"));
+                                    "Context-Activity NP-Exception"));
                         }
                     } else {
                         //返回后端传回的错误信息
-                        int serverCode = BCPayResult.APP_INTERNAL_EXCEPTION_ERR_CODE;
                         String serverMsg = String.valueOf(responseMap.get("result_msg"));
                         String serverDetail = String.valueOf(responseMap.get("err_detail"));
 
-                        try{
-                            serverCode = Integer.valueOf((String)responseMap.get("result_code"));
-                        } catch (Exception e) {
-                            serverMsg = BCPayResult.FAIL_ERR_FROM_SERVER;
-                            serverDetail = e.getMessage();
-                        }
-
                         callback.done(new BCPayResult(BCPayResult.RESULT_FAIL,
-                                serverCode,
+                                resultCode,
                                 serverMsg,
                                 serverDetail));
                     }
@@ -430,7 +429,7 @@ public class BCPay {
         }
 
         payCallback.done(new BCPayResult(result, errCode, errMsg,
-                errDetail, BCCache.getInstance(null).billID));
+                errDetail, BCCache.getInstance().billID));
     }
 
     /**
@@ -459,7 +458,8 @@ public class BCPay {
         //Log.w(TAG, orderInfo);
 
         Map<String, String> map = new HashMap<String, String>();
-        BaiduPay.getInstance().doPay(mContextActivity, orderInfo, new PayCallBack() {
+        baiduPay = BaiduPay.getInstance();
+        baiduPay.doPay(mContextActivity, orderInfo, new PayCallBack() {
             public void onPayResult(int stateCode, String payDesc) {
                 //Log.w(TAG, "rsult=" + stateCode + "#desc=" + payDesc);
 
@@ -527,7 +527,7 @@ public class BCPay {
 
                 payCallback.done(new BCPayResult(result, errCode, errMsg,
                         errDetail + "#result=" + stateCode + "#desc=" + payDesc,
-                        BCCache.getInstance(null).billID));
+                        BCCache.getInstance().billID));
             }
 
             public boolean isHideLoadingDialog() {
@@ -621,9 +621,9 @@ public class BCPay {
 
         payCallback = callback;
 
-        if (BCCache.getInstance(null).paypalClientID == null ||
-                BCCache.getInstance(null).paypalSecret == null ||
-                BCCache.getInstance(null).paypalPayType == null) {
+        if (BCCache.getInstance().paypalClientID == null ||
+                BCCache.getInstance().paypalSecret == null ||
+                BCCache.getInstance().paypalPayType == null) {
             callback.done(new BCPayResult(BCPayResult.RESULT_FAIL,
                     BCPayResult.APP_INTERNAL_PARAMS_ERR_CODE,
                     BCPayResult.FAIL_INVALID_PARAMS,
@@ -726,7 +726,7 @@ public class BCPay {
 
             if (resultCode == 0) {
 
-                BCCache.getInstance(null).billID=String.valueOf(responseMap.get("id"));
+                BCCache.getInstance().billID=String.valueOf(responseMap.get("id"));
 
                 return new String[]{BCPayResult.RESULT_SUCCESS,
                         String.valueOf(responseMap.get("id"))};
@@ -766,7 +766,7 @@ public class BCPay {
         try{
             billTotalFee = Integer.valueOf(syncItem.get("billTotalFee"));
         } catch (Exception e){
-            Log.e(TAG, e.getMessage());
+            Log.e(TAG, e.getMessage() == null ? "Exception" : e.getMessage());
             billTotalFee = -1;
         }
 
@@ -777,7 +777,7 @@ public class BCPay {
         if (result[0].equals(BCPayResult.RESULT_SUCCESS)) {
             List<String> syncedRecord = new ArrayList<String>(1);
             syncedRecord.add(syncJson);
-            BCCache.getInstance(mContextActivity).removeSyncedPalPalRecords(syncedRecord);
+            BCCache.getInstance().removeSyncedPalPalRecords(mContextActivity, syncedRecord);
         }
 
         return result[0];
@@ -789,7 +789,7 @@ public class BCPay {
      * @return Map use key "cachedNum" to get the cached total number, use key "syncedNum" to get the successfully synced number(also payments are valid)
      */
     public Map<String, Integer> batchSyncPayPalPayment() {
-        List<String> allRecords = BCCache.getInstance(mContextActivity).getUnSyncedPayPalRecords();
+        List<String> allRecords = BCCache.getInstance().getUnSyncedPayPalRecords(mContextActivity);
 
         Map<String, Integer> result = new HashMap<String, Integer>();
         result.put("cachedNum", allRecords.size());
@@ -805,7 +805,7 @@ public class BCPay {
 
         result.put("syncedNum", syncedRecords.size());
 
-        BCCache.getInstance(mContextActivity).removeSyncedPalPalRecords(syncedRecords);
+        BCCache.getInstance().removeSyncedPalPalRecords(mContextActivity, syncedRecords);
 
         return result;
     }
@@ -814,7 +814,7 @@ public class BCPay {
      * used when you would like to know the sync result
      */
     public void addPayPalSyncObserver(BCPayPalSyncObserver observer) {
-        BCPay.payPalSyncObserver = observer;
+        payPalSyncObserver = observer;
     }
 
     /**

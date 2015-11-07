@@ -320,19 +320,11 @@ public class BCOfflinePay {
 
                     } else {
                         //返回服务端传回的错误信息
-                        int serverCode = BCPayResult.APP_INTERNAL_EXCEPTION_ERR_CODE;
                         String serverMsg = String.valueOf(responseMap.get("result_msg"));
                         String serverDetail = String.valueOf(responseMap.get("err_detail"));
 
-                        try{
-                            serverCode = Integer.valueOf((String)responseMap.get("result_code"));
-                        } catch (Exception e) {
-                            serverMsg = BCPayResult.FAIL_ERR_FROM_SERVER;
-                            serverDetail = e.getMessage();
-                        }
-
                         callback.done(new BCPayResult(BCPayResult.RESULT_FAIL,
-                                serverCode,
+                                resultCode,
                                 serverMsg,
                                 serverDetail));
                     }

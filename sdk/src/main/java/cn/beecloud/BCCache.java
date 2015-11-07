@@ -6,7 +6,7 @@
 */
 package cn.beecloud;
 
-import android.app.Activity;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
@@ -24,7 +24,6 @@ public class BCCache {
 
     private static BCCache instance;
 
-    private static Activity contextActivity;
     private static final String separator = "#@#";
 
     /**
@@ -75,7 +74,7 @@ public class BCCache {
      * 唯一获取实例的方法
      * @return  BCCache实例
      */
-    public synchronized static BCCache getInstance(Activity contextActivity) {
+    public synchronized static BCCache getInstance() {
         if (instance == null) {
             instance = new BCCache();
 
@@ -87,23 +86,20 @@ public class BCCache {
             instance.connectTimeout = 10000;
         }
 
-        if (contextActivity != null)
-            BCCache.contextActivity = contextActivity;
-
         return instance;
     }
 
     /**
      * to retrieve paypal not synced records
      */
-    public List<String> getUnSyncedPayPalRecords() {
-        if (BCCache.contextActivity == null) {
-            Log.e("BCCache", "NPE: can not get context activity");
+    public List<String> getUnSyncedPayPalRecords(Context context) {
+        if (context == null) {
+            Log.e("BCCache", "param context NPE");
             return null;
         }
 
         String cacheStr =
-                BCCache.contextActivity.getSharedPreferences(BC_PAYPAL_SHARED_PREFERENCE_NAME, 0)
+                context.getSharedPreferences(BC_PAYPAL_SHARED_PREFERENCE_NAME, 0)
                         .getString(BC_PAYPAL_UNSYNCED_STR_CACHE, null);
 
         if (cacheStr != null)
@@ -115,14 +111,14 @@ public class BCCache {
     /**
      * clear un-synced cache
      */
-    public void clearUnSyncedPayPalRecords() {
-        if (BCCache.contextActivity == null) {
-            Log.e("BCCache", "NPE: can not get context activity");
+    public void clearUnSyncedPayPalRecords(Context context) {
+        if (context == null) {
+            Log.e("BCCache", "param context NPE");
             return;
         }
 
         final SharedPreferences prefs =
-                BCCache.contextActivity.getSharedPreferences(BC_PAYPAL_SHARED_PREFERENCE_NAME, 0);
+                context.getSharedPreferences(BC_PAYPAL_SHARED_PREFERENCE_NAME, 0);
         SharedPreferences.Editor spEditor = prefs.edit();
         spEditor.clear();
         spEditor.apply();
@@ -131,14 +127,14 @@ public class BCCache {
     /**
      * remove synced record
      */
-    public void removeSyncedPalPalRecords(List<String> rmRecords) {
-        if (BCCache.contextActivity == null) {
-            Log.e("BCCache", "NPE: can not get context activity");
+    public void removeSyncedPalPalRecords(Context context, List<String> rmRecords) {
+        if (context == null) {
+            Log.e("BCCache", "param context NPE");
             return;
         }
 
         final SharedPreferences prefs =
-                BCCache.contextActivity.getSharedPreferences(BC_PAYPAL_SHARED_PREFERENCE_NAME, 0);
+                context.getSharedPreferences(BC_PAYPAL_SHARED_PREFERENCE_NAME, 0);
 
         String records = prefs.getString(BC_PAYPAL_UNSYNCED_STR_CACHE, null);
 
@@ -154,7 +150,7 @@ public class BCCache {
         leftRecords.removeAll(rmRecords);
 
         if (leftRecords.size() == 0) {
-            clearUnSyncedPayPalRecords();
+            clearUnSyncedPayPalRecords(context);
         } else {
             SharedPreferences.Editor spEditor = prefs.edit();
             spEditor.putString(BC_PAYPAL_UNSYNCED_STR_CACHE, joinStrings(leftRecords));
@@ -165,14 +161,14 @@ public class BCCache {
     /**
      * to store paypal not synced records
      */
-    public void storeUnSyncedPayPalRecords(String newRecord) {
-        if (BCCache.contextActivity == null) {
-            Log.e("BCCache", "NPE: can not get context activity");
+    public void storeUnSyncedPayPalRecords(Context context, String newRecord) {
+        if (context == null) {
+            Log.e("BCCache", "param context NPE");
             return;
         }
 
         final SharedPreferences prefs =
-                BCCache.contextActivity.getSharedPreferences(BC_PAYPAL_SHARED_PREFERENCE_NAME, 0);
+                context.getSharedPreferences(BC_PAYPAL_SHARED_PREFERENCE_NAME, 0);
 
         String cachedStr = prefs.getString(BC_PAYPAL_UNSYNCED_STR_CACHE, null);
 
@@ -206,7 +202,4 @@ public class BCCache {
         return joined.toString();
     }
 
-    public void detach() {
-        contextActivity = null;
-    }
 }

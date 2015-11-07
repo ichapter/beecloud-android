@@ -175,4 +175,11 @@ public class QRCodeEntryActivity extends Activity {
             }
         });
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        //用到BCPay的activity在结束前，清理context引用
+        BCPay.clear();
+    }
 }

@@ -74,7 +74,8 @@ public class ShoppingCartActivity extends Activity {
                     } else if (result.equals(BCPayResult.RESULT_CANCEL))
                         Toast.makeText(ShoppingCartActivity.this, "用户取消支付", Toast.LENGTH_LONG).show();
                     else if (result.equals(BCPayResult.RESULT_FAIL)) {
-                        Toast.makeText(ShoppingCartActivity.this, "支付失败, 原因: " + bcPayResult.getErrMsg()
+                        Toast.makeText(ShoppingCartActivity.this, "支付失败, 原因: " + bcPayResult.getErrCode()
+                                + " # " + bcPayResult.getErrMsg()
                                 + ", " + bcPayResult.getDetailInfo(), Toast.LENGTH_LONG).show();
 
                         if (bcPayResult.getErrMsg().equals(BCPayResult.FAIL_PLUGIN_NOT_INSTALLED) ||
@@ -150,7 +151,8 @@ public class ShoppingCartActivity extends Activity {
         setContentView(R.layout.activity_shopping_cart);
 
         // 推荐在主Activity里的onCreate函数中初始化BeeCloud.
-        BeeCloud.setAppIdAndSecret("c5d1cba1-5e3f-4ba0-941d-9b0a371fe719", "39a7a518-9ac8-4a9e-87bc-7885f33cf18c");
+        BeeCloud.setAppIdAndSecret("c5d1cba1-5e3f-4ba0-941d-9b0a371fe719",
+                "39a7a518-9ac8-4a9e-87bc-7885f33cf18c");
 
         // 如果用到微信支付，在用到微信支付的Activity的onCreate函数里调用以下函数.
         // 第二个参数需要换成你自己的微信AppID.
@@ -392,6 +394,12 @@ public class ShoppingCartActivity extends Activity {
     protected void onDestroy() {
         super.onDestroy();
         //清理当前的activity引用
-        BCPay.detach();
+        BCPay.clear();
+
+        //使用微信的，在initWechatPay的activity结束时detach
+        BCPay.detachWechat();
+
+        //使用百度支付的，在activity结束时detach
+        BCPay.detachBaiduPay();
     }
 }

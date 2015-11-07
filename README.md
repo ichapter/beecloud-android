@@ -1,6 +1,6 @@
 ## BeeCloud Android SDK (Open Source)
 
-![pass](https://img.shields.io/badge/Build-pass-green.svg) ![license](https://img.shields.io/badge/license-MIT-brightgreen.svg) ![version](https://img.shields.io/badge/version-v2.0.2-blue.svg)
+![pass](https://img.shields.io/badge/Build-pass-green.svg) ![license](https://img.shields.io/badge/license-MIT-brightgreen.svg) ![version](https://img.shields.io/badge/version-v2.0.3-blue.svg)
 
 ## 简介
 
@@ -42,7 +42,7 @@
 银联需要引入`UPPayAssistEx.jar`，<br/>
 百度钱包支付需要引入`Cashier_SDK-v4.2.0.jar`，<br/>
 PayPal需要引入`PayPalAndroidSDK-2.11.2.jar`，<br/>
-最后添加`beecloud android sdk`：`beecloud-android\sdk\beecloud-2.0.2.jar`
+最后添加`beecloud android sdk`：`beecloud-android\sdk\beecloud-2.0.3.jar`
 
 2.对于微信支付，需要注意你的`AndroidManifest.xml`中`package`需要和微信平台创建的移动应用`应用包名`保持一致，关于其`应用签名`请参阅[创建微信应用->B.填写平台信息](https://beecloud.cn/doc/payapply/?index=0)，
 
@@ -261,12 +261,12 @@ BCCache.executorService.execute(new Runnable() {
             //成功全部同步
         } else {
             //没有成功同步的订单
-            Set<String> unSynced = BCCache.getInstance(activity).getUnSyncedPayPalRecords());
+            Set<String> unSynced = BCCache.getInstance().getUnSyncedPayPalRecords(activity));
         }
     }
 });
 ```
-如果想手动清除未同步订单，调用`BCCache.getInstance(activity).clearUnSyncedPayPalRecords()`
+如果想手动清除未同步订单，调用`BCCache.getInstance().clearUnSyncedPayPalRecords(activity)`
 
 ### 5.线下支付
 请查看`doc`中的`API`，线下支付类`BCOfflinePay`，参照`demo`中`QRCodeEntryActivity`和其关联的activity；一般用于线下门店通过出示二维码由用户扫描付款，或者通过用户出示的付款码收款。<br/><br/>
@@ -603,6 +603,9 @@ BCQuery.getInstance().queryOfflineBillStatusAsync(
 * demo中支付宝支付，跳转到支付后提示“系统繁忙”：  
 由于支付宝对企业账号监控严格，故不再提供支付宝支付的测试功能，请在BeeCloud平台配置正确参数后，使用自行创建的APP的appID和appSecret。给您带来的不便，敬请谅解。
 
+* APP_INVALID, 根据app_id找不到对应的APP/keyspace或者app_sign不正确,或者timestamp不是当前UTC
+一般是测试设备时钟没有校准，或者你创建的APP出现了故障，请联系BeeCloud
+
 ## 代码贡献
 我们非常欢迎大家来贡献代码，我们会向贡献者致以最诚挚的敬意。
 
@@ -625,7 +628,7 @@ Pull Request要求
 - 清晰的commit历史 - 保证你的pull请求的每次commit操作都是有意义的。如果你开发中需要执行多次的即时commit操作，那么请把它们放到一起再提交pull请求。
 
 ## 联系我们
-- 如果有什么问题，可以到BeeCloud开发者1群:**321545822** 或 BeeCloud开发者2群:**427128840** 提问
+- 如果有什么问题，可以到BeeCloud开发者1群:**321545822** 或 BeeCloud开发者2群:**427128840** 或 BeeCloud开发者3群:**102350518** 提问
 - 更详细的文档，见源代码的注释以及[官方文档](https://beecloud.cn/doc/?index=2)
 - 如果发现了bug，欢迎提交[issue](https://github.com/beecloud/beecloud-android/issues)
 - 如果有新的需求，欢迎提交[issue](https://github.com/beecloud/beecloud-android/issues)

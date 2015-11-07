@@ -119,7 +119,7 @@ class BCHttpClientUtil {
     }
 
     public static String getPayPalAccessTokenUrl() {
-        if (BCCache.getInstance(null).paypalPayType == BCPay.PAYPAL_PAY_TYPE.LIVE)
+        if (BCCache.getInstance().paypalPayType == BCPay.PAYPAL_PAY_TYPE.LIVE)
             return PAYPAL_LIVE_BASE_URL + PAYPAL_ACCESS_TOKEN_URL;
         else
             return PAYPAL_SANDBOX_BASE_URL + PAYPAL_ACCESS_TOKEN_URL;
@@ -152,7 +152,7 @@ class BCHttpClientUtil {
         try {
             URL urlObj = new URL(url);
             httpsURLConnection = (HttpsURLConnection)urlObj.openConnection();
-            httpsURLConnection.setConnectTimeout(BCCache.getInstance(null).connectTimeout);
+            httpsURLConnection.setConnectTimeout(BCCache.getInstance().connectTimeout);
             httpsURLConnection.setDoInput(true);
 
             response = readStream(httpsURLConnection);
@@ -301,7 +301,7 @@ class BCHttpClientUtil {
             URL urlObj = new URL(url);
             httpsURLConnection = (HttpsURLConnection)urlObj.openConnection();
             httpsURLConnection.setRequestMethod("POST");
-            httpsURLConnection.setConnectTimeout(BCCache.getInstance(null).connectTimeout);
+            httpsURLConnection.setConnectTimeout(BCCache.getInstance().connectTimeout);
             httpsURLConnection.setRequestProperty("Content-Type", "application/json;charset=utf-8");
             httpsURLConnection.setDoOutput(true);
             httpsURLConnection.setChunkedStreamingMode(0);
@@ -360,11 +360,11 @@ class BCHttpClientUtil {
         try {
             URL urlObj = new URL(getPayPalAccessTokenUrl());
             httpsURLConnection = (HttpsURLConnection)urlObj.openConnection();
-            httpsURLConnection.setConnectTimeout(BCCache.getInstance(null).connectTimeout);
+            httpsURLConnection.setConnectTimeout(BCCache.getInstance().connectTimeout);
             httpsURLConnection.setRequestMethod("POST");
             httpsURLConnection.setRequestProperty("Accept", "application/json");
             httpsURLConnection.setRequestProperty("Authorization", BCSecurityUtil.getB64Auth(
-                    BCCache.getInstance(null).paypalClientID, BCCache.getInstance(null).paypalSecret));
+                    BCCache.getInstance().paypalClientID, BCCache.getInstance().paypalSecret));
             httpsURLConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
             httpsURLConnection.setDoOutput(true);
             httpsURLConnection.setChunkedStreamingMode(0);

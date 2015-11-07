@@ -19,11 +19,11 @@ import com.tencent.mm.sdk.openapi.WXAPIFactory;
 
 import cn.beecloud.entity.BCPayResult;
 
-/**
+/*
  * 微信支付结果接收类
  */
 public class BCWechatPaymentActivity extends Activity implements IWXAPIEventHandler {
-    private static final String TAG = "WechatPaymentActivity";
+    private static final String TAG = "BCWechatPaymentActivity";
 
     private IWXAPI wxAPI;
 
@@ -34,15 +34,38 @@ public class BCWechatPaymentActivity extends Activity implements IWXAPIEventHand
         Log.i(TAG, "into weixin return activity");
 
         try {
-            String wxAppId = BCCache.getInstance(null).wxAppId;
+            String wxAppId = BCCache.getInstance().wxAppId;
             if (wxAppId != null && wxAppId.length() > 0) {
                 wxAPI = WXAPIFactory.createWXAPI(this, wxAppId);
                 wxAPI.handleIntent(getIntent(), this);
             } else {
-                Log.e(TAG, "Error: wxAppId 不合法 WechatPaymentActivity: " + wxAppId);
+                Log.e(TAG, "Error: wxAppId 不合法 BCWechatPaymentActivity: " + wxAppId);
+
+                if (BCPay.payCallback != null) {
+                    BCPay.payCallback.done(
+                            new BCPayResult(BCPayResult.RESULT_FAIL,
+                                BCPayResult.APP_INTERNAL_PARAMS_ERR_CODE,
+                                BCPayResult.FAIL_INVALID_PARAMS,
+                                "wxAppId 不合法"));
+                }
+
+                this.finish();
+
             }
         } catch (Exception ex) {
-            Log.e(TAG, ex.getMessage());
+            Log.e(TAG, ex.getMessage()==null ? "未知错误，初始化回调入口失败" : ex.getMessage());
+
+            if (BCPay.payCallback != null) {
+                BCPay.payCallback.done(
+                        new BCPayResult(BCPayResult.RESULT_FAIL,
+                            BCPayResult.APP_INTERNAL_EXCEPTION_ERR_CODE,
+                            BCPayResult.FAIL_EXCEPTION,
+                            "微信回调入口初始化失败"));
+            }
+
+            ex.printStackTrace();
+
+            this.finish();
         }
     }
 
@@ -55,7 +78,17 @@ public class BCWechatPaymentActivity extends Activity implements IWXAPIEventHand
                 wxAPI.handleIntent(intent, this);
             }
         } catch (Exception ex) {
-            Log.e(TAG, ex.getMessage());
+            if (BCPay.payCallback != null) {
+                BCPay.payCallback.done(
+                        new BCPayResult(BCPayResult.RESULT_FAIL,
+                                BCPayResult.APP_INTERNAL_EXCEPTION_ERR_CODE,
+                                BCPayResult.FAIL_EXCEPTION,
+                                "微信回调入口初始化失败"));
+            }
+
+            ex.printStackTrace();
+
+            this.finish();
         }
     }
 
@@ -73,7 +106,7 @@ public class BCWechatPaymentActivity extends Activity implements IWXAPIEventHand
     @Override
     public void onResp(BaseResp baseResp) {
 
-        //Log.i(TAG, "onPayFinish, result code = " + baseResp.errCode);
+        Log.i(TAG, "onPayFinish, result code = " + baseResp.errCode);
 
         String result = BCPayResult.RESULT_FAIL;
         int errCode = BCPayResult.APP_INTERNAL_THIRD_CHANNEL_ERR_CODE;
@@ -109,15 +142,21 @@ public class BCWechatPaymentActivity extends Activity implements IWXAPIEventHand
                 detailInfo += "支付失败";
         }
 
-        BCPay instance = BCPay.getInstance(BCWechatPaymentActivity.this);
-
-        if (instance != null && instance.payCallback != null) {
-            instance.payCallback.done(new BCPayResult(result,
+        if (BCPay.payCallback != null) {
+            BCPay.payCallback.done(new BCPayResult(result,
                     errCode,
                     errMsg,
                     detailInfo,
-                    BCCache.getInstance(null).billID));
+                    BCCache.getInstance().billID));
         }
         this.finish();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        if (wxAPI != null)
+            wxAPI.detach();
     }
 }

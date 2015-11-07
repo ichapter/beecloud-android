@@ -22,7 +22,7 @@ import cn.beecloud.entity.BCPayResult;
  */
 public class BCUnionPaymentActivity extends Activity {
 
-    private static Integer targetVersion = 53;
+    private static final Integer TARGET_VERSION = 53;
     private static final String UN_APK_PACKAGE = "com.unionpay.uppay";
 
     @Override
@@ -42,7 +42,7 @@ public class BCUnionPaymentActivity extends Activity {
             int curVer = getUNAPKVersion();
             if (curVer == -1)
                 retPay = -1;
-            else if (curVer < targetVersion)
+            else if (curVer < TARGET_VERSION)
                 retPay = 2;
             else
                 retPay = UPPayAssistEx.startPay(this, null, null, tn, "00");
@@ -51,10 +51,8 @@ public class BCUnionPaymentActivity extends Activity {
             //插件问题 -1表示没有安装插件，2表示插件需要升级
             if (retPay==-1 || retPay==2) {
 
-                BCPay instance = BCPay.getInstance(BCUnionPaymentActivity.this);
-
-                if (instance != null && instance.payCallback != null) {
-                    instance.payCallback.done(new BCPayResult(BCPayResult.RESULT_FAIL,
+                if (BCPay.payCallback != null) {
+                    BCPay.payCallback.done(new BCPayResult(BCPayResult.RESULT_FAIL,
                             BCPayResult.APP_INTERNAL_THIRD_CHANNEL_ERR_CODE,
                             (retPay == -1)? BCPayResult.FAIL_PLUGIN_NOT_INSTALLED:BCPayResult.FAIL_PLUGIN_NEED_UPGRADE,
                          "银联插件问题, 需重新安装或升级"));
@@ -108,11 +106,9 @@ public class BCUnionPaymentActivity extends Activity {
             }
         }
 
-        BCPay instance = BCPay.getInstance(BCUnionPaymentActivity.this);
-
-        if (instance != null && instance.payCallback != null) {
-            instance.payCallback.done(new BCPayResult(result, errCode, errMsg,
-                    detailInfo, BCCache.getInstance(null).billID));
+        if (BCPay.payCallback != null) {
+            BCPay.payCallback.done(new BCPayResult(result, errCode, errMsg,
+                    detailInfo, BCCache.getInstance().billID));
         }
 
         this.finish();
@@ -126,7 +122,8 @@ public class BCUnionPaymentActivity extends Activity {
             PackageInfo Info=packageManager.getPackageInfo(UN_APK_PACKAGE, 0);
             version = Info.versionCode;
         } catch (PackageManager.NameNotFoundException e) {
-            Log.e("union payment", e.getMessage());
+            Log.e("union payment", e.getMessage()==null ?
+                    "PackageManager.NameNotFoundException":e.getMessage());
         }
 
         return version;

@@ -387,7 +387,7 @@ public class BCReqParams {
         if (reqType == ReqType.OFFLINE_PAY && !BCChannelTypes.isValidOfflinePayChannelType(channel))
             throw new BCException("非法的线下支付渠道");
 
-        BCCache mCache = BCCache.getInstance(null);
+        BCCache mCache = BCCache.getInstance();
 
         if (mCache.appId == null || mCache.appSecret == null) {
             throw new BCException("parameters: 请通过BeeCloud初始化appId和appSecret");

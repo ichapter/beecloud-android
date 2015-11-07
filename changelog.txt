@@ -1,5 +1,12 @@
 BeeCloud Android SDK Changelog
 ==========================
+v2.0.3 2015年11年07日
+fix bug
+增加BCPay context清理API：
+通过clear()释放BCPay占据的context, callback, observer引用，
+通过detachBaiduPay()释放baidu钱包占据的callback引用，
+通过detachWechat()释放微信占据的context
+
 v2.0.2 2015年11年05日
 消除Offline Pay无效引用
 
