@@ -4,7 +4,7 @@
 
     <!-- would be overridden by gradle -->
     <uses-sdk
-        android:minSdkVersion="10"
+        android:minSdkVersion="11"
         android:targetSdkVersion="22" />
 
     <!-- for all -->
@@ -127,6 +127,10 @@
             android:theme="@style/EbpayThemeActivit"
             android:windowSoftInputMode="stateVisible" >
         </activity>
+
+
+        <!-- 如果你的IDE提示该activity不存在而报错，可以删除，不影响百度支付；
+            也可以升级你的IDE到最新版本，与百度官方demo的声明保持一致 -->
         <activity
             android:name="com.baidu.paysdk.ui.PwdSetActivity"
             android:configChanges="keyboardHidden|navigation|orientation|screenSize"
@@ -136,6 +140,9 @@
             android:theme="@style/EbpayThemeActivit"
             android:windowSoftInputMode="stateVisible" >
         </activity>
+
+        <!-- 如果你的IDE提示该activity不存在而报错，可以删除，不影响百度支付；
+            也可以升级你的IDE到最新版本，与百度官方demo的声明保持一致 -->
         <activity
             android:name="com.baidu.paysdk.ui.PwdConfirmActivity"
             android:configChanges="keyboardHidden|navigation|orientation|screenSize"
@@ -145,6 +152,7 @@
             android:theme="@style/EbpayThemeActivit"
             android:windowSoftInputMode="stateVisible" >
         </activity>
+
         <activity
             android:name="com.baidu.paysdk.ui.PwdSetAndConfirmActivity"
             android:configChanges="keyboardHidden|navigation|orientation|screenSize"
@@ -185,6 +193,7 @@
             android:exported="@bool/bd_wallet_switch_global_debug"
             android:screenOrientation="portrait"
             android:theme="@style/EbpayThemeActivit"
+            android:launchMode="singleTask"
             android:windowSoftInputMode="stateHidden" />
         <activity
             android:name="com.baidu.paysdk.ui.BindCardDetailActivity"
@@ -193,6 +202,7 @@
             android:exported="@bool/bd_wallet_switch_global_debug"
             android:screenOrientation="portrait"
             android:theme="@style/EbpayThemeActivit"
+            android:launchMode="singleTask"
             android:windowSoftInputMode="stateVisible|adjustResize" />
         <activity
             android:name="com.baidu.paysdk.ui.BindCardDetailCredit2Activity"
@@ -201,6 +211,7 @@
             android:exported="@bool/bd_wallet_switch_global_debug"
             android:screenOrientation="portrait"
             android:theme="@style/EbpayThemeActivit"
+            android:launchMode="singleTask"
             android:windowSoftInputMode="stateVisible|adjustResize" />
         <activity
             android:name="com.baidu.paysdk.ui.BindCardDetailCreditActivity"
@@ -209,6 +220,7 @@
             android:exported="@bool/bd_wallet_switch_global_debug"
             android:screenOrientation="portrait"
             android:theme="@style/EbpayThemeActivit"
+            android:launchMode="singleTask"
             android:windowSoftInputMode="stateVisible|adjustResize" />
         <activity
             android:name="com.baidu.paysdk.ui.BindSmsActivity"
@@ -227,7 +239,10 @@
             android:theme="@style/EbpayThemeActivit"
             android:windowSoftInputMode="stateHidden" />
         <!-- 支付相关 Activity 结束 -->
+
         <!-- 安全中心 Activity 开始 -->
+        <!-- 如果你的IDE提示该activity不存在而报错，可以删除，不影响百度支付；
+                    也可以升级你的IDE到最新版本，与百度官方demo的声明保持一致 -->
         <activity
             android:name="com.baidu.paysdk.ui.PhonePwdActivity"
             android:configChanges="keyboardHidden|navigation|orientation|screenSize"
@@ -236,8 +251,8 @@
             android:screenOrientation="portrait"
             android:theme="@style/EbpayThemeActivit"
             android:windowSoftInputMode="adjustUnspecified|stateHidden" />
- -->
         <!-- 安全中心 Activity 结束 -->
+
         <activity
             android:name="com.baidu.paysdk.ui.SignChannelListActivity"
             android:configChanges="keyboardHidden|navigation|orientation|screenSize"
@@ -306,6 +321,7 @@
         <activity android:name=".PayViaAuthCodeActivity"
             android:screenOrientation="portrait">
         </activity>
+
     </application>
 
 </manifest>
