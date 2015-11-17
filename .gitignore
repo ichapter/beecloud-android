@@ -10,3 +10,4 @@ demo_eclipse/bin/*
 *.keystore
 UPPayPluginEx_old.apk
 sdk/sdk.iml
+demo/demo.iml
