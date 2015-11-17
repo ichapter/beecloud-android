@@ -82,6 +82,16 @@ public class BCQuery {
         BCCache.executorService.execute(new Runnable() {
              @Override
              public void run() {
+
+                 if (channel == null) {
+                     doErrCallBack(operation, BCRestfulCommonResult.APP_INNER_FAIL_NUM,
+                             BCRestfulCommonResult.APP_INNER_FAIL,
+                             "channel NPE, set ALL if you want to query all records",
+                             callback);
+
+                     return;
+                 }
+
                  BCQueryReqParams bcQueryReqParams;
                  try {
                      bcQueryReqParams = new BCQueryReqParams(channel);
@@ -108,7 +118,7 @@ public class BCQuery {
                  //Log.w("BCQuery",queryURL + bcQueryReqParams.transToEncodedJsonString());
 
                  BCHttpClientUtil.Response response = BCHttpClientUtil.httpGet(queryURL +
-                    bcQueryReqParams.transToEncodedJsonString());
+                         bcQueryReqParams.transToEncodedJsonString());
 
                  if (response.code == 200) {
 
@@ -293,7 +303,6 @@ public class BCQuery {
                 if (response.code == 200) {
 
                     String ret = response.content;
-
                     callback.done(BCRefundStatus.transJsonToObject(ret));
 
                 } else {
@@ -320,6 +329,7 @@ public class BCQuery {
         BCCache.executorService.execute(new Runnable() {
             @Override
             public void run() {
+
                 if (id == null) {
                     callback.done(new BCQueryBillResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
                             BCRestfulCommonResult.APP_INNER_FAIL, "id NPE!"));
