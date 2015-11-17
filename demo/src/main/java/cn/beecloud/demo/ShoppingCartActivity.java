@@ -286,8 +286,8 @@ public class ShoppingCartActivity extends Activity {
                         //商户自定义订单号
                         payParam.billNum = BillUtils.genBillNum();
 
-                        //订单超时时间，以秒为单位，建议最小300，可以为null
-                        payParam.billTimeout = 300;
+                        //订单超时时间，以秒为单位，建议不小于360，可以为null
+                        payParam.billTimeout = 360;
 
                         //扩展参数，可以传入任意数量的key/value对来补充对业务逻辑的需求，可以为null
                         payParam.optional = mapOptional;

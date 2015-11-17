@@ -146,7 +146,8 @@ public class BCOfflinePay {
 
                 String qrCodeReqURL = BCHttpClientUtil.getBillOfflinePayURL();
 
-                BCHttpClientUtil.Response response = BCHttpClientUtil.httpPost(qrCodeReqURL, parameters.transToBillReqMapParams());
+                BCHttpClientUtil.Response response = BCHttpClientUtil
+                        .httpPost(qrCodeReqURL, parameters.transToBillReqMapParams());
 
                 if (response.code == 200) {
                     String ret = response.content;
@@ -297,7 +298,8 @@ public class BCOfflinePay {
 
                 String qrCodeReqURL = BCHttpClientUtil.getBillOfflinePayURL();
 
-                BCHttpClientUtil.Response response = BCHttpClientUtil.httpPost(qrCodeReqURL, parameters.transToBillReqMapParams());
+                BCHttpClientUtil.Response response = BCHttpClientUtil
+                        .httpPost(qrCodeReqURL, parameters.transToBillReqMapParams());
 
                 if (response.code == 200) {
                     String ret = response.content;
@@ -419,7 +421,7 @@ public class BCOfflinePay {
                 //校验并准备公用参数
                 BCReqParams parameters;
                 try {
-                    parameters = new BCReqParams(channelType, BCReqParams.ReqType.OFFLINE_PAY);
+                    parameters = new BCReqParams(channelType, BCReqParams.ReqType.OFFLINE);
                 } catch (BCException e) {
                     callback.done(new BCRevertStatus(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
                             BCRestfulCommonResult.APP_INNER_FAIL,
@@ -440,7 +442,8 @@ public class BCOfflinePay {
                 Map<String, Object> reqMap = parameters.transToReqMapParams();
                 reqMap.put("method", "REVERT");
 
-                BCHttpClientUtil.Response response = BCHttpClientUtil.httpPost(revertURL, reqMap);
+                BCHttpClientUtil.Response response = BCHttpClientUtil
+                        .httpPost(revertURL, reqMap);
 
                 if (response.code == 200) {
 

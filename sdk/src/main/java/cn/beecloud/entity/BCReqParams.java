@@ -41,7 +41,7 @@ public class BCReqParams {
     /**
      * 请求类型
      */
-    public enum ReqType{PAY, QUERY, QRCODE, OFFLINE_PAY}
+    public enum ReqType{PAY, QUERY, QRCODE, OFFLINE, OFFLINE_PAY}
 
     /**
      * 渠道支付类型
@@ -258,6 +258,17 @@ public class BCReqParams {
          * @return true表示有效
          */
         public static boolean isValidOfflinePayChannelType(BCChannelTypes channel) {
+            return channel == WX_SCAN ||
+                    channel == ALI_SCAN;
+        }
+
+        /**
+         * 判断是否为有效线下渠道类型
+         *
+         * @param channel 支付渠道类型
+         * @return true表示有效
+         */
+        public static boolean isValidOfflineChannelType(BCChannelTypes channel) {
             return channel == WX_NATIVE ||
                     channel == WX_SCAN ||
                     channel == ALI_OFFLINE_QRCODE ||
@@ -382,10 +393,13 @@ public class BCReqParams {
             throw new BCException("非法APP支付渠道");
 
         if (reqType == ReqType.QRCODE && !BCChannelTypes.isValidQRCodeReqChannelType(channel))
-            throw new BCException("非法二维码生成请求渠道");
+            throw new BCException("非法二维码生成渠道");
 
         if (reqType == ReqType.OFFLINE_PAY && !BCChannelTypes.isValidOfflinePayChannelType(channel))
-            throw new BCException("非法的线下支付渠道");
+            throw new BCException("非法的线下扫码支付渠道");
+
+        if (reqType == ReqType.OFFLINE && !BCChannelTypes.isValidOfflineChannelType(channel))
+            throw new BCException("非法的线下渠道");
 
         BCCache mCache = BCCache.getInstance();
 
