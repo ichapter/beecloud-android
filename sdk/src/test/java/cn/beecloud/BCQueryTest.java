@@ -57,7 +57,7 @@ public class BCQueryTest {
      * @throws Exception
      */
     @Test
-    public void testQueryBillsAsync1() throws Exception {
+    public void testQueryBillsAsyncChannelNull() throws Exception {
         query.queryBillsAsync(null, null, null, null, null, null, new BCCallback() {
             @Override
             public void done(BCResult result) {
@@ -80,7 +80,7 @@ public class BCQueryTest {
      * @throws Exception
      */
     @Test
-    public void testQueryBillsAsync2() throws Exception {
+    public void testQueryBillsAsyncNetworkError() throws Exception {
         final BCHttpClientUtil.Response response = new BCHttpClientUtil.Response();
         response.code = 400;
         response.content = "wrong";
@@ -111,7 +111,7 @@ public class BCQueryTest {
      * @throws Exception
      */
     @Test
-    public void testQueryBillsAsync3() throws Exception {
+    public void testQueryBillsAsyncSucc() throws Exception {
         final BCHttpClientUtil.Response response = new BCHttpClientUtil.Response();
         response.code = 200;
         //please note this content is fake, there should be more content for bills, here just keep one record for the limit of space
@@ -130,7 +130,7 @@ public class BCQueryTest {
 
                         Assert.assertEquals((Integer)0, billsResult.getResultCode());
                         //最多可以获取到limit条数据
-                        Assert.assertTrue(billsResult.getCount() <= 10);
+                        Assert.assertTrue(billsResult.getCount() == 10);
 
                         BCBillOrder billOrder = billsResult.getBills().get(0);
 
@@ -157,7 +157,7 @@ public class BCQueryTest {
      * @throws Exception
      */
     @Test
-    public void testQueryBillsAsync4() throws Exception {
+    public void testQueryBillsAsyncByChannel() throws Exception {
         final BCHttpClientUtil.Response response = new BCHttpClientUtil.Response();
         response.code = 200;
         //please note this content is fake, there should be content for bills, here delete the record for the limit of space
@@ -175,6 +175,7 @@ public class BCQueryTest {
                         BCQueryBillsResult billsResult = (BCQueryBillsResult) result;
 
                         Assert.assertEquals((Integer)0, billsResult.getResultCode());
+                        Assert.assertEquals((Integer)10, billsResult.getCount());
 
                         latch.countDown();
                     }
@@ -189,7 +190,7 @@ public class BCQueryTest {
      * @throws Exception
      */
     @Test
-    public void testQueryBillsAsync5() throws Exception {
+    public void testQueryBillsAsyncByChannelBillNum() throws Exception {
         final BCHttpClientUtil.Response response = new BCHttpClientUtil.Response();
         response.code = 200;
         //please note this content is fake, there should be content for bills, here delete the record for the limit of space
@@ -208,6 +209,7 @@ public class BCQueryTest {
                         BCQueryBillsResult billsResult = (BCQueryBillsResult) result;
 
                         Assert.assertEquals((Integer)0, billsResult.getResultCode());
+                        Assert.assertEquals((Integer)10, billsResult.getCount());
 
                         latch.countDown();
                     }
@@ -222,7 +224,7 @@ public class BCQueryTest {
      * @throws Exception
      */
     @Test
-    public void testQueryBillsAsync6() throws Exception {
+    public void testQueryBillsAsyncByBean() throws Exception {
         final BCHttpClientUtil.Response response = new BCHttpClientUtil.Response();
         response.code = 200;
         //please note this content is fake, there should be content for bills, here delete the record for the limit of space
@@ -245,6 +247,7 @@ public class BCQueryTest {
                         BCQueryBillsResult billsResult = (BCQueryBillsResult) result;
 
                         Assert.assertEquals((Integer)0, billsResult.getResultCode());
+                        Assert.assertEquals((Integer)10, billsResult.getCount());
 
                         latch.countDown();
                     }
@@ -259,7 +262,7 @@ public class BCQueryTest {
      * @throws Exception
      */
     @Test
-    public void testQueryRefundsAsync1() throws Exception {
+    public void testQueryRefundsAsyncChannelNull() throws Exception {
         query.queryRefundsAsync(null, null, null, null, null, null, null, new BCCallback() {
             @Override
             public void done(BCResult result) {
@@ -282,7 +285,7 @@ public class BCQueryTest {
      * @throws Exception
      */
     @Test
-    public void testQueryRefundsAsync2() throws Exception {
+    public void testQueryRefundsAsyncNetworkError() throws Exception {
         final BCHttpClientUtil.Response response = new BCHttpClientUtil.Response();
         response.code = 400;
         response.content = "wrong";
@@ -313,7 +316,7 @@ public class BCQueryTest {
      * @throws Exception
      */
     @Test
-    public void testQueryRefundsAsync3() throws Exception {
+    public void testQueryRefundsAsyncSucc() throws Exception {
         final BCHttpClientUtil.Response response = new BCHttpClientUtil.Response();
         response.code = 200;
         //please note this content is fake, there should be more content for refunds, here just keep one record for the limit of space
@@ -331,7 +334,7 @@ public class BCQueryTest {
                         BCQueryRefundsResult refundsResult = (BCQueryRefundsResult) result;
 
                         Assert.assertEquals((Integer) 0, refundsResult.getResultCode());
-                        Assert.assertTrue(refundsResult.getCount() <= 10);
+                        Assert.assertTrue(refundsResult.getCount() == 10);
 
                         BCRefundOrder refundOrder = refundsResult.getRefunds().get(0);
 
@@ -359,7 +362,7 @@ public class BCQueryTest {
      * @throws Exception
      */
     @Test
-    public void testQueryRefundsAsync4() throws Exception {
+    public void testQueryRefundsAsyncByChannel() throws Exception {
         final BCHttpClientUtil.Response response = new BCHttpClientUtil.Response();
         response.code = 200;
         //please note this content is fake, there should be content for refunds, here delete the record for the limit of space
@@ -377,6 +380,7 @@ public class BCQueryTest {
                         BCQueryRefundsResult refundsResult = (BCQueryRefundsResult) result;
 
                         Assert.assertEquals((Integer) 0, refundsResult.getResultCode());
+                        Assert.assertEquals((Integer)10, refundsResult.getCount());
 
                         latch.countDown();
                     }
@@ -391,7 +395,7 @@ public class BCQueryTest {
      * @throws Exception
      */
     @Test
-    public void testQueryRefundsAsync5() throws Exception {
+    public void testQueryRefundsAsyncByChannelBillRefundNum() throws Exception {
         final BCHttpClientUtil.Response response = new BCHttpClientUtil.Response();
         response.code = 200;
         //please note this content is fake, there should be content for refunds, here delete the record for the limit of space
@@ -411,6 +415,7 @@ public class BCQueryTest {
                         BCQueryRefundsResult refundsResult = (BCQueryRefundsResult) result;
 
                         Assert.assertEquals((Integer) 0, refundsResult.getResultCode());
+                        Assert.assertEquals((Integer)10, refundsResult.getCount());
 
                         latch.countDown();
                     }
@@ -425,7 +430,7 @@ public class BCQueryTest {
      * @throws Exception
      */
     @Test
-    public void testQueryRefundsAsync6() throws Exception {
+    public void testQueryRefundsAsyncByBean() throws Exception {
         final BCHttpClientUtil.Response response = new BCHttpClientUtil.Response();
         response.code = 200;
         //please note this content is fake, there should be content for refunds, here delete the record for the limit of space
@@ -448,6 +453,7 @@ public class BCQueryTest {
                         BCQueryRefundsResult refundsResult = (BCQueryRefundsResult) result;
 
                         Assert.assertEquals((Integer) 0, refundsResult.getResultCode());
+                        Assert.assertEquals((Integer)10, refundsResult.getCount());
 
                         latch.countDown();
                     }
@@ -462,7 +468,7 @@ public class BCQueryTest {
      * @throws Exception
      */
     @Test
-    public void testQueryRefundStatusAsync1() throws Exception {
+    public void testQueryRefundStatusAsyncChannelInvalid() throws Exception {
         query.queryRefundStatusAsync(BCReqParams.BCChannelTypes.ALI,
                 Mockito.anyString(),
                 new BCCallback() {
@@ -487,7 +493,7 @@ public class BCQueryTest {
      * @throws Exception
      */
     @Test
-    public void testQueryRefundStatusAsync2() throws Exception {
+    public void testQueryRefundStatusAsyncRefundNumInvalid() throws Exception {
         query.queryRefundStatusAsync(BCReqParams.BCChannelTypes.WX,
                 null,
                 new BCCallback() {
@@ -512,7 +518,7 @@ public class BCQueryTest {
      * @throws Exception
      */
     @Test
-    public void testQueryRefundStatusAsync3() throws Exception {
+    public void testQueryRefundStatusAsyncNetworkError() throws Exception {
         final BCHttpClientUtil.Response response = new BCHttpClientUtil.Response();
         response.code = 400;
         response.content = "wrong";
@@ -544,7 +550,7 @@ public class BCQueryTest {
      * @throws Exception
      */
     @Test
-    public void testQueryRefundStatusAsync4() throws Exception {
+    public void testQueryRefundStatusAsyncSucc() throws Exception {
         final BCHttpClientUtil.Response response = new BCHttpClientUtil.Response();
         response.code = 200;
         response.content = "{\"result_msg\":\"OK\",\"refund_status\":\"SUCCESS\",\"resultCode\":0,\"errMsg\":\"OK:\",\"err_detail\":\"\",\"result_code\":0}";
@@ -578,7 +584,7 @@ public class BCQueryTest {
      * @throws Exception
      */
     @Test
-    public void testQueryBillByIDAsync1() throws Exception {
+    public void testQueryBillByIDAsyncParamInvalid() throws Exception {
 
         query.queryBillByIDAsync(null, new BCCallback() {
             @Override
@@ -603,7 +609,7 @@ public class BCQueryTest {
      * @throws Exception
      */
     @Test
-    public void testQueryBillByIDAsync2() throws Exception {
+    public void testQueryBillByIDAsyncNetworkError() throws Exception {
 
         final BCHttpClientUtil.Response response = new BCHttpClientUtil.Response();
         response.code = 400;
@@ -635,7 +641,7 @@ public class BCQueryTest {
      * @throws Exception
      */
     @Test
-    public void testQueryBillByIDAsync3() throws Exception {
+    public void testQueryBillByIDAsyncSucc() throws Exception {
 
         final BCHttpClientUtil.Response response = new BCHttpClientUtil.Response();
         response.code = 200;
@@ -680,7 +686,7 @@ public class BCQueryTest {
      * @throws Exception
      */
     @Test
-    public void testQueryRefundByIDAsync1() throws Exception {
+    public void testQueryRefundByIDAsyncParamInvalid() throws Exception {
 
         query.queryRefundByIDAsync(null, new BCCallback() {
             @Override
@@ -705,7 +711,7 @@ public class BCQueryTest {
      * @throws Exception
      */
     @Test
-    public void testQueryRefundByIDAsync2() throws Exception {
+    public void testQueryRefundByIDAsyncNetworkError() throws Exception {
 
         final BCHttpClientUtil.Response response = new BCHttpClientUtil.Response();
         response.code = 400;
@@ -737,7 +743,7 @@ public class BCQueryTest {
      * @throws Exception
      */
     @Test
-    public void testQueryRefundByIDAsync3() throws Exception {
+    public void testQueryRefundByIDAsyncSucc() throws Exception {
 
         final BCHttpClientUtil.Response response = new BCHttpClientUtil.Response();
         response.code = 200;
@@ -784,7 +790,7 @@ public class BCQueryTest {
      * @throws Exception
      */
     @Test
-    public void testQueryOfflineBillStatusAsync1() throws Exception {
+    public void testQueryOfflineBillStatusAsyncChannelInvalid() throws Exception {
         query.queryOfflineBillStatusAsync(BCReqParams.BCChannelTypes.WX_APP,
                 null,
                 new BCCallback() {
@@ -795,7 +801,7 @@ public class BCQueryTest {
                         BCBillStatus status = (BCBillStatus) result;
 
                         Assert.assertEquals(BCRestfulCommonResult.APP_INNER_FAIL_NUM, status.getResultCode());
-                        Assert.assertEquals("非法的线下支付渠道", status.getErrDetail());
+                        Assert.assertEquals("非法的线下渠道", status.getErrDetail());
 
                         latch.countDown();
                     }
@@ -810,7 +816,7 @@ public class BCQueryTest {
      * @throws Exception
      */
     @Test
-    public void testQueryOfflineBillStatusAsync2() throws Exception {
+    public void testQueryOfflineBillStatusAsyncBillNumInvalid() throws Exception {
         query.queryOfflineBillStatusAsync(BCReqParams.BCChannelTypes.WX_SCAN,
                 null,
                 new BCCallback() {
@@ -835,7 +841,7 @@ public class BCQueryTest {
      * @throws Exception
      */
     @Test
-    public void testQueryOfflineBillStatusAsync3() throws Exception {
+    public void testQueryOfflineBillStatusAsyncNetworkError() throws Exception {
         final BCHttpClientUtil.Response response = new BCHttpClientUtil.Response();
         response.code = 400;
         response.content = "wrong";
@@ -869,7 +875,7 @@ public class BCQueryTest {
      * @throws Exception
      */
     @Test
-    public void testQueryOfflineBillStatusAsync4() throws Exception {
+    public void testQueryOfflineBillStatusAsyncSucc() throws Exception {
         final BCHttpClientUtil.Response response = new BCHttpClientUtil.Response();
         response.code = 200;
         response.content = "{\"result_msg\":\"OK\",\"submit_msg\":\"OK\",\"resultCode\":0,\"errMsg\":\"OK:\",\"err_detail\":\"\",\"result_code\":0,\"did_submit\":true,\"pay_result\":true}";
@@ -878,7 +884,7 @@ public class BCQueryTest {
         PowerMockito.stub(PowerMockito.method(BCHttpClientUtil.class, "httpPost",
                 String.class, Map.class)).toReturn(response);
 
-        query.queryOfflineBillStatusAsync(BCReqParams.BCChannelTypes.WX_SCAN,
+        query.queryOfflineBillStatusAsync(BCReqParams.BCChannelTypes.WX_NATIVE,
                 "fakeid",
                 new BCCallback() {
                     @Override

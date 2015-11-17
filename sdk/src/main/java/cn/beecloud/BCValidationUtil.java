@@ -110,13 +110,13 @@ class BCValidationUtil {
             return "parameters: 不合法的参数-订单标题长度不合法, 32个字节内, 汉字以2个字节计";
         }
 
-        if (!BCValidationUtil.isValidBillNum(billNum))
-            return "parameters: 订单号必须是长度8~32位字母和/或数字组合成的字符串";
-
-        if (billTotalFee < 0) {
+        if (billTotalFee == null || billTotalFee <= 0) {
             return "parameters: billTotalFee " + billTotalFee +
                     " 格式不正确, 必须是以分为单位的正整数, 比如100表示1元";
         }
+
+        if (!BCValidationUtil.isValidBillNum(billNum))
+            return "parameters: 订单号必须是长度8~32位字母和/或数字组合成的字符串";
 
         parameters.title = billTitle;
         parameters.totalFee = billTotalFee;
