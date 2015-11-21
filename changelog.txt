@@ -1,5 +1,8 @@
 BeeCloud Android SDK Changelog
 ==========================
+v2.0.4 2015年11年21日
+根据unit test调整了部分错误信息
+
 v2.0.3 2015年11年07日
 fix bug
 增加BCPay context清理API：

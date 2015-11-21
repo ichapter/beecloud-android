@@ -225,9 +225,15 @@ class BCHttpClientUtil {
                 response.content = stringBuilder.toString();
 
             } catch (IOException e1) {
-                response.content = e.getMessage();
+                response.content = e1.getMessage();
                 response.code = -1;
                 e1.printStackTrace();
+            } catch (Exception ex) {
+                //if user directly shuts down network when trying to write to server
+                //there could be NullPointerException or SSLException
+                response.content = ex.getMessage();
+                response.code = -1;
+                ex.printStackTrace();
             }
         } finally {
             if (reader != null) {
@@ -271,9 +277,17 @@ class BCHttpClientUtil {
                 response.content = stringBuilder.toString();
 
             } catch (IOException e1) {
-                response.content = e.getMessage();
+                response = new Response();
+                response.content = e1.getMessage();
                 response.code = -1;
                 e1.printStackTrace();
+            } catch (Exception ex) {
+                //if user directly shutdowns network when trying to write to server
+                //there could be NullPointerException or SSLException
+                response = new Response();
+                response.content = ex.getMessage();
+                response.code = -1;
+                ex.printStackTrace();
             }
         } finally {
             try {

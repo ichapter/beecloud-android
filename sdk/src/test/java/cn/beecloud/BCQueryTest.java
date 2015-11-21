@@ -5,7 +5,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -200,7 +199,7 @@ public class BCQueryTest {
         PowerMockito.stub(PowerMockito.method(BCHttpClientUtil.class, "httpGet", String.class)).toReturn(response);
 
         query.queryBillsAsync(BCReqParams.BCChannelTypes.ALL,
-                Mockito.anyString(),
+                "billnum",
                 new BCCallback() {
                     @Override
                     public void done(BCResult result) {
@@ -405,8 +404,8 @@ public class BCQueryTest {
         PowerMockito.stub(PowerMockito.method(BCHttpClientUtil.class, "httpGet", String.class)).toReturn(response);
 
         query.queryRefundsAsync(BCReqParams.BCChannelTypes.ALL,
-                Mockito.anyString(),
-                Mockito.anyString(),
+                "billnum",
+                "refundnum",
                 new BCCallback() {
                     @Override
                     public void done(BCResult result) {
@@ -441,8 +440,8 @@ public class BCQueryTest {
 
         BCQuery.QueryParams queryParams = new BCQuery.QueryParams();
         queryParams.channel = BCReqParams.BCChannelTypes.UN;
-        queryParams.refundNum = Mockito.anyString();
-        queryParams.billNum = Mockito.anyString();
+        queryParams.refundNum = "refundnum";
+        queryParams.billNum = "billnum";
 
         query.queryRefundsAsync(queryParams,
                 new BCCallback() {
@@ -470,7 +469,7 @@ public class BCQueryTest {
     @Test
     public void testQueryRefundStatusAsyncChannelInvalid() throws Exception {
         query.queryRefundStatusAsync(BCReqParams.BCChannelTypes.ALI,
-                Mockito.anyString(),
+                "refundnum",
                 new BCCallback() {
                     @Override
                     public void done(BCResult result) {
@@ -527,7 +526,7 @@ public class BCQueryTest {
         PowerMockito.stub(PowerMockito.method(BCHttpClientUtil.class, "httpGet", String.class)).toReturn(response);
 
         query.queryRefundStatusAsync(BCReqParams.BCChannelTypes.WX,
-                Mockito.anyString(),
+                "refundnum",
                 new BCCallback() {
                     @Override
                     public void done(BCResult result) {
@@ -559,7 +558,7 @@ public class BCQueryTest {
         PowerMockito.stub(PowerMockito.method(BCHttpClientUtil.class, "httpGet", String.class)).toReturn(response);
 
         query.queryRefundStatusAsync(BCReqParams.BCChannelTypes.WX,
-                Mockito.anyString(),
+                "refundnum",
                 new BCCallback() {
                     @Override
                     public void done(BCResult result) {
@@ -618,7 +617,7 @@ public class BCQueryTest {
         //mock
         PowerMockito.stub(PowerMockito.method(BCHttpClientUtil.class, "httpGet", String.class)).toReturn(response);
 
-        query.queryBillByIDAsync(Mockito.anyString(), new BCCallback() {
+        query.queryBillByIDAsync("billid", new BCCallback() {
             @Override
             public void done(BCResult result) {
                 Assert.assertTrue(result instanceof BCQueryBillResult);
@@ -650,7 +649,7 @@ public class BCQueryTest {
         //mock
         PowerMockito.stub(PowerMockito.method(BCHttpClientUtil.class, "httpGet", String.class)).toReturn(response);
 
-        query.queryBillByIDAsync(Mockito.anyString(), new BCCallback() {
+        query.queryBillByIDAsync("billid", new BCCallback() {
             @Override
             public void done(BCResult result) {
                 Assert.assertTrue(result instanceof BCQueryBillResult);
@@ -720,7 +719,7 @@ public class BCQueryTest {
         //mock
         PowerMockito.stub(PowerMockito.method(BCHttpClientUtil.class, "httpGet", String.class)).toReturn(response);
 
-        query.queryRefundByIDAsync(Mockito.anyString(), new BCCallback() {
+        query.queryRefundByIDAsync("refundid", new BCCallback() {
             @Override
             public void done(BCResult result) {
                 Assert.assertTrue(result instanceof BCQueryRefundResult);
@@ -752,7 +751,7 @@ public class BCQueryTest {
         //mock
         PowerMockito.stub(PowerMockito.method(BCHttpClientUtil.class, "httpGet", String.class)).toReturn(response);
 
-        query.queryRefundByIDAsync(Mockito.anyString(), new BCCallback() {
+        query.queryRefundByIDAsync("refundid", new BCCallback() {
             @Override
             public void done(BCResult result) {
                 Assert.assertTrue(result instanceof BCQueryRefundResult);
