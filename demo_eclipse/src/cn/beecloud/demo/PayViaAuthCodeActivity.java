@@ -28,6 +28,7 @@ import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
+import cn.beecloud.BCCache;
 import cn.beecloud.BCOfflinePay;
 import cn.beecloud.BCQuery;
 import cn.beecloud.async.BCCallback;
@@ -174,6 +175,13 @@ public class PayViaAuthCodeActivity extends Activity {
                                     "err code:" + payResult.getResult() +
                                     "; err msg: " + payResult.getErrMsg() +
                                     "; err detail: " + payResult.getDetailInfo();
+
+                            /**
+                             * 你发布的项目中不需要做如下判断，此处由于支付宝政策原因，
+                             * 不再提供支付宝支付的测试功能，所以给出提示说明
+                             */
+                            if (BCCache.getInstance().appId.equals("c5d1cba1-5e3f-4ba0-941d-9b0a371fe719"))
+                                errMsg = "支付失败：由于支付宝政策原因，故不再提供支付宝支付的测试功能，给您带来的不便，敬请谅解";
 
                             msg.what = ERR_CODE;
                         }

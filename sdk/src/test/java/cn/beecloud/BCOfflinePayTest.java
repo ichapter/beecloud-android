@@ -8,7 +8,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -51,12 +50,12 @@ public class BCOfflinePayTest {
     @Test
     public void testReqQRCodeAsyncChannelInvalid() throws Exception {
         pay.reqQRCodeAsync(BCReqParams.BCChannelTypes.ALI_APP,
-                Mockito.anyString(),
-                Mockito.anyInt(),
-                Mockito.anyString(),
+                "billtitle",
+                1,
+                "billnum",
                 null,
-                Mockito.anyBoolean(),
-                Mockito.anyInt(),
+                Boolean.FALSE,
+                333,
                 new BCCallback() {
                     @Override
                     public void done(BCResult result) {
@@ -102,8 +101,8 @@ public class BCOfflinePayTest {
                     (Integer)objects[1],
                     (String)objects[2],
                     null,
-                    Mockito.anyBoolean(),
-                    Mockito.anyInt(),
+                    Boolean.FALSE,
+                    333,
                     new BCCallback() {
                         @Override
                         public void done(BCResult result) {
@@ -134,7 +133,7 @@ public class BCOfflinePayTest {
     public void testReqQRCodeAsyncNetworkError() throws Exception {
         final BCHttpClientUtil.Response response = new BCHttpClientUtil.Response();
         response.code = 400;
-        response.content = Mockito.anyString();
+        response.content = "wrong";
 
         //mock
         PowerMockito.stub(PowerMockito.method(BCHttpClientUtil.class, "httpPost",
@@ -145,8 +144,8 @@ public class BCOfflinePayTest {
                 1,
                 "123456789ABCDE",
                 null,
-                Mockito.anyBoolean(),
-                Mockito.anyInt(),
+                Boolean.FALSE,
+                555,
                 new BCCallback() {
                     @Override
                     public void done(BCResult result) {
@@ -184,8 +183,8 @@ public class BCOfflinePayTest {
                 1,
                 "123456789ABCDE",
                 null,
-                Mockito.anyBoolean(),
-                Mockito.anyInt(),
+                Boolean.FALSE,
+                321,
                 new BCCallback() {
                     @Override
                     public void done(BCResult result) {
@@ -358,7 +357,7 @@ public class BCOfflinePayTest {
     public void testReqAliOfflineQRCodeAsync() throws Exception {
         final BCHttpClientUtil.Response response = new BCHttpClientUtil.Response();
         response.code = 400;
-        response.content = Mockito.anyString();
+        response.content = "wrong";
 
         //mock
         PowerMockito.stub(PowerMockito.method(BCHttpClientUtil.class, "httpPost",
@@ -368,8 +367,8 @@ public class BCOfflinePayTest {
                 1,
                 "123456789ABCDE",
                 null,
-                Mockito.anyBoolean(),
-                Mockito.anyInt(),
+                Boolean.FALSE,
+                123,
                 new BCCallback() {
                     @Override
                     public void done(BCResult result) {
@@ -417,8 +416,8 @@ public class BCOfflinePayTest {
                     (String) objects[3],
                     null,
                     (String) objects[4],
-                    Mockito.anyString(),
-                    Mockito.anyString(),
+                    "terminalid",
+                    null,
                     new BCCallback() {
                         @Override
                         public void done(BCResult result) {
@@ -453,7 +452,7 @@ public class BCOfflinePayTest {
     public void testReqOfflinePayAsyncNetworkError() throws Exception {
         final BCHttpClientUtil.Response response = new BCHttpClientUtil.Response();
         response.code = 400;
-        response.content = Mockito.anyString();
+        response.content = "wrong";
 
         //mock network
         PowerMockito.stub(PowerMockito.method(BCHttpClientUtil.class, "httpPost",
@@ -465,8 +464,8 @@ public class BCOfflinePayTest {
                 "123456789ABCDE",
                 null,
                 "fakecode",
-                Mockito.anyString(),
-                Mockito.anyString(),
+                null,
+                null,
                 new BCCallback() {
                     @Override
                     public void done(BCResult result) {
@@ -510,8 +509,8 @@ public class BCOfflinePayTest {
                 "123456789ABCDE",
                 null,
                 "fakecode",
-                Mockito.anyString(),
-                Mockito.anyString(),
+                null,
+                "storeid",
                 new BCCallback() {
                     @Override
                     public void done(BCResult result) {
@@ -554,8 +553,8 @@ public class BCOfflinePayTest {
                 "123456789ABCDE",
                 null,
                 "fakecode",
-                Mockito.anyString(),
-                Mockito.anyString(),
+                null,
+                "storeid",
                 new BCCallback() {
                     @Override
                     public void done(BCResult result) {
@@ -661,7 +660,7 @@ public class BCOfflinePayTest {
     public void testReqRevertBillAsyncNetworkError() throws Exception {
         BCHttpClientUtil.Response response = new BCHttpClientUtil.Response();
         response.code = 400;
-        response.content = Mockito.anyString();
+        response.content = "wrong";
 
         //mock network
         PowerMockito.stub(PowerMockito.method(BCHttpClientUtil.class, "httpPost",

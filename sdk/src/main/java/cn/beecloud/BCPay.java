@@ -114,7 +114,7 @@ public class BCPay {
                 wxAPI.registerApp(wechatAppID);
             } else {
                 errMsg = "Error: 安装的微信版本不支持支付.";
-                Log.d(TAG, errMsg);
+                Log.e(TAG, errMsg);
             }
         } catch (Exception ignored) {
             errMsg = "Error: 无法注册微信 " + wechatAppID + ". Exception: " + ignored.getMessage();
@@ -139,6 +139,7 @@ public class BCPay {
     public static void detachWechat() {
         if (wxAPI != null) {
             wxAPI.detach();
+            wxAPI = null;
         }
     }
 
@@ -146,8 +147,10 @@ public class BCPay {
      * 释放baidu钱包占据的callback引用
      */
     public static void detachBaiduPay() {
-        if (baiduPay != null)
+        if (baiduPay != null) {
             baiduPay.finish();
+            baiduPay = null;
+        }
     }
 
     public enum PAYPAL_PAY_TYPE {
@@ -252,7 +255,8 @@ public class BCPay {
 
                 String payURL = BCHttpClientUtil.getBillPayURL();
 
-                BCHttpClientUtil.Response response = BCHttpClientUtil.httpPost(payURL, parameters.transToBillReqMapParams());
+                BCHttpClientUtil.Response response = BCHttpClientUtil
+                        .httpPost(payURL, parameters.transToBillReqMapParams());
 
                 if (response.code == 200) {
                     String ret = response.content;
@@ -373,7 +377,7 @@ public class BCPay {
             payCallback.done(new BCPayResult(BCPayResult.RESULT_FAIL,
                     BCPayResult.APP_INTERNAL_EXCEPTION_ERR_CODE,
                     BCPayResult.FAIL_EXCEPTION,
-                    "Error: 微信API为空, 请确认已经在需要调起微信支付的Activity的onCreate函数中调用BCPay.initWechatPay(XXActivity.this)"));
+                    "Error: 微信API为空, 请确认已经在需要调起微信支付的Activity中[成功]调用了BCPay.initWechatPay"));
         }
     }
 
@@ -642,7 +646,9 @@ public class BCPay {
     }
 
     private String getPayPalAccessToken() {
-        BCHttpClientUtil.Response response = BCHttpClientUtil.getPayPalAccessToken();
+
+        BCHttpClientUtil.Response response = BCHttpClientUtil
+                .getPayPalAccessToken();
 
         String accessToken = null;
 
@@ -666,7 +672,8 @@ public class BCPay {
     /**
      * sync with server to verify the payment
      *
-     * @return BCPayResult.RESULT_SUCCESS means sync successfully and payment is valid
+     * @return if first item equals BCPayResult.RESULT_SUCCESS then it means sync successfully and payment is valid,
+     *         else second item contains error info
      */
     String[] syncPayPalPayment(final String billTitle, final Integer billTotalFee, final String billNum,
                              final String currency, final String optional, final PAYPAL_PAY_TYPE paypalType,
@@ -710,7 +717,8 @@ public class BCPay {
 
         String payURL = BCHttpClientUtil.getBillPayURL();
 
-        BCHttpClientUtil.Response response = BCHttpClientUtil.httpPost(payURL, parameters.transToBillReqMapParams());
+        BCHttpClientUtil.Response response = BCHttpClientUtil
+                .httpPost(payURL, parameters.transToBillReqMapParams());
 
         if (response.code == 200) {
             String ret = response.content;
@@ -756,9 +764,10 @@ public class BCPay {
     /**
      * sync with server to verify the payment
      *
-     * @return BCPayResult.RESULT_SUCCESS means sync successfully and payment is valid
+     * @return if first item equals BCPayResult.RESULT_SUCCESS then it means sync successfully and payment is valid,
+     *         else second item contains error info
      */
-    public String syncPayPalPayment(final String syncJson, final String token) {
+    public String[] syncPayPalPayment(final String syncJson, final String token) {
         Gson gson = new Gson();
         Map<String, String> syncItem = gson.fromJson(syncJson, new TypeToken<Map<String,String>>() {}.getType());
 
@@ -780,7 +789,7 @@ public class BCPay {
             BCCache.getInstance().removeSyncedPalPalRecords(mContextActivity, syncedRecord);
         }
 
-        return result[0];
+        return result;
     }
 
     /**
@@ -796,16 +805,14 @@ public class BCPay {
 
         String accessToken = getPayPalAccessToken();
 
-        List<String> syncedRecords = new ArrayList<String>();
+        int syncedNum = 0;
 
         for (String jsonStr : allRecords) {
-            if (syncPayPalPayment(jsonStr, accessToken).equals(BCPayResult.RESULT_SUCCESS))
-                syncedRecords.add(jsonStr);
+            if (syncPayPalPayment(jsonStr, accessToken)[0].equals(BCPayResult.RESULT_SUCCESS))
+                syncedNum++;
         }
 
-        result.put("syncedNum", syncedRecords.size());
-
-        BCCache.getInstance().removeSyncedPalPalRecords(mContextActivity, syncedRecords);
+        result.put("syncedNum", syncedNum);
 
         return result;
     }
@@ -877,7 +884,8 @@ public class BCPay {
 
                 String qrCodeReqURL = BCHttpClientUtil.getQRCodeReqURL();
 
-                BCHttpClientUtil.Response response = BCHttpClientUtil.httpPost(qrCodeReqURL, parameters.transToBillReqMapParams());
+                BCHttpClientUtil.Response response = BCHttpClientUtil
+                        .httpPost(qrCodeReqURL, parameters.transToBillReqMapParams());
 
                 if (response.code == 200) {
                     String ret = response.content;
@@ -962,7 +970,7 @@ public class BCPay {
         public String currency;
 
         /**
-         * 订单超时时间，以秒为单位，建议不小于300, 可以为null
+         * 订单超时时间，以秒为单位，建议不小于360, 可以为null
          */
         public Integer billTimeout;
 

@@ -74,9 +74,25 @@ public class ShoppingCartActivity extends Activity {
                     } else if (result.equals(BCPayResult.RESULT_CANCEL))
                         Toast.makeText(ShoppingCartActivity.this, "用户取消支付", Toast.LENGTH_LONG).show();
                     else if (result.equals(BCPayResult.RESULT_FAIL)) {
-                        Toast.makeText(ShoppingCartActivity.this, "支付失败, 原因: " + bcPayResult.getErrCode()
-                                + " # " + bcPayResult.getErrMsg()
-                                + ", " + bcPayResult.getDetailInfo(), Toast.LENGTH_LONG).show();
+                        String toastMsg = "支付失败, 原因: " + bcPayResult.getErrCode() +
+                                " # " + bcPayResult.getErrMsg() +
+                                " # " + bcPayResult.getDetailInfo();
+
+                        /**
+                         * 你发布的项目中不应该出现如下错误，此处由于支付宝政策原因，
+                         * 不再提供支付宝支付的测试功能，所以给出提示说明
+                         */
+                        if (bcPayResult.getErrMsg().equals("PAY_FACTOR_NOT_SET") &&
+                                bcPayResult.getDetailInfo().startsWith("支付宝参数")) {
+                            toastMsg = "支付失败：由于支付宝政策原因，故不再提供支付宝支付的测试功能，给您带来的不便，敬请谅解";
+                        }
+
+                        /**
+                         * 以下是正常流程，请按需处理失败信息
+                         */
+
+                        Toast.makeText(ShoppingCartActivity.this, toastMsg, Toast.LENGTH_LONG).show();
+                        Log.e(TAG, toastMsg);
 
                         if (bcPayResult.getErrMsg().equals(BCPayResult.FAIL_PLUGIN_NOT_INSTALLED) ||
                                 bcPayResult.getErrMsg().equals(BCPayResult.FAIL_PLUGIN_NEED_UPGRADE)) {
@@ -85,6 +101,7 @@ public class ShoppingCartActivity extends Activity {
                             msg.what = 1;
                             mHandler.sendMessage(msg);
                         }
+
                     } else if (result.equals(BCPayResult.RESULT_UNKNOWN)) {
                         //可能出现在支付宝8000返回状态
                         Toast.makeText(ShoppingCartActivity.this, "订单状态未知", Toast.LENGTH_LONG).show();
@@ -167,7 +184,8 @@ public class ShoppingCartActivity extends Activity {
 
         payMethod = (ListView) this.findViewById(R.id.payMethod);
         Integer[] payIcons = new Integer[]{R.drawable.wechat, R.drawable.alipay,
-                R.drawable.unionpay, R.drawable.baidupay ,R.drawable.paypal, R.drawable.scan};
+                R.drawable.unionpay, R.drawable.baidupay ,
+                R.drawable.paypal, R.drawable.scan};
         final String[] payNames = new String[]{"微信支付", "支付宝支付",
                 "银联在线", "百度钱包", "PayPal支付", "二维码支付"};
         String[] payDescs = new String[]{"使用微信支付，以人民币CNY计费", "使用支付宝支付，以人民币CNY计费",
@@ -217,7 +235,7 @@ public class ShoppingCartActivity extends Activity {
                         mapOptional.put("money", "2");
 
                         BCPay.getInstance(ShoppingCartActivity.this).reqAliPaymentAsync(
-                                "支付宝支付测试",
+                                "安卓支付宝支付测试",
                                 1,
                                 BillUtils.genBillNum(),
                                 mapOptional,
@@ -228,7 +246,7 @@ public class ShoppingCartActivity extends Activity {
                     case 2: //银联支付
                         loadingDialog.show();
 
-                        /*
+                        /*  你可以通过如下方法发起支付，或者PayParams的方式
                         BCPay.getInstance(ShoppingCartActivity.this).reqUnionPaymentAsync("银联支付测试",
                                 1,
                                 BillUtils.genBillNum(),
@@ -278,7 +296,7 @@ public class ShoppingCartActivity extends Activity {
                         payParam.channelType = BCReqParams.BCChannelTypes.BD_APP;
 
                         //商品描述, 32个字节内, 汉字以2个字节计
-                        payParam.billTitle = "Baidu钱包支付测试";
+                        payParam.billTitle = "安卓Baidu钱包支付测试";
 
                         //支付金额，以分为单位，必须是正整数
                         payParam.billTotalFee = 1;
@@ -286,13 +304,13 @@ public class ShoppingCartActivity extends Activity {
                         //商户自定义订单号
                         payParam.billNum = BillUtils.genBillNum();
 
-                        //订单超时时间，以秒为单位，建议不小于360，可以为null
+                        //订单超时时间，以秒为单位，建议不小于360，可以不设置
                         payParam.billTimeout = 360;
 
-                        //扩展参数，可以传入任意数量的key/value对来补充对业务逻辑的需求，可以为null
+                        //扩展参数，可以传入任意数量的key/value对来补充对业务逻辑的需求，可以不设置
                         payParam.optional = mapOptional;
 
-                        //扩展参数，用于后期分析，目前只支持key为category的分类分析，可以为null
+                        //扩展参数，用于后期分析，目前只支持key为category的分类分析，可以不设置
                         analysis = new HashMap<String, String>();
                         analysis.put("category", "BD");
                         payParam.analysis = analysis;
@@ -328,6 +346,8 @@ public class ShoppingCartActivity extends Activity {
                             public boolean onSyncFailed(String billInfo, String failInfo) {
                                 Log.w(TAG, "billInfo: " + billInfo +
                                     "#failInfo: "+failInfo);
+                                //return true if you have successfully dealt with the billInfo
+                                //else sdk will continue to store the un-synced billInfo into cache for later sync
                                 return false;
                             }
                         });

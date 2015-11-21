@@ -41,7 +41,17 @@ public class BCReqParams {
     /**
      * 请求类型
      */
-    public enum ReqType{PAY, QUERY, QRCODE, OFFLINE, OFFLINE_PAY}
+    public enum ReqType{
+        //正常的APP方式支付
+        PAY,
+        //查询操作
+        QUERY,
+        //二维码请求
+        QRCODE,
+        //线下类型
+        OFFLINE,
+        //线下扫码支付
+        OFFLINE_PAY}
 
     /**
      * 渠道支付类型

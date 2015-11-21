@@ -110,22 +110,35 @@ public class QRCodeEntryActivity extends Activity {
                                     Log.w(Tag, "ali qrcode url: " + aliQRURL);
                                     Log.w(Tag, "ali qrcode html: " + aliQRHtml);
 
+                                    Message msg = mHandler.obtainMessage();
+                                    msg.what = 2;
+                                    mHandler.sendMessage(msg);
+
                                 } else {
 
                                     QRCodeEntryActivity.this.runOnUiThread(new Runnable() {
                                         @Override
                                         public void run() {
-                                            Toast.makeText(QRCodeEntryActivity.this, "err code:" + bcqrCodeResult.getResultCode() +
+
+                                            String toastMsg = "err code:" + bcqrCodeResult.getResultCode() +
                                                     "; err msg: " + bcqrCodeResult.getResultMsg() +
-                                                    "; err detail: " + bcqrCodeResult.getErrDetail(), Toast.LENGTH_LONG).show();
+                                                    "; err detail: " + bcqrCodeResult.getErrDetail();
+
+                                            /**
+                                             * 你发布的项目中不应该出现如下错误，此处由于支付宝政策原因，
+                                             * 不再提供支付宝支付的测试功能，所以给出提示说明
+                                             */
+                                            if (bcqrCodeResult.getResultMsg().equals("PAY_FACTOR_NOT_SET") &&
+                                                    bcqrCodeResult.getErrDetail().startsWith("支付宝参数")) {
+                                                toastMsg = "支付失败：由于支付宝政策原因，故不再提供支付宝支付的测试功能，给您带来的不便，敬请谅解";
+                                            }
+
+                                            Toast.makeText(QRCodeEntryActivity.this, toastMsg, Toast.LENGTH_LONG).show();
                                         }
                                     });
 
                                 }
 
-                                Message msg = mHandler.obtainMessage();
-                                msg.what = 2;
-                                mHandler.sendMessage(msg);
                             }
                         });
             }

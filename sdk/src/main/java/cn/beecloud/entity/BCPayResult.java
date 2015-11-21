@@ -84,11 +84,6 @@ public class BCPayResult implements BCResult {
     public static final String FAIL_INVALID_PARAMS = "FAIL_INVALID_PARAMS";
 
     /**
-     * 从beecloud服务端返回的错误
-     */
-    public static final String FAIL_ERR_FROM_SERVER = "FAIL_ERR_FROM_SERVER";
-
-    /**
      * 从第三方app支付渠道返回的错误信息
      */
     public static final String FAIL_ERR_FROM_CHANNEL = "FAIL_ERR_FROM_CHANNEL";

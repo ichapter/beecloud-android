@@ -151,7 +151,6 @@ public class BCOfflinePay {
 
                 if (response.code == 200) {
                     String ret = response.content;
-
                     //反序列化json
                     Gson res = new Gson();
 

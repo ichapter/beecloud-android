@@ -11,6 +11,7 @@ import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -29,7 +30,7 @@ import cn.beecloud.entity.BCPayResult;
 
 public class PayPalUnSyncedListActivity extends Activity {
 
-    private String result;
+    private String[] result;
 
     TextView syncTip;
     ListView unSyncedListView;
@@ -50,7 +51,7 @@ public class PayPalUnSyncedListActivity extends Activity {
                 unSyncedListView.setVisibility(View.GONE);
                 btnBatchSync.setVisibility(View.GONE);
             }else if (msg.what == 3) {
-                Toast.makeText(PayPalUnSyncedListActivity.this, "sync failed: " + result, Toast.LENGTH_LONG).show();
+                Toast.makeText(PayPalUnSyncedListActivity.this, "sync failed: " + result[1], Toast.LENGTH_LONG).show();
             }
 
             return true;
@@ -95,11 +96,14 @@ public class PayPalUnSyncedListActivity extends Activity {
                         public void run() {
 
                             //sync for each json string
-                            result = BCPay.getInstance(PayPalUnSyncedListActivity.this).
-                                    syncPayPalPayment(adapterData.get(position), null);
+                            result = BCPay.getInstance(PayPalUnSyncedListActivity.this).syncPayPalPayment(adapterData.get(position), null);
 
-                            if (result.equals(BCPayResult.RESULT_SUCCESS)) {
+                            if (result[0].equals(BCPayResult.RESULT_SUCCESS)) {
                                 adapterData.remove(position);
+
+                                Log.d(PayPalUnSyncedListActivity.class.getName(),
+                                        "you can deal with the object id or not, it can be used with the query bill by id API:" +
+                                            result[1]);
 
                                 if (adapterData.size() == 0) {
                                     Message msg = mHandler.obtainMessage();
@@ -133,8 +137,8 @@ public class PayPalUnSyncedListActivity extends Activity {
                         @Override
                         public void run() {
                             //batch sync
-                            Map<String, Integer> result = BCPay.getInstance(PayPalUnSyncedListActivity.this).
-                                    batchSyncPayPalPayment();
+                            Map<String, Integer> result =
+                                    BCPay.getInstance(PayPalUnSyncedListActivity.this).batchSyncPayPalPayment();
 
                             //total cached number
                             Integer allCached = result.get("cachedNum");
