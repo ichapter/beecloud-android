@@ -50,7 +50,7 @@ public class PayPalUnSyncedListActivity extends Activity {
                 syncTip.setVisibility(View.VISIBLE);
                 unSyncedListView.setVisibility(View.GONE);
                 btnBatchSync.setVisibility(View.GONE);
-            }else if (msg.what == 3) {
+            } else if (msg.what == 3) {
                 Toast.makeText(PayPalUnSyncedListActivity.this, "sync failed: " + result[1], Toast.LENGTH_LONG).show();
             }
 
