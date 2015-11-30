@@ -14,6 +14,7 @@ import cn.beecloud.async.BCCallback;
 import cn.beecloud.entity.BCBillStatus;
 import cn.beecloud.entity.BCQueryBillResult;
 import cn.beecloud.entity.BCQueryBillsResult;
+import cn.beecloud.entity.BCQueryCountResult;
 import cn.beecloud.entity.BCQueryRefundResult;
 import cn.beecloud.entity.BCQueryRefundsResult;
 import cn.beecloud.entity.BCQueryReqParams;
@@ -32,8 +33,8 @@ public class BCQuery {
     private BCQuery() {
     }
 
-    //查询订单类型-支付订单, 退款订单
-    public enum QueryOrderType{QUERY_BILLS, QUERY_REFUNDS}
+    //查询订单类型-支付订单, 退款订单, 支付订单条数, 退款订单条数
+    enum QueryOrderType{QUERY_BILLS, QUERY_REFUNDS, QUERY_BILLS_COUNT, QUERY_REFUNDS_COUNT}
 
     /**
      * 唯一获取BCQuery实例的入口
@@ -54,6 +55,10 @@ public class BCQuery {
                 break;
             case QUERY_REFUNDS:
                 callback.done(new BCQueryRefundsResult(errCode, errMsg, errDetail));
+                break;
+            case QUERY_BILLS_COUNT:
+            case QUERY_REFUNDS_COUNT:
+                callback.done(new BCQueryCountResult(errCode, errMsg, errDetail));
         }
     }
 
@@ -62,88 +67,116 @@ public class BCQuery {
      * @param channel       支付渠道类型
      * @param operation     发起的操作类型
      * @param billNum       发起支付时填写的订单号, 可为null
+     * @param payResult     true表示只返回成功的支付订单
      * @param refundNum     退款的单号, 可为null
+     * @param needDetail    true表示需要返回商户返回的详细信息
      * @param startTime     订单生成时间, 毫秒时间戳, 13位, 可为null
      * @param endTime       订单完成时间, 毫秒时间戳, 13位, 可为null
      * @param skip          忽略的记录个数, 默认为0, 设置为10表示忽略满足条件的前10条数据, 可为null
      * @param limit         本次抓取的记录数, 默认为10, [10, 50]之间, 设置为10表示只返回满足条件的10条数据, 可为null
+     * @param needApproval  true表示只返回预退款, 可为null
      * @param callback      回调函数
      */
     protected void queryOrdersAsync(final BCReqParams.BCChannelTypes channel,
                                     final QueryOrderType operation,
-                                    final String billNum, final String refundNum,
+                                    final String billNum, final Boolean payResult,
+                                    final String refundNum, final Boolean needDetail,
                                     final Long startTime, final Long endTime,
-                                    final Integer skip, final Integer limit, final BCCallback callback) {
+                                    final Integer skip, final Integer limit,
+                                    final Boolean needApproval, final BCCallback callback) {
         if (callback == null) {
             Log.w(TAG, "请初始化callback");
             return;
         }
 
         BCCache.executorService.execute(new Runnable() {
-             @Override
-             public void run() {
+            @Override
+            public void run() {
 
-                 if (channel == null) {
-                     doErrCallBack(operation, BCRestfulCommonResult.APP_INNER_FAIL_NUM,
-                             BCRestfulCommonResult.APP_INNER_FAIL,
-                             "channel NPE, set ALL if you want to query all records",
-                             callback);
+                if (channel == null) {
+                    doErrCallBack(operation, BCRestfulCommonResult.APP_INNER_FAIL_NUM,
+                            BCRestfulCommonResult.APP_INNER_FAIL,
+                            "channel NPE, set ALL if you want to query all records",
+                            callback);
 
-                     return;
-                 }
+                    return;
+                }
 
-                 BCQueryReqParams bcQueryReqParams;
-                 try {
-                     bcQueryReqParams = new BCQueryReqParams(channel);
-                 } catch (BCException e) {
-                     doErrCallBack(operation, BCRestfulCommonResult.APP_INNER_FAIL_NUM,
-                             BCRestfulCommonResult.APP_INNER_FAIL, e.getMessage(), callback);
-                     return;
-                 }
+                BCQueryReqParams bcQueryReqParams;
+                try {
+                    bcQueryReqParams = new BCQueryReqParams(channel);
+                } catch (BCException e) {
+                    doErrCallBack(operation, BCRestfulCommonResult.APP_INNER_FAIL_NUM,
+                            BCRestfulCommonResult.APP_INNER_FAIL, e.getMessage(), callback);
+                    return;
+                }
 
-                 //common
-                 bcQueryReqParams.billNum = billNum;
-                 bcQueryReqParams.startTime = startTime;
-                 bcQueryReqParams.endTime = endTime;
-                 bcQueryReqParams.skip = skip;
-                 bcQueryReqParams.limit = limit;
+                //common
+                bcQueryReqParams.billNum = billNum;
+                bcQueryReqParams.startTime = startTime;
+                bcQueryReqParams.endTime = endTime;
 
-                 String queryURL = BCHttpClientUtil.getBillsQueryURL();
+                String queryURL = null;
 
-                 if (operation == QueryOrderType.QUERY_REFUNDS){
-                     bcQueryReqParams.refundNum = refundNum;
-                     queryURL = BCHttpClientUtil.getRefundsQueryURL();
-                 }
+                switch (operation) {
+                    case QUERY_BILLS:
+                        queryURL = BCHttpClientUtil.getBillsQueryURL();
+                        bcQueryReqParams.payResult = payResult;
+                        bcQueryReqParams.needDetail = needDetail;
+                        bcQueryReqParams.skip = skip;
+                        bcQueryReqParams.limit = limit;
+                        break;
+                    case QUERY_REFUNDS:
+                        queryURL = BCHttpClientUtil.getRefundsQueryURL();
+                        bcQueryReqParams.refundNum = refundNum;
+                        bcQueryReqParams.needDetail = needDetail;
+                        bcQueryReqParams.skip = skip;
+                        bcQueryReqParams.limit = limit;
+                        bcQueryReqParams.needApproval = needApproval;
+                        break;
+                    case QUERY_BILLS_COUNT:
+                        queryURL = BCHttpClientUtil.getBillsCountQueryURL();
+                        bcQueryReqParams.payResult = payResult;
+                        break;
+                    case QUERY_REFUNDS_COUNT:
+                        queryURL = BCHttpClientUtil.getRefundsCountQueryURL();
+                        bcQueryReqParams.refundNum = refundNum;
+                        bcQueryReqParams.needApproval = needApproval;
+                }
 
-                 //Log.w("BCQuery",queryURL + bcQueryReqParams.transToEncodedJsonString());
+                //Log.w("BCQuery",queryURL + bcQueryReqParams.transToEncodedJsonString());
 
-                 BCHttpClientUtil.Response response = BCHttpClientUtil.httpGet(queryURL +
-                         bcQueryReqParams.transToEncodedJsonString());
+                BCHttpClientUtil.Response response = BCHttpClientUtil.httpGet(queryURL +
+                        bcQueryReqParams.transToEncodedJsonString());
 
-                 if (response.code == 200) {
+                if (response.code == 200) {
 
+                    String ret = response.content;
+                    Log.w("BCQuery", ret);
 
-                     String ret = response.content;
+                    switch (operation) {
+                        case QUERY_BILLS:
+                            callback.done(BCQueryBillsResult.transJsonToResultObject(ret));
+                            break;
+                        case QUERY_REFUNDS:
+                            callback.done(BCQueryRefundsResult.transJsonToResultObject(ret));
+                            break;
+                        case QUERY_BILLS_COUNT:
+                        case QUERY_REFUNDS_COUNT:
+                            callback.done(BCQueryCountResult.transJsonToObject(ret));
+                            break;
+                        default:
+                            doErrCallBack(operation, BCRestfulCommonResult.APP_INNER_FAIL_NUM,
+                                    BCRestfulCommonResult.APP_INNER_FAIL, "Invalid channel", callback);
+                    }
 
-                     switch (operation){
-                         case QUERY_BILLS:
-                             callback.done(BCQueryBillsResult.transJsonToResultObject(ret));
-                             break;
-                         case QUERY_REFUNDS:
-                             callback.done(BCQueryRefundsResult.transJsonToResultObject(ret));
-                             break;
-                         default:
-                             doErrCallBack(operation, BCRestfulCommonResult.APP_INNER_FAIL_NUM,
-                                     BCRestfulCommonResult.APP_INNER_FAIL, "Invalid channel", callback);
-                     }
-
-                 } else {
-                     doErrCallBack(operation, BCRestfulCommonResult.APP_INNER_FAIL_NUM,
-                             BCRestfulCommonResult.APP_INNER_FAIL,
-                             "Network Error:" + response.code + " # " + response.content,callback);
-                 }
-             }
-         });
+                } else {
+                    doErrCallBack(operation, BCRestfulCommonResult.APP_INNER_FAIL_NUM,
+                            BCRestfulCommonResult.APP_INNER_FAIL,
+                            "Network Error:" + response.code + " # " + response.content, callback);
+                }
+            }
+        });
 
     }
 
@@ -160,7 +193,8 @@ public class BCQuery {
     public void queryBillsAsync(final BCReqParams.BCChannelTypes channel, final String billNum,
                                 final Long startTime, final Long endTime,
                                 final Integer skip, final Integer limit, final BCCallback callback){
-        queryOrdersAsync(channel, QueryOrderType.QUERY_BILLS, billNum, null, startTime, endTime, skip, limit, callback);
+        queryOrdersAsync(channel, QueryOrderType.QUERY_BILLS, billNum,
+                null, null, null, startTime, endTime, skip, limit, null, callback);
     }
 
     /**
@@ -188,12 +222,23 @@ public class BCQuery {
      * @param callback       回调接口
      */
     public void queryBillsAsync(final QueryParams queryParams, final BCCallback callback) {
-        queryBillsAsync(queryParams.channel,
+
+        if (queryParams == null) {
+            Log.w(TAG, "查询参数queryParams不可为null");
+            return;
+        }
+
+        queryOrdersAsync(queryParams.channel,
+                QueryOrderType.QUERY_BILLS,
                 queryParams.billNum,
+                queryParams.payResult,
+                null,
+                queryParams.needDetail,
                 queryParams.startTime,
                 queryParams.endTime,
                 queryParams.skip,
                 queryParams.limit,
+                null,
                 callback);
     }
 
@@ -211,7 +256,8 @@ public class BCQuery {
     public void queryRefundsAsync(final BCReqParams.BCChannelTypes channel, final String billNum, final String refundNum,
                                 final Long startTime, final Long endTime,
                                 final Integer skip, final Integer limit, final BCCallback callback){
-        queryOrdersAsync(channel, QueryOrderType.QUERY_REFUNDS, billNum, refundNum, startTime, endTime, skip, limit, callback);
+        queryOrdersAsync(channel, QueryOrderType.QUERY_REFUNDS, billNum,
+                null, refundNum, null, startTime, endTime, skip, limit, null, callback);
     }
 
     /**
@@ -241,13 +287,72 @@ public class BCQuery {
      * @param callback      回调接口
      */
     public void queryRefundsAsync(final QueryParams queryParams, final BCCallback callback) {
-        queryRefundsAsync(queryParams.channel,
+        if (queryParams == null) {
+            Log.w(TAG, "查询参数queryParams不可为null");
+            return;
+        }
+
+        queryOrdersAsync(queryParams.channel,
+                QueryOrderType.QUERY_REFUNDS,
                 queryParams.billNum,
+                null,
                 queryParams.refundNum,
+                queryParams.needDetail,
                 queryParams.startTime,
                 queryParams.endTime,
                 queryParams.skip,
                 queryParams.limit,
+                queryParams.needApproval,
+                callback);
+    }
+
+    /**
+     * 查询支付订单数目
+     * @param queryParams    @see cn.beecloud.BCQuery.QueryParams 查询参数
+     * @param callback       回调接口
+     */
+    public void queryBillsCountAsync(final QueryParams queryParams, final BCCallback callback) {
+        if (queryParams == null) {
+            Log.w(TAG, "查询参数queryParams不可为null");
+            return;
+        }
+
+        queryOrdersAsync(queryParams.channel,
+                QueryOrderType.QUERY_BILLS_COUNT,
+                queryParams.billNum,
+                queryParams.payResult,
+                null,
+                null,
+                queryParams.startTime,
+                queryParams.endTime,
+                null,
+                null,
+                null,
+                callback);
+    }
+
+    /**
+     * 查询退款订单数目
+     * @param queryParams   @see cn.beecloud.BCQuery.QueryParams 查询参数
+     * @param callback      回调接口
+     */
+    public void queryRefundsCountAsync(final QueryParams queryParams, final BCCallback callback) {
+        if (queryParams == null) {
+            Log.w(TAG, "查询参数queryParams不可为null");
+            return;
+        }
+
+        queryOrdersAsync(queryParams.channel,
+                QueryOrderType.QUERY_REFUNDS_COUNT,
+                queryParams.billNum,
+                null,
+                queryParams.refundNum,
+                null,
+                queryParams.startTime,
+                queryParams.endTime,
+                null,
+                null,
+                queryParams.needApproval,
                 callback);
     }
 
@@ -491,9 +596,21 @@ public class BCQuery {
         public String billNum;
 
         /**
+         * 支付结果过滤, true表示只返回支付成功的订单(订单是否退款对该标志位无影响),
+         * 只在查询支付订单时有效, 可为null
+         */
+        public Boolean payResult;
+
+        /**
          * 退款的单号, 查询退款订单的时候填写, 可为null
          */
         public String refundNum;
+
+        /**
+         * 是否需要返回返回渠道详细信息, true表示返回, 可为null,
+         * 如果是查询订单数目, 该参数会被忽略
+         */
+        public Boolean needDetail;
 
         /**
          * 查询起始时间, 毫秒时间戳, 13位, 可为null
@@ -506,13 +623,22 @@ public class BCQuery {
         public Long endTime;
 
         /**
-         * 跳过的记录个数, 默认为0, 设置为10表示跳过满足条件的前10条数据, 可为null
+         * 跳过的记录个数, 默认为0, 设置为10表示跳过满足条件的前10条数据, 可为null,
+         * 如果是查询订单数目, 该参数会被忽略
          */
         public Integer skip;
 
         /**
-         * 本次抓取的记录数, 默认为10, [10, 50]之间, 设置为10表示只返回满足条件的10条数据, 可为null
+         * 本次抓取的记录数, 默认为10, [10, 50]之间, 设置为10表示只返回满足条件的10条数据, 可为null,
+         * 如果是查询订单数目, 该参数会被忽略
          */
         public Integer limit;
+
+        /**
+         * 标识退款记录是否为预退款, 仅在查询退款相关记录时用到, true表示查询预退款, 可为null,
+         * 如果发起了预退款, 然后正式退款已经完成, 此时设为true将查不到该记录,
+         * 如果是查询支付订单相关记录, 该参数会被忽略
+         */
+        public Boolean needApproval;
     }
 }

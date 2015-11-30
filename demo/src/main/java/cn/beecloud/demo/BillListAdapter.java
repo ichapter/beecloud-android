@@ -7,6 +7,7 @@
 package cn.beecloud.demo;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +21,7 @@ import cn.beecloud.entity.BCBillOrder;
 import cn.beecloud.entity.BCReqParams;
 
 public class BillListAdapter extends BaseAdapter {
+    public static final String TAG = "BillListAdapter";
 
     private List<BCBillOrder> bills;
     private LayoutInflater mInflater;
@@ -128,6 +130,12 @@ public class BillListAdapter extends BaseAdapter {
         viewHolder.txtPayResult.setText("订单是否支付完成: " + (bcBillOrder.getPayResult()?"是":"否"));
         viewHolder.txtCreatedTime.setText("订单生成时间: " + new Date(bcBillOrder.getCreatedTime()));
         viewHolder.txtOptional.setText("扩展参数: " + bcBillOrder.getOptional());
+
+        Log.w(TAG, "订单是否已经退款成功: " + bcBillOrder.getRefundResult());
+        Log.w(TAG, "订单是否已经被撤销(一般用于线下渠道): " + bcBillOrder.getRevertResult());
+        Log.w(TAG, "渠道返回的详细信息(需要通过QueryParams发起query请求，并且设置needDetail为true)，按需处理: "
+                + bcBillOrder.getMessageDetail());
+
         return convertView;
     }
 

@@ -30,6 +30,7 @@ import cn.beecloud.async.BCResult;
 import cn.beecloud.demo.util.DisplayUtils;
 import cn.beecloud.entity.BCBillOrder;
 import cn.beecloud.entity.BCQueryBillsResult;
+import cn.beecloud.entity.BCQueryCountResult;
 import cn.beecloud.entity.BCReqParams;
 
 /**
@@ -126,7 +127,7 @@ public class BillListActivity extends Activity {
 
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(
                 this,android.R.layout.simple_spinner_item,
-                new String[]{"微信", "支付宝", "银联", "百度", "PayPal", "全渠道"});
+                new String[]{"微信", "支付宝", "银联", "百度", "PayPal", "全渠道", "订单总数"});
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         channelChooser.setAdapter(adapter);
 
@@ -186,6 +187,9 @@ public class BillListActivity extends Activity {
                         //限制支付订单号
                         //params.billNum = null;
 
+                        //只返回成功的订单
+                        params.payResult = Boolean.TRUE;
+
                         //限制起始时间
                         params.startTime = startTime.getTime();
 
@@ -197,6 +201,9 @@ public class BillListActivity extends Activity {
 
                         //最多返回的数目
                         params.limit = 20;
+
+                        //是否获取渠道返回的详细信息
+                        params.needDetail = true;
 
                         BCQuery.getInstance().queryBillsAsync(params,
                                 bcCallback);
@@ -212,8 +219,68 @@ public class BillListActivity extends Activity {
                     case 5: //全部的渠道类型
                         params = new BCQuery.QueryParams();
                         params.channel = BCReqParams.BCChannelTypes.ALL;
+
+                        //跳过满足条件的数目
+                        params.skip = 10;
+
+                        //最多返回的数目
+                        params.limit = 20;
+
                         BCQuery.getInstance().queryBillsAsync(params,
                                 bcCallback);
+                    case 6:
+                        params = new BCQuery.QueryParams();
+
+                        //以下为可用的限制参数
+                        //渠道类型
+                        params.channel = BCReqParams.BCChannelTypes.ALL;
+
+                        //支付单号
+                        //params.billNum = "your bill number";
+
+                        //订单是否支付成功
+                        params.payResult = Boolean.TRUE;
+
+                        //限制起始时间
+                        params.startTime = startTime.getTime();
+
+                        //限制结束时间
+                        params.endTime = endTime.getTime();
+
+                        BCQuery.getInstance().queryBillsCountAsync(params, new BCCallback() {
+                            @Override
+                            public void done(BCResult result) {
+                                if (loadingDialog.isShowing())
+                                    loadingDialog.dismiss();
+
+                                final BCQueryCountResult countResult = (BCQueryCountResult) result;
+
+                                if (countResult.getResultCode() == 0) {
+
+                                    //显示获取到的订单总数
+                                    BillListActivity.this.runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            Toast.makeText(BillListActivity.this,
+                                                    "订单总数:" + countResult.getCount(),
+                                                    Toast.LENGTH_LONG).show();
+                                        }
+                                    });
+                                } else {
+                                    BillListActivity.this.runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            Toast.makeText(BillListActivity.this,
+                                                    "err code:" + countResult.getResultCode() +
+                                                    "; err msg: " + countResult.getResultMsg() +
+                                                    "; err detail: " + countResult.getErrDetail(),
+                                                    Toast.LENGTH_LONG).show();
+                                        }
+                                    });
+
+                                }
+                            }
+                        });
                 }
             }
 

@@ -1,6 +1,6 @@
 ## BeeCloud Android SDK (Open Source)
 
-![pass](https://img.shields.io/badge/Build-pass-green.svg) ![license](https://img.shields.io/badge/license-MIT-brightgreen.svg) ![version](https://img.shields.io/badge/version-v2.0.4-blue.svg)
+![pass](https://img.shields.io/badge/Build-pass-green.svg) ![license](https://img.shields.io/badge/license-MIT-brightgreen.svg) ![version](https://img.shields.io/badge/version-v2.0.5-blue.svg)
 
 ## 简介
 
@@ -42,7 +42,7 @@
 银联需要引入`UPPayAssistEx.jar`，<br/>
 百度钱包支付需要引入`Cashier_SDK-v4.2.0.jar`，<br/>
 PayPal需要引入`PayPalAndroidSDK-2.11.2.jar`，<br/>
-最后添加`beecloud android sdk`：`beecloud-android\sdk\beecloud-2.0.4.jar`
+最后添加`beecloud android sdk`：`beecloud-android\sdk\beecloud-2.0.5.jar`
 
 2.对于微信支付，需要注意你的`AndroidManifest.xml`中`package`需要和微信平台创建的移动应用`应用包名`保持一致，关于其`应用签名`请参阅[创建微信应用->B.填写平台信息](https://beecloud.cn/doc/payapply/?index=0)，
 
@@ -450,6 +450,7 @@ BCQuery.getInstance().queryBillsAsync(
     15,                                     //返回满足条件的15条数据
     bcCallback);
 ```
+
 * **查询退款订单**
 
 请查看`doc`中的`API`，查询类`BCQuery`，参照`demo`中`RefundOrdersActivity`
@@ -471,6 +472,50 @@ BCQuery.getInstance().queryRefundsAsync(
     15,                                     //返回满足条件的15条数据
     bcCallback);
 ```
+
+* **查询订单数目**
+
+请查看`doc`中的`API`，查询类`BCQuery`，参照`demo`中`BillListActivity`和`RefundOrdersActivity`
+
+**原型：**
+
+通过构造`BCQuery`的实例，使用`queryBillsCountAsync`方法发起支付订单数目查询，使用`queryRefundsCountAsync`方法发起退款订单数目查询；在回调函数中将`BCResult`转化成`BCQueryCountResult`之后做后续处理
+
+**调用：**<br/>
+以查询支付订单数目为例
+```java
+BCQuery.QueryParams params = new BCQuery.QueryParams();
+
+//以下为可用的限制参数
+//渠道类型
+params.channel = BCReqParams.BCChannelTypes.ALL;
+
+//支付单号
+//params.billNum = "your bill number";
+
+//订单是否支付成功
+params.payResult = Boolean.TRUE;
+
+//限制起始时间
+params.startTime = startTime.getTime();
+
+//限制结束时间
+params.endTime = endTime.getTime();
+
+BCQuery.getInstance().queryBillsCountAsync(params, new BCCallback() {
+    @Override
+    public void done(BCResult result) {
+        
+        final BCQueryCountResult countResult = (BCQueryCountResult) result;
+
+        if (countResult.getResultCode() == 0) {
+            //TODO with
+            countResult.getCount();
+        }
+    }
+});
+```
+
 * **查询订单退款状态**
 
 请查看`doc`中的`API`，查询类`BCQuery`，参照`demo`中`RefundStatusActivity`
@@ -549,7 +594,7 @@ BCQuery.getInstance().queryOfflineBillStatusAsync(
 ```
 #第三方库的申明，注意在Android Studio中不需要
 #BeeCloud及依赖jar
--libraryjars libs/beecloud.jar
+-libraryjars libs/beecloud-x.x.x.jar
 -libraryjars libs/gson-2.2.4.jar
 -libraryjars libs/zxing-3.2.0.jar
 #支付宝

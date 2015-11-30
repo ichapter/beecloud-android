@@ -7,6 +7,7 @@
 package cn.beecloud.demo;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +21,8 @@ import cn.beecloud.entity.BCRefundOrder;
 import cn.beecloud.entity.BCReqParams;
 
 public class RefundOrdersAdapter extends BaseAdapter {
+    private static final String TAG = "RefundOrdersAdapter";
+
     private List<BCRefundOrder> refunds;
     private LayoutInflater mInflater;
 
@@ -134,6 +137,9 @@ public class RefundOrdersAdapter extends BaseAdapter {
         viewHolder.txtRefundResult.setText("是否接受退款并完成退款: " + (bcRefundOrder.getRefundResult()?"是":"否"));
         viewHolder.txtRefundCreatedTime.setText("退款订单生成时间: " + new Date(bcRefundOrder.getRefundCreatedTime()));
         viewHolder.txtOptional.setText("退款订单生成时间: " + bcRefundOrder.getOptional());
+
+        Log.w(TAG, "渠道返回的详细信息(需要通过QueryParams发起query请求，并且设置needDetail为true)，按需处理: "
+                + bcRefundOrder.getMessageDetail());
 
         return convertView;
     }

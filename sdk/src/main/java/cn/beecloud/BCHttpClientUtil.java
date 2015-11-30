@@ -41,11 +41,17 @@ class BCHttpClientUtil {
     //支付订单列表查询部分URL
     private static final String BILLS_QUERY_URL = "rest/bills?para=";
 
+    //支付订单数目查询部分URL
+    private static final String BILLS_COUNT_QUERY_URL = "rest/bills/count?para=";
+
     //退款订单查询部分URL
     private static final String REFUND_QUERY_URL = "rest/refund";
 
     //退款订单列表查询部分URL
     private static final String REFUNDS_QUERY_URL = "rest/refunds?para=";
+
+    //退款订单数目查询部分URL
+    private static final String REFUNDS_COUNT_QUERY_URL = "rest/refunds/count?para=";
 
     //退款订单查询部分URL
     private static final String REFUND_STATUS_QUERY_URL = "rest/refund/status?para=";
@@ -98,6 +104,13 @@ class BCHttpClientUtil {
     }
 
     /**
+     * @return  查询支付订单数目URL
+     */
+    public static String getBillsCountQueryURL() {
+        return getRandomHost() + BILLS_COUNT_QUERY_URL;
+    }
+
+    /**
      * @return  查询退款订单部分URL
      */
     public static String getRefundQueryURL() {
@@ -109,6 +122,13 @@ class BCHttpClientUtil {
      */
     public static String getRefundsQueryURL() {
         return getRandomHost() + REFUNDS_QUERY_URL;
+    }
+
+    /**
+     * @return  查询退款订单数目URL
+     */
+    public static String getRefundsCountQueryURL() {
+        return getRandomHost() + REFUNDS_COUNT_QUERY_URL;
     }
 
     /**

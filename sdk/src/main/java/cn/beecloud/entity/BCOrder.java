@@ -33,6 +33,9 @@ class BCOrder {
     //扩展参数
     private String optional;
 
+    //渠道返回的详细信息
+    private String message_detail;
+
     /**
      * @return  订单号
      */
@@ -73,5 +76,12 @@ class BCOrder {
      */
     public String getOptional() {
         return optional;
+    }
+
+    /**
+     * @return  渠道返回的详细信息
+     */
+    public String getMessageDetail() {
+        return message_detail;
     }
 }

@@ -21,6 +21,7 @@ import cn.beecloud.entity.BCBillOrder;
 import cn.beecloud.entity.BCBillStatus;
 import cn.beecloud.entity.BCQueryBillResult;
 import cn.beecloud.entity.BCQueryBillsResult;
+import cn.beecloud.entity.BCQueryCountResult;
 import cn.beecloud.entity.BCQueryRefundResult;
 import cn.beecloud.entity.BCQueryRefundsResult;
 import cn.beecloud.entity.BCRefundOrder;
@@ -245,8 +246,8 @@ public class BCQueryTest {
 
                         BCQueryBillsResult billsResult = (BCQueryBillsResult) result;
 
-                        Assert.assertEquals((Integer)0, billsResult.getResultCode());
-                        Assert.assertEquals((Integer)10, billsResult.getCount());
+                        Assert.assertEquals((Integer) 0, billsResult.getResultCode());
+                        Assert.assertEquals((Integer) 10, billsResult.getCount());
 
                         latch.countDown();
                     }
@@ -379,7 +380,7 @@ public class BCQueryTest {
                         BCQueryRefundsResult refundsResult = (BCQueryRefundsResult) result;
 
                         Assert.assertEquals((Integer) 0, refundsResult.getResultCode());
-                        Assert.assertEquals((Integer)10, refundsResult.getCount());
+                        Assert.assertEquals((Integer) 10, refundsResult.getCount());
 
                         latch.countDown();
                     }
@@ -452,7 +453,7 @@ public class BCQueryTest {
                         BCQueryRefundsResult refundsResult = (BCQueryRefundsResult) result;
 
                         Assert.assertEquals((Integer) 0, refundsResult.getResultCode());
-                        Assert.assertEquals((Integer)10, refundsResult.getCount());
+                        Assert.assertEquals((Integer) 10, refundsResult.getCount());
 
                         latch.countDown();
                     }
@@ -566,7 +567,7 @@ public class BCQueryTest {
 
                         BCRefundStatus status = (BCRefundStatus) result;
 
-                        Assert.assertEquals((Integer)0, status.getResultCode());
+                        Assert.assertEquals((Integer) 0, status.getResultCode());
                         Assert.assertTrue(BCRefundStatus.RefundStatus.REFUND_STATUS_SUCCESS
                                 .equals(status.getRefundStatus()));
 
@@ -852,17 +853,17 @@ public class BCQueryTest {
         query.queryOfflineBillStatusAsync(BCReqParams.BCChannelTypes.WX_SCAN,
                 "fakeid",
                 new BCCallback() {
-            @Override
-            public void done(BCResult result) {
-                Assert.assertTrue(result instanceof BCBillStatus);
+                    @Override
+                    public void done(BCResult result) {
+                        Assert.assertTrue(result instanceof BCBillStatus);
 
-                BCBillStatus status = (BCBillStatus) result;
+                        BCBillStatus status = (BCBillStatus) result;
 
-                Assert.assertEquals(BCRestfulCommonResult.APP_INNER_FAIL_NUM, status.getResultCode());
-                //释放
-                latch.countDown();
-            }
-        });
+                        Assert.assertEquals(BCRestfulCommonResult.APP_INNER_FAIL_NUM, status.getResultCode());
+                        //释放
+                        latch.countDown();
+                    }
+                });
 
         //等待
         latch.await(2000, TimeUnit.MILLISECONDS);
@@ -892,7 +893,7 @@ public class BCQueryTest {
 
                         BCBillStatus status = (BCBillStatus) result;
 
-                        Assert.assertEquals((Integer)0, status.getResultCode());
+                        Assert.assertEquals((Integer) 0, status.getResultCode());
                         Assert.assertTrue(status.getPayResult());
                         //释放
                         latch.countDown();
@@ -902,4 +903,201 @@ public class BCQueryTest {
         //等待
         latch.await(2000, TimeUnit.MILLISECONDS);
     }
+
+    /**
+     * #1
+     * 测试channel为null
+     * @throws Exception
+     */
+    @Test
+    public void testQueryBillsCountAsyncChannelInvalid() throws Exception {
+        BCQuery.QueryParams queryParams = new BCQuery.QueryParams();
+        queryParams.channel = null;
+
+        query.queryBillsCountAsync(queryParams,
+                new BCCallback() {
+                    @Override
+                    public void done(BCResult result) {
+                        Assert.assertTrue(result instanceof BCQueryCountResult);
+
+                        BCQueryCountResult countResult = (BCQueryCountResult) result;
+
+                        Assert.assertEquals(BCRestfulCommonResult.APP_INNER_FAIL_NUM, countResult.getResultCode());
+
+                        latch.countDown();
+                    }
+                });
+
+        latch.await(2000, TimeUnit.MILLISECONDS);
+    }
+
+    /**
+     * #2
+     * 网络请求400等异常情况
+     * @throws Exception
+     */
+    @Test
+    public void testQueryBillsCountAsyncNetworkError() throws Exception {
+        final BCHttpClientUtil.Response response = new BCHttpClientUtil.Response();
+        response.code = 400;
+        response.content = "wrong";
+
+        //mock
+        PowerMockito.stub(PowerMockito.method(BCHttpClientUtil.class, "httpGet", String.class)).toReturn(response);
+
+        BCQuery.QueryParams params = new BCQuery.QueryParams();
+        params.channel = BCReqParams.BCChannelTypes.ALL;
+
+        query.queryBillsCountAsync(params,
+                new BCCallback() {
+                    @Override
+                    public void done(BCResult result) {
+                        Assert.assertTrue(result instanceof BCQueryCountResult);
+
+                        BCQueryCountResult countResult = (BCQueryCountResult) result;
+
+                        Assert.assertEquals(BCRestfulCommonResult.APP_INNER_FAIL_NUM, countResult.getResultCode());
+
+                        latch.countDown();
+                    }
+                });
+
+        latch.await(2000, TimeUnit.MILLISECONDS);
+    }
+
+    /**
+     * #3
+     * 网络请求200
+     * @throws Exception
+     */
+    @Test
+    public void testQueryBillsCountAsyncSucc() throws Exception {
+        final BCHttpClientUtil.Response response = new BCHttpClientUtil.Response();
+        response.code = 200;
+        response.content = "{\"result_msg\":\"OK\",\"err_detail\":\"\",\"count\":826,\"result_code\":0}";
+
+        //mock
+        PowerMockito.stub(PowerMockito.method(BCHttpClientUtil.class, "httpGet", String.class)).toReturn(response);
+
+        BCQuery.QueryParams params = new BCQuery.QueryParams();
+        params.channel = BCReqParams.BCChannelTypes.ALL;
+        params.payResult = Boolean.TRUE;
+
+        query.queryBillsCountAsync(params,
+                new BCCallback() {
+                    @Override
+                    public void done(BCResult result) {
+                        Assert.assertTrue(result instanceof BCQueryCountResult);
+
+                        BCQueryCountResult countResult = (BCQueryCountResult) result;
+
+                        Assert.assertEquals((Integer) 0, countResult.getResultCode());
+                        Assert.assertEquals((Integer) 826, countResult.getCount());
+
+                        latch.countDown();
+                    }
+                });
+
+        latch.await(2000, TimeUnit.MILLISECONDS);
+    }
+
+    /**
+     * #1
+     * 测试channel为null
+     * @throws Exception
+     */
+    @Test
+    public void testQueryRefundsCountAsyncChannelInvalid() throws Exception {
+        BCQuery.QueryParams queryParams = new BCQuery.QueryParams();
+        queryParams.channel = null;
+
+        query.queryRefundsCountAsync(queryParams,
+                new BCCallback() {
+                    @Override
+                    public void done(BCResult result) {
+                        Assert.assertTrue(result instanceof BCQueryCountResult);
+
+                        BCQueryCountResult countResult = (BCQueryCountResult) result;
+
+                        Assert.assertEquals(BCRestfulCommonResult.APP_INNER_FAIL_NUM, countResult.getResultCode());
+
+                        latch.countDown();
+                    }
+                });
+
+        latch.await(2000, TimeUnit.MILLISECONDS);
+    }
+
+    /**
+     * #2
+     * 网络请求400等异常情况
+     * @throws Exception
+     */
+    @Test
+    public void testQueryRefundsCountAsyncNetworkError() throws Exception {
+        final BCHttpClientUtil.Response response = new BCHttpClientUtil.Response();
+        response.code = 400;
+        response.content = "wrong";
+
+        //mock
+        PowerMockito.stub(PowerMockito.method(BCHttpClientUtil.class, "httpGet", String.class)).toReturn(response);
+
+        BCQuery.QueryParams params = new BCQuery.QueryParams();
+        params.channel = BCReqParams.BCChannelTypes.ALL;
+
+        query.queryRefundsCountAsync(params,
+                new BCCallback() {
+                    @Override
+                    public void done(BCResult result) {
+                        Assert.assertTrue(result instanceof BCQueryCountResult);
+
+                        BCQueryCountResult countResult = (BCQueryCountResult) result;
+
+                        Assert.assertEquals(BCRestfulCommonResult.APP_INNER_FAIL_NUM, countResult.getResultCode());
+
+                        latch.countDown();
+                    }
+                });
+
+        latch.await(2000, TimeUnit.MILLISECONDS);
+    }
+
+    /**
+     * #3
+     * 网络请求200
+     * @throws Exception
+     */
+    @Test
+    public void testQueryRefundsCountAsyncSucc() throws Exception {
+        final BCHttpClientUtil.Response response = new BCHttpClientUtil.Response();
+        response.code = 200;
+        response.content = "{\"result_msg\":\"OK\",\"err_detail\":\"\",\"count\":826,\"result_code\":0}";
+
+        //mock
+        PowerMockito.stub(PowerMockito.method(BCHttpClientUtil.class, "httpGet", String.class)).toReturn(response);
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.CHINA);
+
+        BCQuery.QueryParams queryParams = new BCQuery.QueryParams();
+        queryParams.channel = BCReqParams.BCChannelTypes.WX;
+        queryParams.startTime = sdf.parse("2015-10-01 00:00").getTime();
+
+        query.queryRefundsCountAsync(queryParams,
+                new BCCallback() {
+                    @Override
+                    public void done(BCResult result) {
+                        Assert.assertTrue(result instanceof BCQueryCountResult);
+
+                        BCQueryCountResult countResult = (BCQueryCountResult) result;
+
+                        Assert.assertEquals((Integer) 0, countResult.getResultCode());
+                        Assert.assertEquals((Integer) 826, countResult.getCount());
+
+                        latch.countDown();
+                    }
+                });
+
+        latch.await(2000, TimeUnit.MILLISECONDS);
+    }
+
 }

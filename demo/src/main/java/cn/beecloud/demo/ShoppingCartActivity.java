@@ -173,7 +173,10 @@ public class ShoppingCartActivity extends Activity {
 
         // 如果用到微信支付，在用到微信支付的Activity的onCreate函数里调用以下函数.
         // 第二个参数需要换成你自己的微信AppID.
-        BCPay.initWechatPay(ShoppingCartActivity.this, "wxf1aa465362b4c8f1");
+        String initInfo = BCPay.initWechatPay(ShoppingCartActivity.this, "wxf1aa465362b4c8f1");
+        if (initInfo != null) {
+            Toast.makeText(this, "微信初始化失败：" + initInfo, Toast.LENGTH_LONG).show();
+        }
 
         // 如果使用PayPal需要在支付之前设置client id和应用secret
         // BCPay.PAYPAL_PAY_TYPE.SANDBOX用于测试，BCPay.PAYPAL_PAY_TYPE.LIVE用于生产环境
@@ -223,6 +226,10 @@ public class ShoppingCartActivity extends Activity {
                                     mapOptional,            //扩展参数(可以null)
                                     bcCallback);            //支付完成后回调入口
 
+                        } else {
+                            Toast.makeText(ShoppingCartActivity.this,
+                                    "您尚未安装微信或者安装的微信版本不支持", Toast.LENGTH_LONG).show();
+                            loadingDialog.dismiss();
                         }
                         break;
 
@@ -406,6 +413,10 @@ public class ShoppingCartActivity extends Activity {
 
                         Log.d(TAG, "订单创建时间:" + new Date(billOrder.getCreatedTime()));
                         Log.d(TAG, "扩展参数:" + billOrder.getOptional());
+
+                        Log.w(TAG, "订单是否已经退款成功(用于后期查询): " + billOrder.getRefundResult());
+                        Log.w(TAG, "渠道返回的详细信息，按需处理: " + billOrder.getMessageDetail());
+
                     }
                 });
     }
