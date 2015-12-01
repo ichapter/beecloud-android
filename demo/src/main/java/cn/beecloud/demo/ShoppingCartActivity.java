@@ -232,7 +232,7 @@ public class ShoppingCartActivity extends Activity {
                             loadingDialog.dismiss();
                         }
                         break;
-
+ 
                     case 1: //支付宝支付
                         loadingDialog.show();
 
