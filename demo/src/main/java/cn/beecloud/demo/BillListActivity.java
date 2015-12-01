@@ -256,7 +256,6 @@ public class BillListActivity extends Activity {
                                 final BCQueryCountResult countResult = (BCQueryCountResult) result;
 
                                 if (countResult.getResultCode() == 0) {
-
                                     //显示获取到的订单总数
                                     BillListActivity.this.runOnUiThread(new Runnable() {
                                         @Override
@@ -277,7 +276,6 @@ public class BillListActivity extends Activity {
                                                     Toast.LENGTH_LONG).show();
                                         }
                                     });
-
                                 }
                             }
                         });

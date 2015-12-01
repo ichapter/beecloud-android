@@ -297,7 +297,6 @@ public class RefundOrdersActivity extends Activity {
                                 final BCQueryCountResult countResult = (BCQueryCountResult) result;
 
                                 if (countResult.getResultCode() == 0) {
-
                                     //显示获取到的订单总数
                                     RefundOrdersActivity.this.runOnUiThread(new Runnable() {
                                         @Override

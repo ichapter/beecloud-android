@@ -28,10 +28,10 @@ public class BCQueryCountResult extends BCRestfulCommonResult {
      * @param jsonStr   json串
      * @return          BCQueryCountResult实例
      */
-    public static BCQueryCountResult transJsonToObject(String jsonStr){
+    public static BCQueryCountResult transJsonToObject(String jsonStr) {
         //反序列化json
         Gson res = new Gson();
 
-        return res.fromJson(jsonStr,new TypeToken<BCQueryCountResult>() {}.getType() );
+        return res.fromJson(jsonStr,new TypeToken<BCQueryCountResult>(){}.getType() );
     }
 }

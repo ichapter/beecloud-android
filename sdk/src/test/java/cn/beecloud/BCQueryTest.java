@@ -246,8 +246,8 @@ public class BCQueryTest {
 
                         BCQueryBillsResult billsResult = (BCQueryBillsResult) result;
 
-                        Assert.assertEquals((Integer) 0, billsResult.getResultCode());
-                        Assert.assertEquals((Integer) 10, billsResult.getCount());
+                        Assert.assertEquals((Integer)0, billsResult.getResultCode());
+                        Assert.assertEquals((Integer)10, billsResult.getCount());
 
                         latch.countDown();
                     }
@@ -341,8 +341,8 @@ public class BCQueryTest {
                         Assert.assertEquals("20151113132244266", refundOrder.getBillNum());
                         Assert.assertEquals("201511141447430832000", refundOrder.getRefundNum());
                         Assert.assertEquals("2015-10-21 Release", refundOrder.getTitle());
-                        Assert.assertEquals((Integer) 1, refundOrder.getTotalFee());
-                        Assert.assertEquals((Integer) 1, refundOrder.getRefundFee());
+                        Assert.assertEquals((Integer)1, refundOrder.getTotalFee());
+                        Assert.assertEquals((Integer)1, refundOrder.getRefundFee());
                         Assert.assertEquals("WX", refundOrder.getChannel());
                         Assert.assertEquals("WX_APP", refundOrder.getSubChannel());
                         Assert.assertFalse(refundOrder.isRefundFinished());
@@ -379,8 +379,8 @@ public class BCQueryTest {
 
                         BCQueryRefundsResult refundsResult = (BCQueryRefundsResult) result;
 
-                        Assert.assertEquals((Integer) 0, refundsResult.getResultCode());
-                        Assert.assertEquals((Integer) 10, refundsResult.getCount());
+                        Assert.assertEquals((Integer)0, refundsResult.getResultCode());
+                        Assert.assertEquals((Integer)10, refundsResult.getCount());
 
                         latch.countDown();
                     }
@@ -414,7 +414,7 @@ public class BCQueryTest {
 
                         BCQueryRefundsResult refundsResult = (BCQueryRefundsResult) result;
 
-                        Assert.assertEquals((Integer) 0, refundsResult.getResultCode());
+                        Assert.assertEquals((Integer)0, refundsResult.getResultCode());
                         Assert.assertEquals((Integer)10, refundsResult.getCount());
 
                         latch.countDown();
@@ -452,8 +452,8 @@ public class BCQueryTest {
 
                         BCQueryRefundsResult refundsResult = (BCQueryRefundsResult) result;
 
-                        Assert.assertEquals((Integer) 0, refundsResult.getResultCode());
-                        Assert.assertEquals((Integer) 10, refundsResult.getCount());
+                        Assert.assertEquals((Integer)0, refundsResult.getResultCode());
+                        Assert.assertEquals((Integer)10, refundsResult.getCount());
 
                         latch.countDown();
                     }
@@ -567,7 +567,7 @@ public class BCQueryTest {
 
                         BCRefundStatus status = (BCRefundStatus) result;
 
-                        Assert.assertEquals((Integer) 0, status.getResultCode());
+                        Assert.assertEquals((Integer)0, status.getResultCode());
                         Assert.assertTrue(BCRefundStatus.RefundStatus.REFUND_STATUS_SUCCESS
                                 .equals(status.getRefundStatus()));
 
@@ -657,14 +657,14 @@ public class BCQueryTest {
 
                 BCQueryBillResult billResult = (BCQueryBillResult) result;
 
-                Assert.assertEquals((Integer) 0, billResult.getResultCode());
+                Assert.assertEquals((Integer)0, billResult.getResultCode());
 
                 BCBillOrder billOrder = billResult.getBill();
 
                 Assert.assertEquals("20151116110810464", billOrder.getBillNum());
                 Assert.assertEquals("安卓微信支付测试", billOrder.getTitle());
                 Assert.assertTrue(billOrder.getTradeNum() == null || billOrder.getTradeNum().length() == 0);
-                Assert.assertEquals((Integer) 1, billOrder.getTotalFee());
+                Assert.assertEquals((Integer)1, billOrder.getTotalFee());
                 Assert.assertEquals("WX", billOrder.getChannel());
                 Assert.assertEquals("WX_APP", billOrder.getSubChannel());
                 Assert.assertFalse(billOrder.getPayResult());
@@ -759,20 +759,20 @@ public class BCQueryTest {
 
                 BCQueryRefundResult refundResult = (BCQueryRefundResult) result;
 
-                Assert.assertEquals((Integer) 0, refundResult.getResultCode());
+                Assert.assertEquals((Integer)0, refundResult.getResultCode());
 
                 BCRefundOrder refundOrder = refundResult.getRefund();
 
                 Assert.assertEquals("ccd378d8823640a68e220949686e5922", refundOrder.getBillNum());
                 Assert.assertEquals("2015110362316", refundOrder.getRefundNum());
                 Assert.assertEquals("demo测试", refundOrder.getTitle());
-                Assert.assertEquals((Integer) 1, refundOrder.getTotalFee());
-                Assert.assertEquals((Integer) 1, refundOrder.getRefundFee());
+                Assert.assertEquals((Integer)1, refundOrder.getTotalFee());
+                Assert.assertEquals((Integer)1, refundOrder.getRefundFee());
                 Assert.assertEquals("WX", refundOrder.getChannel());
                 Assert.assertEquals("WX_NATIVE", refundOrder.getSubChannel());
                 Assert.assertFalse(refundOrder.isRefundFinished());
                 Assert.assertFalse(refundOrder.getRefundResult());
-                Assert.assertEquals((Long) 1446531122439L, refundOrder.getRefundCreatedTime());
+                Assert.assertEquals((Long)1446531122439L, refundOrder.getRefundCreatedTime());
                 Assert.assertEquals("{\"test\":\"test\"}", refundOrder.getOptional());
 
                 //释放
@@ -893,7 +893,7 @@ public class BCQueryTest {
 
                         BCBillStatus status = (BCBillStatus) result;
 
-                        Assert.assertEquals((Integer) 0, status.getResultCode());
+                        Assert.assertEquals((Integer)0, status.getResultCode());
                         Assert.assertTrue(status.getPayResult());
                         //释放
                         latch.countDown();
@@ -991,8 +991,8 @@ public class BCQueryTest {
 
                         BCQueryCountResult countResult = (BCQueryCountResult) result;
 
-                        Assert.assertEquals((Integer) 0, countResult.getResultCode());
-                        Assert.assertEquals((Integer) 826, countResult.getCount());
+                        Assert.assertEquals((Integer)0, countResult.getResultCode());
+                        Assert.assertEquals((Integer)826, countResult.getCount());
 
                         latch.countDown();
                     }
@@ -1090,8 +1090,8 @@ public class BCQueryTest {
 
                         BCQueryCountResult countResult = (BCQueryCountResult) result;
 
-                        Assert.assertEquals((Integer) 0, countResult.getResultCode());
-                        Assert.assertEquals((Integer) 826, countResult.getCount());
+                        Assert.assertEquals((Integer)0, countResult.getResultCode());
+                        Assert.assertEquals((Integer)826, countResult.getCount());
 
                         latch.countDown();
                     }

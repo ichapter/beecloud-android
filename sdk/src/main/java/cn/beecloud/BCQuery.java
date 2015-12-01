@@ -67,23 +67,23 @@ public class BCQuery {
      * @param channel       支付渠道类型
      * @param operation     发起的操作类型
      * @param billNum       发起支付时填写的订单号, 可为null
-     * @param payResult     true表示只返回成功的支付订单
+     * @param payResult     true表示只返回成功的支付订单, 可为null
      * @param refundNum     退款的单号, 可为null
-     * @param needDetail    true表示需要返回商户返回的详细信息
+     * @param needApproval  true表示只返回预退款, 可为null, 默认返回全部退款订单
      * @param startTime     订单生成时间, 毫秒时间戳, 13位, 可为null
      * @param endTime       订单完成时间, 毫秒时间戳, 13位, 可为null
      * @param skip          忽略的记录个数, 默认为0, 设置为10表示忽略满足条件的前10条数据, 可为null
      * @param limit         本次抓取的记录数, 默认为10, [10, 50]之间, 设置为10表示只返回满足条件的10条数据, 可为null
-     * @param needApproval  true表示只返回预退款, 可为null
+     * @param needDetail    true表示需要返回商户返回的详细信息, 可为null, 默认不返回详细信息
      * @param callback      回调函数
      */
     protected void queryOrdersAsync(final BCReqParams.BCChannelTypes channel,
                                     final QueryOrderType operation,
                                     final String billNum, final Boolean payResult,
-                                    final String refundNum, final Boolean needDetail,
+                                    final String refundNum, final Boolean needApproval,
                                     final Long startTime, final Long endTime,
                                     final Integer skip, final Integer limit,
-                                    final Boolean needApproval, final BCCallback callback) {
+                                    final Boolean needDetail, final BCCallback callback) {
         if (callback == null) {
             Log.w(TAG, "请初始化callback");
             return;
@@ -96,7 +96,7 @@ public class BCQuery {
                 if (channel == null) {
                     doErrCallBack(operation, BCRestfulCommonResult.APP_INNER_FAIL_NUM,
                             BCRestfulCommonResult.APP_INNER_FAIL,
-                            "channel NPE, set ALL if you want to query all records",
+                            "Channel should not be null, set it to ALL if you want to query all records.",
                             callback);
 
                     return;
@@ -150,9 +150,8 @@ public class BCQuery {
                         bcQueryReqParams.transToEncodedJsonString());
 
                 if (response.code == 200) {
-
                     String ret = response.content;
-                    Log.w("BCQuery", ret);
+                    //Log.w("BCQuery", ret);
 
                     switch (operation) {
                         case QUERY_BILLS:
@@ -192,7 +191,7 @@ public class BCQuery {
      */
     public void queryBillsAsync(final BCReqParams.BCChannelTypes channel, final String billNum,
                                 final Long startTime, final Long endTime,
-                                final Integer skip, final Integer limit, final BCCallback callback){
+                                final Integer skip, final Integer limit, final BCCallback callback) {
         queryOrdersAsync(channel, QueryOrderType.QUERY_BILLS, billNum,
                 null, null, null, startTime, endTime, skip, limit, null, callback);
     }
@@ -202,7 +201,7 @@ public class BCQuery {
      * @param channel       支付渠道, 若为ALL则查询全部订单
      * @param callback      回调接口
      */
-    public void queryBillsAsync(final BCReqParams.BCChannelTypes channel, final BCCallback callback){
+    public void queryBillsAsync(final BCReqParams.BCChannelTypes channel, final BCCallback callback) {
         queryBillsAsync(channel, null, null, null, null, null, callback);
     }
 
@@ -212,7 +211,7 @@ public class BCQuery {
      * @param billNum       订单号
      * @param callback      回调接口
      */
-    public void queryBillsAsync(final BCReqParams.BCChannelTypes channel, final String billNum, final BCCallback callback){
+    public void queryBillsAsync(final BCReqParams.BCChannelTypes channel, final String billNum, final BCCallback callback) {
         queryBillsAsync(channel, billNum, null, null, null, null, callback);
     }
 
@@ -222,7 +221,6 @@ public class BCQuery {
      * @param callback       回调接口
      */
     public void queryBillsAsync(final QueryParams queryParams, final BCCallback callback) {
-
         if (queryParams == null) {
             Log.w(TAG, "查询参数queryParams不可为null");
             return;
@@ -233,12 +231,12 @@ public class BCQuery {
                 queryParams.billNum,
                 queryParams.payResult,
                 null,
-                queryParams.needDetail,
+                null,
                 queryParams.startTime,
                 queryParams.endTime,
                 queryParams.skip,
                 queryParams.limit,
-                null,
+                queryParams.needDetail,
                 callback);
     }
 
@@ -255,7 +253,7 @@ public class BCQuery {
      */
     public void queryRefundsAsync(final BCReqParams.BCChannelTypes channel, final String billNum, final String refundNum,
                                 final Long startTime, final Long endTime,
-                                final Integer skip, final Integer limit, final BCCallback callback){
+                                final Integer skip, final Integer limit, final BCCallback callback) {
         queryOrdersAsync(channel, QueryOrderType.QUERY_REFUNDS, billNum,
                 null, refundNum, null, startTime, endTime, skip, limit, null, callback);
     }
@@ -265,7 +263,7 @@ public class BCQuery {
      * @param channel       支付渠道, 若为ALL则查询全部订单
      * @param callback      回调接口
      */
-    public void queryRefundsAsync(final BCReqParams.BCChannelTypes channel, final BCCallback callback){
+    public void queryRefundsAsync(final BCReqParams.BCChannelTypes channel, final BCCallback callback) {
         queryRefundsAsync(channel, null, null, null, null, null, null, callback);
     }
 
@@ -277,7 +275,7 @@ public class BCQuery {
      * @param callback      回调接口
      */
     public void queryRefundsAsync(final BCReqParams.BCChannelTypes channel, final String billNum,
-                                  final String refundNum, final BCCallback callback){
+                                  final String refundNum, final BCCallback callback) {
         queryRefundsAsync(channel, billNum, refundNum, null, null, null, null, callback);
     }
 
@@ -297,12 +295,12 @@ public class BCQuery {
                 queryParams.billNum,
                 null,
                 queryParams.refundNum,
-                queryParams.needDetail,
+                queryParams.needApproval,
                 queryParams.startTime,
                 queryParams.endTime,
                 queryParams.skip,
                 queryParams.limit,
-                queryParams.needApproval,
+                queryParams.needDetail,
                 callback);
     }
 
@@ -347,12 +345,12 @@ public class BCQuery {
                 queryParams.billNum,
                 null,
                 queryParams.refundNum,
-                null,
+                queryParams.needApproval,
                 queryParams.startTime,
                 queryParams.endTime,
                 null,
                 null,
-                queryParams.needApproval,
+                null,
                 callback);
     }
 
@@ -363,7 +361,7 @@ public class BCQuery {
      * @param callback      回调入口
      */
     public void queryRefundStatusAsync(final BCReqParams.BCChannelTypes channel, final String refundNum,
-                                       final BCCallback callback){
+                                       final BCCallback callback) {
         if (callback == null) {
             Log.w(TAG, "请初始化callback");
             return;
@@ -607,10 +605,11 @@ public class BCQuery {
         public String refundNum;
 
         /**
-         * 是否需要返回返回渠道详细信息, true表示返回, 可为null,
-         * 如果是查询订单数目, 该参数会被忽略
+         * 标识退款记录是否为预退款, 仅在查询退款相关记录时用到, true表示查询预退款, 可为null,
+         * 如果发起了预退款, 然后正式退款已经完成, 此时设为true将查不到该记录,
+         * 如果是查询支付订单相关记录, 该参数会被忽略
          */
-        public Boolean needDetail;
+        public Boolean needApproval;
 
         /**
          * 查询起始时间, 毫秒时间戳, 13位, 可为null
@@ -635,10 +634,9 @@ public class BCQuery {
         public Integer limit;
 
         /**
-         * 标识退款记录是否为预退款, 仅在查询退款相关记录时用到, true表示查询预退款, 可为null,
-         * 如果发起了预退款, 然后正式退款已经完成, 此时设为true将查不到该记录,
-         * 如果是查询支付订单相关记录, 该参数会被忽略
+         * 是否需要返回返回渠道详细信息, true表示返回, 可为null,
+         * 如果是查询订单数目, 该参数会被忽略
          */
-        public Boolean needApproval;
+        public Boolean needDetail;
     }
 }

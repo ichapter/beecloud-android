@@ -413,7 +413,6 @@ public class ShoppingCartActivity extends Activity {
 
                         Log.d(TAG, "订单创建时间:" + new Date(billOrder.getCreatedTime()));
                         Log.d(TAG, "扩展参数:" + billOrder.getOptional());
-
                         Log.w(TAG, "订单是否已经退款成功(用于后期查询): " + billOrder.getRefundResult());
                         Log.w(TAG, "渠道返回的详细信息，按需处理: " + billOrder.getMessageDetail());
 
