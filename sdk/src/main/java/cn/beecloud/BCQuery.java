@@ -595,7 +595,7 @@ public class BCQuery {
 
         /**
          * 支付结果过滤, true表示只返回支付成功的订单(订单是否退款对该标志位无影响),
-         * 只在查询支付订单时有效, 可为null
+         * 只在查询支付订单时有效, 可为null, 默认返回全部
          */
         public Boolean payResult;
 
@@ -605,7 +605,11 @@ public class BCQuery {
         public String refundNum;
 
         /**
-         * 标识退款记录是否为预退款, 仅在查询退款相关记录时用到, true表示查询预退款, 可为null,
+         * 标识退款记录是否为预退款,
+         * 仅在查询退款相关记录时用到,
+         * true表示查询预退款,
+         * false表示查询直接退款的订单,
+         * 可为null, 默认查询全部退款订单,
          * 如果发起了预退款, 然后正式退款已经完成, 此时设为true将查不到该记录,
          * 如果是查询支付订单相关记录, 该参数会被忽略
          */
@@ -634,7 +638,8 @@ public class BCQuery {
         public Integer limit;
 
         /**
-         * 是否需要返回返回渠道详细信息, true表示返回, 可为null,
+         * 是否需要返回返回渠道详细信息, true表示返回,
+         * 可为null, 默认不返回详细信息
          * 如果是查询订单数目, 该参数会被忽略
          */
         public Boolean needDetail;
