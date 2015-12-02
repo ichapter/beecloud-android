@@ -25,6 +25,9 @@ public class BCBillOrder extends BCOrder{
     //订单是否被撤销
     private Boolean revert_result;
 
+    //订单是否已经退款
+    private Boolean refund_result;
+
     /**
      * @return  渠道返回的交易号，未支付成功时，无效
      */
@@ -52,5 +55,12 @@ public class BCBillOrder extends BCOrder{
      */
     public Long getCreatedTime() {
         return create_time;
+    }
+
+    /**
+     * @return  true表示该支付订单已经退款成功
+     */
+    public Boolean getRefundResult() {
+        return refund_result;
     }
 }

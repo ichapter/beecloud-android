@@ -28,6 +28,7 @@ import cn.beecloud.BCQuery;
 import cn.beecloud.async.BCCallback;
 import cn.beecloud.async.BCResult;
 import cn.beecloud.demo.util.DisplayUtils;
+import cn.beecloud.entity.BCQueryCountResult;
 import cn.beecloud.entity.BCQueryRefundResult;
 import cn.beecloud.entity.BCQueryRefundsResult;
 import cn.beecloud.entity.BCRefundOrder;
@@ -130,7 +131,7 @@ public class RefundOrdersActivity extends Activity {
 
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(
                 this,android.R.layout.simple_spinner_item,
-                new String[]{"微信", "支付宝", "银联", "百度", "PayPal", "全渠道", "通过ID查询"});
+                new String[]{"微信", "支付宝", "银联", "百度", "PayPal", "全渠道", "通过ID查询", "退款订单总数"});
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         channelChooser.setAdapter(adapter);
 
@@ -207,6 +208,9 @@ public class RefundOrdersActivity extends Activity {
                         //最多返回的数目
                         params.limit = 20;
 
+                        //是否获取渠道返回的信息信息
+                        params.needDetail = true;
+
                         BCQuery.getInstance().queryRefundsAsync(params,
                                 bcCallback);
 
@@ -265,6 +269,58 @@ public class RefundOrdersActivity extends Activity {
                                         mHandler.sendMessage(msg);
                                     }
                                 });
+
+                    case 7:
+                        params = new BCQuery.QueryParams();
+
+                        //以下为可用的限制参数
+                        //渠道类型
+                        params.channel = BCReqParams.BCChannelTypes.ALL;
+
+                        //支付单号
+                        //params.billNum = "your bill number";
+                        //退款单号
+                        //params.refundNum = "your refund number";
+
+                        //限制起始时间
+                        params.startTime = startTime.getTime();
+
+                        //限制结束时间
+                        params.endTime = endTime.getTime();
+
+                        BCQuery.getInstance().queryRefundsCountAsync(params, new BCCallback() {
+                            @Override
+                            public void done(BCResult result) {
+                                if (loadingDialog.isShowing())
+                                    loadingDialog.dismiss();
+
+                                final BCQueryCountResult countResult = (BCQueryCountResult) result;
+
+                                if (countResult.getResultCode() == 0) {
+                                    //显示获取到的订单总数
+                                    RefundOrdersActivity.this.runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            Toast.makeText(RefundOrdersActivity.this,
+                                                    "退款订单总数:" + countResult.getCount(),
+                                                    Toast.LENGTH_LONG).show();
+                                        }
+                                    });
+                                } else {
+                                    RefundOrdersActivity.this.runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            Toast.makeText(RefundOrdersActivity.this,
+                                                    "err code:" + countResult.getResultCode() +
+                                                            "; err msg: " + countResult.getResultMsg() +
+                                                            "; err detail: " + countResult.getErrDetail(),
+                                                    Toast.LENGTH_LONG).show();
+                                        }
+                                    });
+
+                                }
+                            }
+                        });
                 }
             }
 

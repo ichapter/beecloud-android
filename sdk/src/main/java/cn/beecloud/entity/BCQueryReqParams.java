@@ -30,12 +30,29 @@ public class BCQueryReqParams extends BCReqParams {
     public String billNum;
 
     /**
+     * 支付结果过滤,
+     * true表示只返回支付成功的订单,
+     * 只在查询支付订单时有效,
+     * 可为null,
+     * 默认返回全部
+     */
+    public Boolean payResult;
+
+    /**
      * 商户退款单号
      * 发起退款时填写的退款单号
      * 仅在退款查询时候有效
      * 查询退款状态时为必填, 其它可以为null
      */
     public String refundNum;
+
+    /**
+     * 是否需要返回返回渠道详细信息,
+     * true表示返回,
+     * 可为null,
+     * 默认不返回详细信息
+     */
+    public Boolean needDetail;
 
     /**
      * 订单生成的时间,
@@ -70,6 +87,17 @@ public class BCQueryReqParams extends BCReqParams {
     public Integer limit;
 
     /**
+     * 标识退款记录是否为预退款,
+     * 仅在查询退款相关记录时用到,
+     * true表示查询预退款,
+     * false表示查询直接退款的订单,
+     * 可为null, 默认查询全部退款订单,
+     * 如果发起了预退款, 然后正式退款已经完成, 此时设为true将查不到该记录,
+     * 如果是查询支付订单相关记录, 该参数会被忽略
+     */
+    public Boolean needApproval;
+
+    /**
      * 构造函数
      * @param channel       支付渠道类型
      * @throws BCException  父类构造有可能抛出异常
@@ -95,6 +123,12 @@ public class BCQueryReqParams extends BCReqParams {
         if (billNum != null)
             params.put("bill_no", billNum);
 
+        if (payResult != null)
+            params.put("spay_result", payResult);
+
+        if (needDetail != null)
+            params.put("need_detail", needDetail);
+
         if (refundNum != null)
             params.put("refund_no", refundNum);
 
@@ -109,6 +143,9 @@ public class BCQueryReqParams extends BCReqParams {
 
         if (limit != null)
             params.put("limit", limit);
+
+        if (needApproval != null)
+            params.put("need_approval", needApproval);
 
         return params;
     }
