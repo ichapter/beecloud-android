@@ -12,9 +12,6 @@ import com.google.gson.reflect.TypeToken;
 import java.util.List;
 
 public class BCQueryRefundsResult extends BCRestfulCommonResult {
-    //实际返回订单结果数量
-    private Integer count;
-
     //退款订单列表
     private List<BCRefundOrder> refunds;
 
@@ -22,7 +19,7 @@ public class BCQueryRefundsResult extends BCRestfulCommonResult {
      * @return 实际返回订单结果数量
      */
     public Integer getCount() {
-        return count;
+        return refunds.size();
     }
 
     /**
@@ -47,21 +44,6 @@ public class BCQueryRefundsResult extends BCRestfulCommonResult {
      */
     public BCQueryRefundsResult(Integer resultCode, String resultMsg, String errDetail) {
         super(resultCode, resultMsg, errDetail);
-    }
-
-    /**
-     * 构造函数
-     *
-     * @param resultCode 返回码
-     * @param resultMsg  返回信息
-     * @param errDetail  具体错误信息
-     * @param count      实际的退款订单数量
-     * @param refunds    退款订单列表
-     */
-    public BCQueryRefundsResult(Integer resultCode, String resultMsg, String errDetail, Integer count, List<BCRefundOrder> refunds) {
-        super(resultCode, resultMsg, errDetail);
-        this.count = count;
-        this.refunds = refunds;
     }
 
     /**

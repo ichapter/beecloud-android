@@ -167,9 +167,12 @@ public class ShoppingCartActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_shopping_cart);
 
-        // 推荐在主Activity里的onCreate函数中初始化BeeCloud.
+        // 推荐在主Activity或application里的onCreate函数中初始化BeeCloud.
+//        BeeCloud.setAppIdAndSecret("c5d1cba1-5e3f-4ba0-941d-9b0a371fe719",
+//                "39a7a518-9ac8-4a9e-87bc-7885f33cf18c");
+        BeeCloud.setSandbox(true);
         BeeCloud.setAppIdAndSecret("c5d1cba1-5e3f-4ba0-941d-9b0a371fe719",
-                "39a7a518-9ac8-4a9e-87bc-7885f33cf18c");
+                "4bfdd244-574d-4bf3-b034-0c751ed34fee");
 
         // 如果用到微信支付，在用到微信支付的Activity的onCreate函数里调用以下函数.
         // 第二个参数需要换成你自己的微信AppID.
@@ -187,7 +190,7 @@ public class ShoppingCartActivity extends Activity {
 
         payMethod = (ListView) this.findViewById(R.id.payMethod);
         Integer[] payIcons = new Integer[]{R.drawable.wechat, R.drawable.alipay,
-                R.drawable.unionpay, R.drawable.baidupay ,
+                R.drawable.unionpay, R.drawable.baidupay,
                 R.drawable.paypal, R.drawable.scan};
         final String[] payNames = new String[]{"微信支付", "支付宝支付",
                 "银联在线", "百度钱包", "PayPal支付", "二维码支付"};
@@ -366,7 +369,7 @@ public class ShoppingCartActivity extends Activity {
                                 hashMapOptional,        //optional info
                                 bcCallback);
                         break;
-                    default:
+                    case 5:
                         Intent intent = new Intent(ShoppingCartActivity.this, QRCodeEntryActivity.class);
                         startActivity(intent);
                 }
@@ -396,13 +399,15 @@ public class ShoppingCartActivity extends Activity {
                         Log.d(TAG, "------getResultMsg------" + billResult.getResultMsg());
                         Log.d(TAG, "------getErrDetail------" + billResult.getErrDetail());
 
+                        if (billResult.getResultCode() != 0)
+                            return;
+
                         Log.d(TAG, "------- bill info ------");
                         BCBillOrder billOrder = billResult.getBill();
                         Log.d(TAG, "订单号:" + billOrder.getBillNum());
                         Log.d(TAG, "订单金额, 单位为分:" + billOrder.getTotalFee());
                         Log.d(TAG, "渠道类型:" + BCReqParams.BCChannelTypes.getTranslatedChannelName(billOrder.getChannel()));
                         Log.d(TAG, "子渠道类型:" + BCReqParams.BCChannelTypes.getTranslatedChannelName(billOrder.getSubChannel()));
-
                         Log.d(TAG, "订单是否成功:" + billOrder.getPayResult());
 
                         if (billOrder.getPayResult())

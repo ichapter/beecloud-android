@@ -14,19 +14,21 @@ public class BeeCloud {
     /**
      * BeeCloud Android SDK 版本
      */
-    public static final String BEECLOUD_ANDROID_SDK_VERSION = "2.0.5";
+    public static final String BEECLOUD_ANDROID_SDK_VERSION = "2.1.0";
 
     /**
-     * 设置AppId和AppSecret(从BeeCloud网站的控制台获得), 并进行一系列异步的初始化
-     * 本函数必须在所有其他BeeCloud函数调用前被调用, 推荐在主Activity的onCreate函数中调用
+     * 设置AppId和secret(从BeeCloud网站的控制台获得)，并进行一系列异步的初始化
+     * 如果是上线版本，secret需要填APP Secret，对于测试模式应填Test Secret，
+     * 本函数必须在所有其他BeeCloud函数调用前被调用，
+     * 推荐在主Activity的onCreate函数中调用，或者在Application中初始化
      *
      * @param appId     App ID obtained from BeeCloud website.
-     * @param appSecret App Secret obtained from BeeCloud website.
+     * @param secret    Secret obtained from BeeCloud website.
      */
-    public static void setAppIdAndSecret(String appId, String appSecret) {
+    public static void setAppIdAndSecret(String appId, String secret) {
         BCCache instance = BCCache.getInstance();
         instance.appId = appId;
-        instance.appSecret = appSecret;
+        instance.secret = secret;
     }
 
     /**
@@ -36,5 +38,13 @@ public class BeeCloud {
      */
     public static void setConnectTimeout(Integer connectTimeout) {
         BCCache.getInstance().connectTimeout = connectTimeout;
+    }
+
+    /**
+     * 设置测试模式，如果不设置将默认为正式版本
+     * @param sandbox true表示设置为测试模式，false表示为正式版本
+     */
+    public static void setSandbox(boolean sandbox){
+        BCCache.getInstance().isTestMode = sandbox;
     }
 }

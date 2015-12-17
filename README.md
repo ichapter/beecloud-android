@@ -1,6 +1,6 @@
 ## BeeCloud Android SDK (Open Source)
 
-[![Build Status](https://travis-ci.org/beecloud/beecloud-android.svg)](https://travis-ci.org/beecloud/beecloud-android) ![license](https://img.shields.io/badge/license-MIT-brightgreen.svg) ![version](https://img.shields.io/badge/version-v2.0.5-blue.svg)
+[![Build Status](https://travis-ci.org/beecloud/beecloud-android.svg)](https://travis-ci.org/beecloud/beecloud-android) ![license](https://img.shields.io/badge/license-MIT-brightgreen.svg) ![version](https://img.shields.io/badge/version-v2.1.0-blue.svg)
 
 ## 简介
 
@@ -42,7 +42,7 @@
 银联需要引入`UPPayAssistEx.jar`，<br/>
 百度钱包支付需要引入`Cashier_SDK-v4.2.0.jar`，<br/>
 PayPal需要引入`PayPalAndroidSDK-2.11.2.jar`，<br/>
-最后添加`beecloud android sdk`：`beecloud-android\sdk\beecloud-2.0.5.jar`
+最后添加`beecloud android sdk`：`beecloud-android\sdk\beecloud-2.1.0.jar`
 
 2.对于微信支付，需要注意你的`AndroidManifest.xml`中`package`需要和微信平台创建的移动应用`应用包名`保持一致，关于其`应用签名`请参阅[创建微信应用->B.填写平台信息](https://beecloud.cn/doc/payapply/?index=0)，
 
@@ -61,9 +61,11 @@ PayPal需要引入`PayPalAndroidSDK-2.11.2.jar`，<br/>
 
 ### 1.初始化支付参数
 请参考`demo`中的`ShoppingCartActivity.java`
->1. 在主activity的onCreate函数中初始化BeeCloud账户中的AppID和AppSecret，例如
+>1. 在主activity的onCreate函数中初始化BeeCloud账户中的AppID和secret，并设置是否开启测试模式（如果不设置默认不开启）；注意：如果是测试模式，secret应该填Test Secret，如果是上线版本，应该填APP Secret，例如
 ```java
-BeeCloud.setAppIdAndSecret("c5d1cba1-5e3f-4ba0-941d-9b0a371fe719", "39a7a518-9ac8-4a9e-87bc-7885f33cf18c");
+BeeCloud.setSandbox(true);
+BeeCloud.setAppIdAndSecret("c5d1cba1-5e3f-4ba0-941d-9b0a371fe719",
+        "4bfdd244-574d-4bf3-b034-0c751ed34fee");
 ```
 <br/>
 >2. 如果用到微信支付，在用到微信支付的Activity的onCreate函数里调用以下函数，第二个参数需要换成你自己的微信AppID，例如

@@ -180,7 +180,9 @@ public class PayViaAuthCodeActivity extends Activity {
                              * 你发布的项目中不需要做如下判断，此处由于支付宝政策原因，
                              * 不再提供支付宝支付的测试功能，所以给出提示说明
                              */
-                            if (BCCache.getInstance().appId.equals("c5d1cba1-5e3f-4ba0-941d-9b0a371fe719"))
+                            if (BCCache.getInstance().appId.equals("c5d1cba1-5e3f-4ba0-941d-9b0a371fe719") &&
+                                    type.equals("ALI") &&
+                                    !payResult.getDetailInfo().equals("该功能暂不支持测试模式"))
                                 errMsg = "支付失败：由于支付宝政策原因，故不再提供支付宝支付的测试功能，给您带来的不便，敬请谅解";
 
                             msg.what = ERR_CODE;

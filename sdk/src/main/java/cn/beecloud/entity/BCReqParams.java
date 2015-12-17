@@ -413,13 +413,13 @@ public class BCReqParams {
 
         BCCache mCache = BCCache.getInstance();
 
-        if (mCache.appId == null || mCache.appSecret == null) {
-            throw new BCException("parameters: 请通过BeeCloud初始化appId和appSecret");
+        if (mCache.appId == null || mCache.secret == null) {
+            throw new BCException("parameters: 请通过BeeCloud初始化appId和secret");
         } else {
             appId = mCache.appId;
             timestamp = (new Date()).getTime();
             appSign = BCSecurityUtil.getMessageMD5Digest(appId +
-                    timestamp + mCache.appSecret);
+                    timestamp + mCache.secret);
             this.channel = channel;
         }
     }

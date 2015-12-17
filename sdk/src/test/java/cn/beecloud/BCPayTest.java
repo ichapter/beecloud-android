@@ -380,6 +380,35 @@ public class BCPayTest {
     }
 
     /**
+     * 模拟paypal支付Test Mode
+     * @throws Exception
+     */
+    @Test
+    public void testReqPayPalPaymentAsyncTestMode() throws Exception {
+        BeeCloud.setSandbox(true);
+
+        pay.reqPayPalPaymentAsync("billnum",
+                111,
+                "USD",
+                null,
+                new BCCallback() {
+                    @Override
+                    public void done(BCResult result) {
+                        Assert.assertTrue(result instanceof BCPayResult);
+                        BCPayResult payResult = (BCPayResult) result;
+
+                        Assert.assertEquals(BCPayResult.RESULT_FAIL, payResult.getResult());
+                        Assert.assertEquals((Integer) BCPayResult.APP_INTERNAL_PARAMS_ERR_CODE,
+                                payResult.getErrCode());
+                        Assert.assertTrue(payResult.getDetailInfo()
+                                .startsWith("PayPal支付暂不支持通过BeeCloud.setSandbox设置测试模式"));
+
+                        BeeCloud.setSandbox(false);
+                    }
+                });
+    }
+
+    /**
      * 模拟paypal客户端支付完成后向服务端发送支付结果
      * @throws Exception
      */
@@ -619,6 +648,40 @@ public class BCPayTest {
                         Assert.assertEquals("mocked url",
                                 bcqrCodeResult.getQrCodeRawContent());
 
+                        latch.countDown();
+                    }
+                });
+
+        latch.await(2000, TimeUnit.MILLISECONDS);
+    }
+
+    /**
+     * test mode
+     * @throws Exception
+     */
+    @Test
+    public void testReqAliInlineQRCodeAsyncTestMode() throws Exception {
+        BeeCloud.setSandbox(true);
+
+        pay.reqAliInlineQRCodeAsync("billTitle",
+                1,
+                "123456789ABCDE",
+                null,
+                "https://beecloud.cn/",
+                "1",
+                new BCCallback() {
+                    @Override
+                    public void done(BCResult result) {
+                        Assert.assertTrue(result instanceof BCQRCodeResult);
+
+                        BCQRCodeResult bcqrCodeResult = (BCQRCodeResult) result;
+
+                        Assert.assertEquals(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
+                                bcqrCodeResult.getResultCode());
+                        Assert.assertEquals("该功能暂不支持测试模式",
+                                bcqrCodeResult.getErrDetail());
+
+                        BeeCloud.setSandbox(false);
                         latch.countDown();
                     }
                 });
