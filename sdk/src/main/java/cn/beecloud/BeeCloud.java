@@ -19,7 +19,6 @@ public class BeeCloud {
     /**
      * 设置AppId和secret(从BeeCloud网站的控制台获得)，并进行一系列异步的初始化
      * 如果是上线版本，secret需要填APP Secret，对于测试模式应填Test Secret，
-     * 本函数必须在所有其他BeeCloud函数调用前被调用，
      * 推荐在主Activity的onCreate函数中调用，或者在Application中初始化
      *
      * @param appId     App ID obtained from BeeCloud website.
