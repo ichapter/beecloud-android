@@ -13,9 +13,6 @@ import java.util.List;
 
 public class BCQueryBillsResult extends BCRestfulCommonResult {
 
-    //实际返回订单结果数量
-    private Integer count;
-
     //支付订单列表
     private List<BCBillOrder> bills;
 
@@ -23,7 +20,7 @@ public class BCQueryBillsResult extends BCRestfulCommonResult {
      * @return  实际返回订单结果数量
      */
     public Integer getCount() {
-        return count;
+        return bills.size();
     }
 
     /**
@@ -48,21 +45,6 @@ public class BCQueryBillsResult extends BCRestfulCommonResult {
      */
     public BCQueryBillsResult(Integer resultCode, String resultMsg, String errDetail) {
         super(resultCode, resultMsg, errDetail);
-    }
-
-    /**
-     * 构造函数
-     * @param resultCode    返回码
-     * @param resultMsg     返回信息
-     * @param errDetail     具体错误信息
-     * @param count         实际返回订单结果数量
-     * @param bills         订单列表
-     */
-    public BCQueryBillsResult(Integer resultCode, String resultMsg, String errDetail,
-                              Integer count, List<BCBillOrder> bills) {
-        super(resultCode, resultMsg, errDetail);
-        this.count = count;
-        this.bills = bills;
     }
 
     /**

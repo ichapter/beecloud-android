@@ -92,6 +92,16 @@ public class BCQuery {
         BCCache.executorService.execute(new Runnable() {
             @Override
             public void run() {
+                if (BCCache.getInstance().isTestMode &&
+                        (operation == QueryOrderType.QUERY_REFUNDS ||
+                         operation == QueryOrderType.QUERY_REFUNDS_COUNT)) {
+                    doErrCallBack(operation, BCRestfulCommonResult.APP_INNER_FAIL_NUM,
+                            BCRestfulCommonResult.APP_INNER_FAIL,
+                            "该功能暂不支持测试模式",
+                            callback);
+
+                    return;
+                }
 
                 if (channel == null) {
                     doErrCallBack(operation, BCRestfulCommonResult.APP_INNER_FAIL_NUM,
@@ -370,6 +380,12 @@ public class BCQuery {
         BCCache.executorService.execute(new Runnable() {
             @Override
             public void run() {
+                if (BCCache.getInstance().isTestMode) {
+                    callback.done(new BCRefundStatus(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
+                            BCRestfulCommonResult.APP_INNER_FAIL, "该功能暂不支持测试模式", null));
+                    return;
+                }
+
                 if (refundNum == null) {
                     callback.done(new BCRefundStatus(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
                             BCRestfulCommonResult.APP_INNER_FAIL, "refundNum不能为null", null));
@@ -482,6 +498,13 @@ public class BCQuery {
         BCCache.executorService.execute(new Runnable() {
             @Override
             public void run() {
+                if (BCCache.getInstance().isTestMode) {
+                    callback.done(new BCQueryRefundResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
+                            BCRestfulCommonResult.APP_INNER_FAIL, "该功能暂不支持测试模式"));
+
+                    return;
+                }
+
                 if (id == null) {
                     callback.done(new BCQueryRefundResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
                             BCRestfulCommonResult.APP_INNER_FAIL, "id NPE!"));
@@ -537,6 +560,12 @@ public class BCQuery {
         BCCache.executorService.execute(new Runnable() {
             @Override
             public void run() {
+                if (BCCache.getInstance().isTestMode){
+                    callback.done(new BCBillStatus(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
+                            BCRestfulCommonResult.APP_INNER_FAIL,
+                            "该功能暂不支持测试模式"));
+                    return;
+                }
 
                 //校验并准备公用参数
                 BCReqParams parameters;

@@ -23,6 +23,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import cn.beecloud.BCQuery;
 import cn.beecloud.async.BCCallback;
@@ -140,15 +141,16 @@ public class BillListActivity extends Activity {
                 //以progressdialog为例
                 loadingDialog.show();
 
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.CHINA);
 
-                Date startTime, endTime;
+                Date startTime;
+                //Date endTime;
                 try {
                     startTime = sdf.parse("2015-10-01 00:00");
-                    endTime = sdf.parse("2015-10-31 23:59");
+                    //endTime = sdf.parse("2015-12-01 23:59");
                 } catch (ParseException e) {
                     startTime = new Date();
-                    endTime = new Date();
+                    //endTime = new Date();
                     e.printStackTrace();
                 }
 
@@ -163,7 +165,7 @@ public class BillListActivity extends Activity {
                     case 1: //支付宝
                         BCQuery.getInstance().queryBillsAsync(
                                 BCReqParams.BCChannelTypes.ALI_APP, //渠道，此处表示ALI客户端渠道
-                                "20150820102712150", //此处表示限制订单号
+                                //"20150820102712150", //此处表示限制订单号
                                 bcCallback);
                         break;
                     case 2: //银联
@@ -172,7 +174,7 @@ public class BillListActivity extends Activity {
                                 BCReqParams.BCChannelTypes.UN_APP,          //渠道, 此处表示银联手机APP客户端支付
                                 null,                                   //订单号
                                 startTime.getTime(),                    //起始时间
-                                endTime.getTime(),                      //结束时间
+                                null,                                   //结束时间
                                 2,                                      //跳过满足条件的前2条数据
                                 15,                                     //最多返回满足条件的15条数据
                                 bcCallback);
@@ -194,10 +196,10 @@ public class BillListActivity extends Activity {
                         params.startTime = startTime.getTime();
 
                         //限制结束时间
-                        params.endTime = endTime.getTime();
+                        //params.endTime = endTime.getTime();
 
                         //跳过满足条件的数目
-                        params.skip = 10;
+                        //params.skip = 10;
 
                         //最多返回的数目
                         params.limit = 20;
@@ -228,6 +230,8 @@ public class BillListActivity extends Activity {
 
                         BCQuery.getInstance().queryBillsAsync(params,
                                 bcCallback);
+                        break;
+
                     case 6:
                         params = new BCQuery.QueryParams();
 
@@ -245,7 +249,7 @@ public class BillListActivity extends Activity {
                         params.startTime = startTime.getTime();
 
                         //限制结束时间
-                        params.endTime = endTime.getTime();
+                        //params.endTime = endTime.getTime();
 
                         BCQuery.getInstance().queryBillsCountAsync(params, new BCCallback() {
                             @Override

@@ -300,6 +300,43 @@ public class BCOfflinePayTest {
     }
 
     /**
+     * #7
+     * 模拟测试模式，应该提示暂不支持
+     * @throws Exception
+     */
+    @Test
+    public void testReqQRCodeAsyncTestMode() throws Exception {
+        BeeCloud.setSandbox(true);
+
+        pay.reqQRCodeAsync(BCReqParams.BCChannelTypes.ALI_OFFLINE_QRCODE,
+                "billtitle",
+                1,
+                "billnum",
+                null,
+                Boolean.FALSE,
+                333,
+                new BCCallback() {
+                    @Override
+                    public void done(BCResult result) {
+                        Assert.assertTrue(result instanceof BCQRCodeResult);
+
+                        BCQRCodeResult bcqrCodeResult = (BCQRCodeResult) result;
+
+                        Assert.assertEquals(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
+                                bcqrCodeResult.getResultCode());
+                        Assert.assertEquals("该功能暂不支持测试模式",
+                                bcqrCodeResult.getErrDetail());
+
+                        //revert back
+                        BeeCloud.setSandbox(false);
+                        latch.countDown();
+                    }
+                });
+
+        latch.await(2000, TimeUnit.MILLISECONDS);
+    }
+
+    /**
      * 模拟直接通过reqWXNativeQRCodeAsync请求微信二维码
      * @throws Exception
      */
@@ -613,6 +650,47 @@ public class BCOfflinePayTest {
     }
 
     /**
+     * #6
+     * 模拟test mode，应该提示暂不支持
+     * @throws Exception
+     */
+    @Test
+    public void testReqOfflinePayAsyncTestMode() throws Exception {
+        BeeCloud.setSandbox(true);
+
+        pay.reqOfflinePayAsync(BCReqParams.BCChannelTypes.ALI_SCAN,
+                "正常title",
+                1,
+                "123456789abcde",
+                null,
+                "authcode",
+                "terminalid",
+                null,
+                new BCCallback() {
+                    @Override
+                    public void done(BCResult result) {
+                        Assert.assertTrue(result instanceof BCPayResult);
+
+                        BCPayResult payResult = (BCPayResult) result;
+
+                        Assert.assertEquals(BCPayResult.RESULT_FAIL,
+                                payResult.getResult());
+                        Assert.assertEquals((Integer) BCPayResult.APP_INTERNAL_PARAMS_ERR_CODE,
+                                payResult.getErrCode());
+                        Assert.assertEquals(BCPayResult.FAIL_INVALID_PARAMS,
+                                payResult.getErrMsg());
+                        Assert.assertEquals("该功能暂不支持测试模式",
+                                payResult.getDetailInfo());
+
+                        BeeCloud.setSandbox(false);
+                        latch.countDown();
+                    }
+                });
+
+        latch.await(2000, TimeUnit.MILLISECONDS);
+    }
+
+    /**
      * #1
      * 模拟参数问题
      * @throws Exception
@@ -715,6 +793,37 @@ public class BCOfflinePayTest {
 
                         Assert.assertTrue(revertStatus.getRevertStatus());
 
+                        latch.countDown();
+                    }
+                });
+
+        latch.await(2000, TimeUnit.MILLISECONDS);
+    }
+
+    /**
+     * #4
+     * test mode暂不支持
+     * @throws Exception
+     */
+    @Test
+    public void testReqRevertBillAsyncTestMode() throws Exception {
+        BeeCloud.setSandbox(true);
+
+        pay.reqRevertBillAsync(BCReqParams.BCChannelTypes.ALI_SCAN,
+                "billnum",
+                new BCCallback() {
+                    @Override
+                    public void done(BCResult result) {
+                        Assert.assertTrue(result instanceof BCRevertStatus);
+
+                        BCRevertStatus revertStatus = (BCRevertStatus) result;
+
+                        Assert.assertEquals(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
+                                revertStatus.getResultCode());
+                        Assert.assertEquals("该功能暂不支持测试模式",
+                                revertStatus.getErrDetail());
+
+                        BeeCloud.setSandbox(false);
                         latch.countDown();
                     }
                 });

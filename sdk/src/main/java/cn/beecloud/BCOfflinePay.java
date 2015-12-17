@@ -123,6 +123,11 @@ public class BCOfflinePay {
         BCCache.executorService.execute(new Runnable() {
             @Override
             public void run() {
+                if (BCCache.getInstance().isTestMode) {
+                    callback.done(new BCQRCodeResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
+                            BCRestfulCommonResult.APP_INNER_FAIL, "该功能暂不支持测试模式"));
+                    return;
+                }
 
                 //校验并准备公用参数
                 BCPayReqParams parameters;
@@ -255,6 +260,13 @@ public class BCOfflinePay {
         BCCache.executorService.execute(new Runnable() {
             @Override
             public void run() {
+                if (BCCache.getInstance().isTestMode) {
+                    callback.done(new BCPayResult(BCPayResult.RESULT_FAIL,
+                            BCPayResult.APP_INTERNAL_PARAMS_ERR_CODE,
+                            BCPayResult.FAIL_INVALID_PARAMS,
+                            "该功能暂不支持测试模式"));
+                    return;
+                }
 
                 //校验并准备公用参数
                 BCPayReqParams parameters;
@@ -416,6 +428,11 @@ public class BCOfflinePay {
         BCCache.executorService.execute(new Runnable() {
             @Override
             public void run() {
+                if (BCCache.getInstance().isTestMode) {
+                    callback.done(new BCRevertStatus(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
+                            BCRestfulCommonResult.APP_INNER_FAIL, "该功能暂不支持测试模式"));
+                    return;
+                }
 
                 //校验并准备公用参数
                 BCReqParams parameters;

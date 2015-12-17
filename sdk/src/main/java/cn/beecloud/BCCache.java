@@ -32,9 +32,14 @@ public class BCCache {
     public String appId;
 
     /**
-     * BeeCloud控制台注册的App Secret
+     * BeeCloud控制台注册的App Secret(如果是正式版本)，或者Test Secret(如果是测试模式)
      */
-    public String appSecret;
+    public String secret;
+
+    /**
+     * 是否为测试模式
+     */
+    public boolean isTestMode;
 
     /**
      * 微信App Id
@@ -79,8 +84,7 @@ public class BCCache {
             instance = new BCCache();
 
             instance.appId = null;
-            instance.appSecret = null;
-
+            instance.secret = null;
             instance.wxAppId = null;
 
             instance.connectTimeout = 10000;

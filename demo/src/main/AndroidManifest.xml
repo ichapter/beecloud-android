@@ -289,6 +289,12 @@
             android:windowSoftInputMode="adjustResize" />
         <!-- PayPal end -->
 
+        <!-- for test mode start -->
+        <activity
+            android:name="cn.beecloud.BCMockedPayActivity"
+            android:screenOrientation="portrait" />
+        <!-- for test mode end -->
+
         <activity
             android:name=".BillListActivity"
             android:label="@string/title_activity_bill_list" >

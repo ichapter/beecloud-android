@@ -38,11 +38,23 @@ class BCHttpClientUtil {
     //订单支付部分URL 和 获取扫码信息
     private static final String BILL_PAY_URL = "rest/bill";
 
+    //测试模式对应的订单支付部分URL和获取扫码信息URL
+    private static final String BILL_PAY_SANDBOX_URL = "rest/sandbox/bill";
+
+    //测试模式的异步通知(通知服务端支付成功)
+    private static final String NOTIFY_PAY_RESULT_SANDBOX_URL = "rest/sandbox/notify";
+
     //支付订单列表查询部分URL
     private static final String BILLS_QUERY_URL = "rest/bills?para=";
 
+    //支付订单列表查询部分测试模式URL
+    private static final String BILLS_QUERY_SANDBOX_URL = "rest/sandbox/bills?para=";
+
     //支付订单数目查询部分URL
     private static final String BILLS_COUNT_QUERY_URL = "rest/bills/count?para=";
+
+    //支付订单数目查询部分测试模式URL
+    private static final String BILLS_COUNT_QUERY_SANDBOX_URL = "rest/sandbox/bills/count?para=";
 
     //退款订单查询部分URL
     private static final String REFUND_QUERY_URL = "rest/refund";
@@ -79,7 +91,16 @@ class BCHttpClientUtil {
      * @return  支付请求URL
      */
     public static String getBillPayURL() {
-        return getRandomHost() + BILL_PAY_URL;
+        if (BCCache.getInstance().isTestMode) {
+            return getRandomHost() + BILL_PAY_SANDBOX_URL;
+        } else {
+            return getRandomHost() + BILL_PAY_URL;
+        }
+    }
+
+    public static String getNotifyPayResultSandboxUrl() {
+        return getRandomHost() + NOTIFY_PAY_RESULT_SANDBOX_URL
+                + "/" + BCCache.getInstance().appId;
     }
 
     /**
@@ -93,21 +114,33 @@ class BCHttpClientUtil {
      * @return  查询支付订单部分URL
      */
     public static String getBillQueryURL() {
-        return getRandomHost() + BILL_PAY_URL;
+        if (BCCache.getInstance().isTestMode) {
+            return getRandomHost() + BILL_PAY_SANDBOX_URL;
+        } else {
+            return getRandomHost() + BILL_PAY_URL;
+        }
     }
 
     /**
      * @return  查询支付订单列表URL
      */
     public static String getBillsQueryURL() {
-        return getRandomHost() + BILLS_QUERY_URL;
+        if (BCCache.getInstance().isTestMode) {
+            return getRandomHost() + BILLS_QUERY_SANDBOX_URL;
+        } else {
+            return getRandomHost() + BILLS_QUERY_URL;
+        }
     }
 
     /**
      * @return  查询支付订单数目URL
      */
     public static String getBillsCountQueryURL() {
-        return getRandomHost() + BILLS_COUNT_QUERY_URL;
+        if (BCCache.getInstance().isTestMode) {
+            return getRandomHost() + BILLS_COUNT_QUERY_SANDBOX_URL;
+        } else {
+            return getRandomHost() + BILLS_COUNT_QUERY_URL;
+        }
     }
 
     /**

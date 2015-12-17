@@ -257,6 +257,45 @@ public class BCQueryTest {
     }
 
     /**
+     * #7
+     * test mode
+     * @throws Exception
+     */
+    @Test
+    public void testQueryBillsAsyncTestMode() throws Exception {
+        BeeCloud.setSandbox(true);
+
+        final BCHttpClientUtil.Response response = new BCHttpClientUtil.Response();
+        response.code = 200;
+        //please note this content is fake, there should be content for bills, here delete the record for the limit of space
+        response.content = "{\"result_msg\":\"OK\",\"err_detail\":\"\",\"count\":10,\"result_code\":0}";
+
+        //mock
+        PowerMockito.stub(PowerMockito.method(BCHttpClientUtil.class, "httpGet", String.class)).toReturn(response);
+
+        BCQuery.QueryParams queryParams = new BCQuery.QueryParams();
+        queryParams.channel = BCReqParams.BCChannelTypes.WX;
+
+        query.queryBillsAsync(queryParams,
+                new BCCallback() {
+                    @Override
+                    public void done(BCResult result) {
+                        Assert.assertTrue(result instanceof BCQueryBillsResult);
+
+                        BCQueryBillsResult billsResult = (BCQueryBillsResult) result;
+
+                        Assert.assertEquals((Integer) 0, billsResult.getResultCode());
+                        Assert.assertEquals((Integer) 10, billsResult.getCount());
+
+                        BeeCloud.setSandbox(false);
+                        latch.countDown();
+                    }
+                });
+
+        latch.await(2000, TimeUnit.MILLISECONDS);
+    }
+
+    /**
      * #1
      * 测试没有传channel的情况
      * @throws Exception
@@ -463,6 +502,36 @@ public class BCQueryTest {
     }
 
     /**
+     * #7
+     * test mode暂不支持
+     * @throws Exception
+     */
+    @Test
+    public void testQueryRefundsAsyncTestMode() throws Exception {
+        BeeCloud.setSandbox(true);
+
+        query.queryRefundsAsync(BCReqParams.BCChannelTypes.ALL,
+                new BCCallback() {
+                    @Override
+                    public void done(BCResult result) {
+                        Assert.assertTrue(result instanceof BCQueryRefundsResult);
+
+                        BCQueryRefundsResult refundsResult = (BCQueryRefundsResult) result;
+
+                        Assert.assertEquals(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
+                                refundsResult.getResultCode());
+                        Assert.assertEquals("该功能暂不支持测试模式",
+                                refundsResult.getErrDetail());
+
+                        BeeCloud.setSandbox(false);
+                        latch.countDown();
+                    }
+                });
+
+        latch.await(2000, TimeUnit.MILLISECONDS);
+    }
+
+    /**
      * #1
      * 测试channel非支持的情况
      * @throws Exception
@@ -579,6 +648,37 @@ public class BCQueryTest {
     }
 
     /**
+     * #5
+     * test mode
+     * @throws Exception
+     */
+    @Test
+    public void testQueryRefundStatusAsyncTestMode() throws Exception {
+        BeeCloud.setSandbox(true);
+
+        query.queryRefundStatusAsync(BCReqParams.BCChannelTypes.WX,
+                "refundnum",
+                new BCCallback() {
+                    @Override
+                    public void done(BCResult result) {
+                        Assert.assertTrue(result instanceof BCRefundStatus);
+
+                        BCRefundStatus status = (BCRefundStatus) result;
+
+                        Assert.assertEquals(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
+                                status.getResultCode());
+                        Assert.assertEquals("该功能暂不支持测试模式",
+                                status.getErrDetail());
+
+                        BeeCloud.setSandbox(false);
+                        latch.countDown();
+                    }
+                });
+
+        latch.await(2000, TimeUnit.MILLISECONDS);
+    }
+
+    /**
      * #1
      * 测试传入id为null的情况
      * @throws Exception
@@ -672,6 +772,53 @@ public class BCQueryTest {
                 Assert.assertEquals((Long) 1447643289722L, billOrder.getCreatedTime());
                 Assert.assertEquals("{\"testkey1\":\"测试value值1\"}", billOrder.getOptional());
                 //释放
+                latch.countDown();
+            }
+        });
+
+        //等待
+        latch.await(2000, TimeUnit.MILLISECONDS);
+    }
+
+    /**
+     * #4
+     * test mode
+     * @throws Exception
+     */
+    @Test
+    public void testQueryBillByIDAsyncTestMode() throws Exception {
+        BeeCloud.setSandbox(true);
+
+        final BCHttpClientUtil.Response response = new BCHttpClientUtil.Response();
+        response.code = 200;
+        response.content = "{\"result_msg\":\"OK\",\"err_detail\":\"\",\"pay\":{\"spay_result\":false,\"create_time\":1447643289722,\"total_fee\":1,\"channel\":\"WX\",\"trade_no\":\"\",\"bill_no\":\"20151116110810464\",\"optional\":\"{\\\"testkey1\\\":\\\"测试value值1\\\"}\",\"revert_result\":false,\"title\":\"安卓微信支付测试\",\"sub_channel\":\"WX_APP\",\"message_detail\":\"\",\"refund_result\":false},\"result_code\":0}";
+
+        //mock
+        PowerMockito.stub(PowerMockito.method(BCHttpClientUtil.class, "httpGet", String.class)).toReturn(response);
+
+        query.queryBillByIDAsync("billid", new BCCallback() {
+            @Override
+            public void done(BCResult result) {
+                Assert.assertTrue(result instanceof BCQueryBillResult);
+
+                BCQueryBillResult billResult = (BCQueryBillResult) result;
+
+                Assert.assertEquals((Integer)0, billResult.getResultCode());
+
+                BCBillOrder billOrder = billResult.getBill();
+
+                Assert.assertEquals("20151116110810464", billOrder.getBillNum());
+                Assert.assertEquals("安卓微信支付测试", billOrder.getTitle());
+                Assert.assertTrue(billOrder.getTradeNum() == null || billOrder.getTradeNum().length() == 0);
+                Assert.assertEquals((Integer) 1, billOrder.getTotalFee());
+                Assert.assertEquals("WX", billOrder.getChannel());
+                Assert.assertEquals("WX_APP", billOrder.getSubChannel());
+                Assert.assertFalse(billOrder.getPayResult());
+                Assert.assertFalse(billOrder.getRevertResult());
+                Assert.assertEquals((Long) 1447643289722L, billOrder.getCreatedTime());
+                Assert.assertEquals("{\"testkey1\":\"测试value值1\"}", billOrder.getOptional());
+
+                BeeCloud.setSandbox(false);
                 latch.countDown();
             }
         });
@@ -778,6 +925,37 @@ public class BCQueryTest {
                 //释放
                 latch.countDown();
             }
+        });
+
+        //等待
+        latch.await(2000, TimeUnit.MILLISECONDS);
+    }
+
+    /**
+     * #4
+     * test mode
+     * @throws Exception
+     */
+    @Test
+    public void testQueryRefundByIDAsyncTestMode() throws Exception {
+        BeeCloud.setSandbox(true);
+
+        query.queryRefundByIDAsync("refundid",
+                new BCCallback() {
+                    @Override
+                    public void done(BCResult result) {
+                        Assert.assertTrue(result instanceof BCQueryRefundResult);
+
+                        BCQueryRefundResult refundResult = (BCQueryRefundResult) result;
+
+                        Assert.assertEquals(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
+                                refundResult.getResultCode());
+                        Assert.assertEquals("该功能暂不支持测试模式",
+                                refundResult.getErrDetail());
+
+                        BeeCloud.setSandbox(false);
+                        latch.countDown();
+                    }
         });
 
         //等待
@@ -896,6 +1074,38 @@ public class BCQueryTest {
                         Assert.assertEquals((Integer)0, status.getResultCode());
                         Assert.assertTrue(status.getPayResult());
                         //释放
+                        latch.countDown();
+                    }
+                });
+
+        //等待
+        latch.await(2000, TimeUnit.MILLISECONDS);
+    }
+
+    /**
+     * #5
+     * test mode
+     * @throws Exception
+     */
+    @Test
+    public void testQueryOfflineBillStatusAsyncTestMode() throws Exception {
+        BeeCloud.setSandbox(true);
+
+        query.queryOfflineBillStatusAsync(BCReqParams.BCChannelTypes.WX_NATIVE,
+                "fakeid",
+                new BCCallback() {
+                    @Override
+                    public void done(BCResult result) {
+                        Assert.assertTrue(result instanceof BCBillStatus);
+
+                        BCBillStatus status = (BCBillStatus) result;
+
+                        Assert.assertEquals(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
+                                status.getResultCode());
+                        Assert.assertEquals("该功能暂不支持测试模式",
+                                status.getErrDetail());
+
+                        BeeCloud.setSandbox(false);
                         latch.countDown();
                     }
                 });
@@ -1100,4 +1310,35 @@ public class BCQueryTest {
         latch.await(2000, TimeUnit.MILLISECONDS);
     }
 
+    /**
+     * #4
+     * test mode
+     * @throws Exception
+     */
+    @Test
+    public void testQueryRefundsCountAsyncTestMode() throws Exception {
+        BeeCloud.setSandbox(true);
+
+        BCQuery.QueryParams queryParams = new BCQuery.QueryParams();
+        queryParams.channel = BCReqParams.BCChannelTypes.WX;
+
+        query.queryRefundsCountAsync(queryParams,
+                new BCCallback() {
+                    @Override
+                    public void done(BCResult result) {
+                        Assert.assertTrue(result instanceof BCQueryCountResult);
+
+                        BCQueryCountResult countResult = (BCQueryCountResult) result;
+
+                        Assert.assertEquals(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
+                                countResult.getResultCode());
+                        Assert.assertEquals("该功能暂不支持测试模式",
+                                countResult.getErrDetail());
+
+                        latch.countDown();
+                    }
+                });
+
+        latch.await(2000, TimeUnit.MILLISECONDS);
+    }
 }

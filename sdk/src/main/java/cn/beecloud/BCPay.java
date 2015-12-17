@@ -276,6 +276,12 @@ public class BCPay {
 
                             BCCache.getInstance().billID = (String)responseMap.get("id");
 
+                            //如果是测试模式
+                            if (BCCache.getInstance().isTestMode) {
+                                reqTestModePayment(billTitle, billTotalFee);
+                                return;
+                            }
+
                             //针对不同的支付渠道调用不同的API
                             switch (channelType) {
                                 case WX_APP:
@@ -541,6 +547,14 @@ public class BCPay {
 
     }
 
+    private void reqTestModePayment(String billTitle, Integer billTotalFee) {
+        Intent intent = new Intent(mContextActivity, BCMockedPayActivity.class);
+        intent.putExtra("id", BCCache.getInstance().billID);
+        intent.putExtra("billTitle", billTitle);
+        intent.putExtra("billTotalFee", billTotalFee);
+        mContextActivity.startActivity(intent);
+    }
+
     /**
      * 微信支付调用接口
      * 如果您申请的是新版本(V3)的微信支付，请使用此接口发起微信支付.
@@ -622,6 +636,13 @@ public class BCPay {
     public void reqPayPalPaymentAsync(final String billTitle, final Integer billTotalFee,
                                           final String currency, final HashMap<String, String> optional,
                                           final BCCallback callback) {
+        if (BCCache.getInstance().isTestMode) {
+            callback.done(new BCPayResult(BCPayResult.RESULT_FAIL,
+                    BCPayResult.APP_INTERNAL_PARAMS_ERR_CODE,
+                    BCPayResult.FAIL_INVALID_PARAMS,
+                    "PayPal支付暂不支持通过BeeCloud.setSandbox设置测试模式，你可以在BCPay.initPayPal中设置其原生的sandbox模式"));
+            return;
+        }
 
         payCallback = callback;
 
@@ -676,8 +697,12 @@ public class BCPay {
      *         else second item contains error info
      */
     String[] syncPayPalPayment(final String billTitle, final Integer billTotalFee, final String billNum,
-                             final String currency, final String optional, final PAYPAL_PAY_TYPE paypalType,
-                             final String token) {
+                               final String currency, final String optional, final PAYPAL_PAY_TYPE paypalType,
+                               final String token) {
+        if (BCCache.getInstance().isTestMode) {
+            return new String[]{BCPayResult.RESULT_FAIL,
+                    "PayPal支付暂不支持通过BeeCloud.setSandbox设置测试模式，你可以在BCPay.initPayPal中设置其原生的sandbox模式"};
+        }
 
         //verify params
         BCPayReqParams parameters;
@@ -849,6 +874,11 @@ public class BCPay {
         BCCache.executorService.execute(new Runnable() {
             @Override
             public void run() {
+                if (BCCache.getInstance().isTestMode) {
+                    callback.done(new BCQRCodeResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
+                            BCRestfulCommonResult.APP_INNER_FAIL, "该功能暂不支持测试模式"));
+                    return;
+                }
 
                 //校验并准备公用参数
                 BCPayReqParams parameters;
