@@ -24,7 +24,7 @@ import java.util.Map;
 
 import cn.beecloud.entity.BCPayResult;
 
-public class BCMockedPayActivity extends Activity {
+public class BCMockPayActivity extends Activity {
     private static final String TAG = "BCMockedPayActivity";
 
     TextView cancelView;
@@ -140,7 +140,7 @@ public class BCMockedPayActivity extends Activity {
         receiverNameLayoutParams.addRule(RelativeLayout.CENTER_VERTICAL, RelativeLayout.TRUE);
 
         TextView receiverName = new TextView(this);
-        receiverName.setText("比可网络");
+        receiverName.setText("比可科技");
         receiverName.setTextColor(Color.BLACK);
         receiverName.setTextSize(14);
 

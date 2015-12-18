@@ -548,7 +548,7 @@ public class BCPay {
     }
 
     private void reqTestModePayment(String billTitle, Integer billTotalFee) {
-        Intent intent = new Intent(mContextActivity, BCMockedPayActivity.class);
+        Intent intent = new Intent(mContextActivity, BCMockPayActivity.class);
         intent.putExtra("id", BCCache.getInstance().billID);
         intent.putExtra("billTitle", billTitle);
         intent.putExtra("billTotalFee", billTotalFee);

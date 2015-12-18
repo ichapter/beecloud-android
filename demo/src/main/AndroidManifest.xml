@@ -291,7 +291,7 @@
 
         <!-- for test mode start -->
         <activity
-            android:name="cn.beecloud.BCMockedPayActivity"
+            android:name="cn.beecloud.BCMockPayActivity"
             android:screenOrientation="portrait" />
         <!-- for test mode end -->
 
