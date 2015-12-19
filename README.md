@@ -108,7 +108,12 @@ BCPay.initPayPal(
 ```
 
 ### 3. 在`AndroidManifest.xml`中注册`activity`
-
+> 如果开启测试模式，需要添加（上线版本不需要）
+```java
+<activity
+    android:name="cn.beecloud.BCMockPayActivity"
+    android:screenOrientation="portrait" />
+```
 > 对于微信支付，需要添加
 ```java
 <activity
