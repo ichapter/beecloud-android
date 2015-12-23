@@ -8,14 +8,14 @@ android {
         applicationId "cn.beecloud.demo"
         minSdkVersion 11
         targetSdkVersion 22
-        versionCode 16
-        versionName "2.1.0"
+        versionCode 17
+        versionName "2.1.1"
     }
-    compileOptions {
-        encoding "UTF-8"
-        sourceCompatibility JavaVersion.VERSION_1_6
-        targetCompatibility JavaVersion.VERSION_1_6
-    }
+//    compileOptions {
+//        encoding "UTF-8"
+//        sourceCompatibility JavaVersion.VERSION_1_6
+//        targetCompatibility JavaVersion.VERSION_1_6
+//    }
     buildTypes {
         release {
             minifyEnabled false

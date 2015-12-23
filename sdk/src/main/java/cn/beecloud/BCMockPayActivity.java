@@ -25,7 +25,7 @@ import java.util.Map;
 import cn.beecloud.entity.BCPayResult;
 
 public class BCMockPayActivity extends Activity {
-    private static final String TAG = "BCMockedPayActivity";
+    private static final String TAG = "BCMockPayActivity";
 
     TextView cancelView;
     TextView billTitleView;
@@ -260,7 +260,6 @@ public class BCMockPayActivity extends Activity {
                                     BCPay.payCallback.done(new BCPayResult(BCPayResult.RESULT_SUCCESS,
                                             BCPayResult.APP_PAY_SUCC_CODE, BCPayResult.RESULT_SUCCESS,
                                             BCPayResult.RESULT_SUCCESS, BCCache.getInstance().billID));
-                                    finish();
                                 } else {
                                     Log.e(TAG, "Callback should not be null");
                                 }
@@ -276,6 +275,8 @@ public class BCMockPayActivity extends Activity {
                                     BCPayResult.FAIL_NETWORK_ISSUE,
                                     "Network Error:" + response.code + " # " + response.content));
                         }
+
+                        finish();
                     }
                 });
             }

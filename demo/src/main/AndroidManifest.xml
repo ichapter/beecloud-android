@@ -292,7 +292,8 @@
         <!-- for test mode start -->
         <activity
             android:name="cn.beecloud.BCMockPayActivity"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
         <!-- for test mode end -->
 
         <activity
