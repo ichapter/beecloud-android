@@ -12,6 +12,10 @@ class BCOrder {
      * 以便于Gson反序列化
      * 请忽略命名规则
      */
+
+    //订单记录的唯一标识
+    private String id;
+
     //订单号
     private String bill_no;
 
@@ -35,6 +39,13 @@ class BCOrder {
 
     //渠道返回的详细信息
     private String message_detail;
+
+    /**
+     * @return  订单记录的唯一标识，可用于查询单笔记录
+     */
+    public String getId() {
+        return id;
+    }
 
     /**
      * @return  订单号

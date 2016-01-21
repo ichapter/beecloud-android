@@ -13,12 +13,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Map;
 import java.util.Random;
-
-import javax.net.ssl.HttpsURLConnection;
 
 /**
  * 网络请求工具类
@@ -201,14 +200,18 @@ class BCHttpClientUtil {
 
         Response response = null;
 
-        HttpsURLConnection httpsURLConnection = null;
+        HttpURLConnection httpURLConnection = null;
         try {
             URL urlObj = new URL(url);
-            httpsURLConnection = (HttpsURLConnection)urlObj.openConnection();
-            httpsURLConnection.setConnectTimeout(BCCache.getInstance().connectTimeout);
-            httpsURLConnection.setDoInput(true);
 
-            response = readStream(httpsURLConnection);
+            //对于https的url底层为com.android.okhttp.internal.http.HttpsURLConnectionImpl
+            //对于http的url底层为com.android.okhttp.internal.http.HttpURLConnectionImpl
+            httpURLConnection = (HttpURLConnection) urlObj.openConnection();
+
+            httpURLConnection.setConnectTimeout(BCCache.getInstance().connectTimeout);
+            httpURLConnection.setDoInput(true);
+
+            response = readStream(httpURLConnection);
 
         } catch (MalformedURLException e) {
             e.printStackTrace();
@@ -228,14 +231,14 @@ class BCHttpClientUtil {
             response.content = ex.getMessage();
             response.code = -1;
         } finally {
-            if (httpsURLConnection != null)
-                httpsURLConnection.disconnect();
+            if (httpURLConnection != null)
+                httpURLConnection.disconnect();
         }
 
         return response;
     }
 
-    static Response readStream(HttpsURLConnection connection) {
+    static Response readStream(HttpURLConnection connection) {
         Response response = new Response();
 
         StringBuilder stringBuilder = new StringBuilder();
@@ -302,7 +305,7 @@ class BCHttpClientUtil {
     }
 
     //return null means successfully write to server
-    static Response writeStream(HttpsURLConnection connection, String content) {
+    static Response writeStream(HttpURLConnection connection, String content) {
         BufferedOutputStream out=null;
         Response response = null;
         try {
@@ -363,22 +366,26 @@ class BCHttpClientUtil {
     public static Response httpPost(String url, String jsonStr) {
         Response response = null;
 
-        HttpsURLConnection httpsURLConnection = null;
+        HttpURLConnection httpURLConnection = null;
         try {
             URL urlObj = new URL(url);
-            httpsURLConnection = (HttpsURLConnection)urlObj.openConnection();
-            httpsURLConnection.setRequestMethod("POST");
-            httpsURLConnection.setConnectTimeout(BCCache.getInstance().connectTimeout);
-            httpsURLConnection.setRequestProperty("Content-Type", "application/json;charset=utf-8");
-            httpsURLConnection.setDoOutput(true);
-            httpsURLConnection.setChunkedStreamingMode(0);
+
+            //对于https的url底层为com.android.okhttp.internal.http.HttpsURLConnectionImpl
+            //对于http的url底层为com.android.okhttp.internal.http.HttpURLConnectionImpl
+            httpURLConnection = (HttpURLConnection) urlObj.openConnection();
+
+            httpURLConnection.setRequestMethod("POST");
+            httpURLConnection.setConnectTimeout(BCCache.getInstance().connectTimeout);
+            httpURLConnection.setRequestProperty("Content-Type", "application/json;charset=utf-8");
+            httpURLConnection.setDoOutput(true);
+            httpURLConnection.setChunkedStreamingMode(0);
 
             //start to post
-            response = writeStream(httpsURLConnection, jsonStr);
+            response = writeStream(httpURLConnection, jsonStr);
 
             if (response == null) { //if post successfully
 
-                response = readStream(httpsURLConnection);
+                response = readStream(httpURLConnection);
 
             }
         } catch (MalformedURLException e) {
@@ -399,8 +406,8 @@ class BCHttpClientUtil {
             response.content = ex.getMessage();
             response.code = -1;
         } finally {
-            if (httpsURLConnection != null)
-                httpsURLConnection.disconnect();
+            if (httpURLConnection != null)
+                httpURLConnection.disconnect();
         }
 
         return response;
@@ -423,23 +430,23 @@ class BCHttpClientUtil {
 
         Response response = null;
 
-        HttpsURLConnection httpsURLConnection = null;
+        HttpURLConnection httpURLConnection = null;
         try {
             URL urlObj = new URL(getPayPalAccessTokenUrl());
-            httpsURLConnection = (HttpsURLConnection)urlObj.openConnection();
-            httpsURLConnection.setConnectTimeout(BCCache.getInstance().connectTimeout);
-            httpsURLConnection.setRequestMethod("POST");
-            httpsURLConnection.setRequestProperty("Accept", "application/json");
-            httpsURLConnection.setRequestProperty("Authorization", BCSecurityUtil.getB64Auth(
+            httpURLConnection = (HttpURLConnection)urlObj.openConnection();
+            httpURLConnection.setConnectTimeout(BCCache.getInstance().connectTimeout);
+            httpURLConnection.setRequestMethod("POST");
+            httpURLConnection.setRequestProperty("Accept", "application/json");
+            httpURLConnection.setRequestProperty("Authorization", BCSecurityUtil.getB64Auth(
                     BCCache.getInstance().paypalClientID, BCCache.getInstance().paypalSecret));
-            httpsURLConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-            httpsURLConnection.setDoOutput(true);
-            httpsURLConnection.setChunkedStreamingMode(0);
+            httpURLConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+            httpURLConnection.setDoOutput(true);
+            httpURLConnection.setChunkedStreamingMode(0);
 
-            response = writeStream(httpsURLConnection, "grant_type=client_credentials");
+            response = writeStream(httpURLConnection, "grant_type=client_credentials");
             if (response == null) {
 
-                response = readStream(httpsURLConnection);
+                response = readStream(httpURLConnection);
 
             }
         } catch (MalformedURLException e) {
@@ -453,8 +460,8 @@ class BCHttpClientUtil {
             response.content = e.getMessage();
             response.code = -1;
         } finally {
-            if (httpsURLConnection != null)
-                httpsURLConnection.disconnect();
+            if (httpURLConnection != null)
+                httpURLConnection.disconnect();
         }
 
         return response;

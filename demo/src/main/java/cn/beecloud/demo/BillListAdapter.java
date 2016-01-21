@@ -95,6 +95,8 @@ public class BillListAdapter extends BaseAdapter {
 
             viewHolder = new ViewHolder();
 
+            viewHolder.txtBillId = (TextView) convertView
+                    .findViewById(R.id.txtBillId);
             viewHolder.txtBillNum = (TextView) convertView
                     .findViewById(R.id.txtBillNum);
             viewHolder.txtTradeNum = (TextView) convertView
@@ -121,15 +123,20 @@ public class BillListAdapter extends BaseAdapter {
 
         BCBillOrder bcBillOrder = bills.get(position);
 
-        viewHolder.txtBillNum.setText("订单号: " + bcBillOrder.getBillNum());
-        viewHolder.txtTradeNum.setText("渠道商的订单号: " + bcBillOrder.getTradeNum());
-        viewHolder.txtTotalFee.setText("订单金额/元: " + (bcBillOrder.getTotalFee()/100.0));
-        viewHolder.txtChannel.setText("支付渠道: " + BCReqParams.BCChannelTypes.getTranslatedChannelName(bcBillOrder.getChannel()));
-        viewHolder.txtSubChannel.setText("子渠道: " + BCReqParams.BCChannelTypes.getTranslatedChannelName(bcBillOrder.getSubChannel()));
-        viewHolder.txtTitle.setText("订单标题: " + bcBillOrder.getTitle());
-        viewHolder.txtPayResult.setText("订单是否支付完成: " + (bcBillOrder.getPayResult()?"是":"否"));
-        viewHolder.txtCreatedTime.setText("订单生成时间: " + new Date(bcBillOrder.getCreatedTime()));
-        viewHolder.txtOptional.setText("扩展参数: " + bcBillOrder.getOptional());
+        viewHolder.txtBillId.setText(String.format("订单唯一标识符: %s", bcBillOrder.getId()));
+        viewHolder.txtBillNum.setText(String.format("订单号: %s", bcBillOrder.getBillNum()));
+        viewHolder.txtTradeNum.setText(String.format("渠道商的订单号: %s", bcBillOrder.getTradeNum()));
+        viewHolder.txtTotalFee.setText(String.format("订单金额/元: %.2f", (bcBillOrder.getTotalFee()/100.0)));
+        viewHolder.txtChannel.setText(String.format("支付渠道: %s",
+                BCReqParams.BCChannelTypes.getTranslatedChannelName(bcBillOrder.getChannel())));
+        viewHolder.txtSubChannel.setText(String.format("子渠道: %s",
+                BCReqParams.BCChannelTypes.getTranslatedChannelName(bcBillOrder.getSubChannel())));
+        viewHolder.txtTitle.setText(String.format("订单标题: %s", bcBillOrder.getTitle()));
+        viewHolder.txtPayResult.setText(String.format("订单是否支付完成: %s",
+                (bcBillOrder.getPayResult()?"是":"否")));
+        viewHolder.txtCreatedTime.setText(String.format("订单生成时间: %s",
+                new Date(bcBillOrder.getCreatedTime())));
+        viewHolder.txtOptional.setText(String.format("扩展参数: %s", bcBillOrder.getOptional()));
 
         Log.w(TAG, "订单是否已经退款成功: " + bcBillOrder.getRefundResult());
         Log.w(TAG, "订单是否已经被撤销(一般用于线下渠道): " + bcBillOrder.getRevertResult());
@@ -140,6 +147,7 @@ public class BillListAdapter extends BaseAdapter {
     }
 
     private class ViewHolder {
+        public TextView txtBillId;
         public TextView txtBillNum;
         public TextView txtTradeNum;
         public TextView txtTotalFee;
