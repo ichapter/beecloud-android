@@ -95,6 +95,8 @@ public class RefundOrdersAdapter extends BaseAdapter {
 
             viewHolder = new ViewHolder();
 
+            viewHolder.txtId = (TextView) convertView
+                    .findViewById(R.id.txtId);
             viewHolder.txtBillNum = (TextView) convertView
                     .findViewById(R.id.txtBillNum);
             viewHolder.txtRefundNum = (TextView) convertView
@@ -126,17 +128,23 @@ public class RefundOrdersAdapter extends BaseAdapter {
 
         BCRefundOrder bcRefundOrder = refunds.get(position);
 
-        viewHolder.txtBillNum.setText("支付订单号: " + bcRefundOrder.getBillNum());
-        viewHolder.txtRefundNum.setText("退款单号: " + bcRefundOrder.getRefundNum());
-        viewHolder.txtTotalFee.setText("订单支付金额/元: " + (bcRefundOrder.getTotalFee()/100.0));
-        viewHolder.txtRefundFee.setText("订单退款金额/元: " + (bcRefundOrder.getRefundFee()/100.0));
-        viewHolder.txtChannel.setText("支付渠道: " + BCReqParams.BCChannelTypes.getTranslatedChannelName(bcRefundOrder.getChannel()));
-        viewHolder.txtSubChannel.setText("支付渠道: " + BCReqParams.BCChannelTypes.getTranslatedChannelName(bcRefundOrder.getSubChannel()));
-        viewHolder.txtTitle.setText("订单标题: " + bcRefundOrder.getTitle());
-        viewHolder.txtRefundFinish.setText("退款订单是否受理完成: " + (bcRefundOrder.isRefundFinished()?"是":"否"));
-        viewHolder.txtRefundResult.setText("是否接受退款并完成退款: " + (bcRefundOrder.getRefundResult()?"是":"否"));
-        viewHolder.txtRefundCreatedTime.setText("退款订单生成时间: " + new Date(bcRefundOrder.getRefundCreatedTime()));
-        viewHolder.txtOptional.setText("退款订单生成时间: " + bcRefundOrder.getOptional());
+        viewHolder.txtId.setText(String.format("退款订单唯一标识符: %s", bcRefundOrder.getId()));
+        viewHolder.txtBillNum.setText(String.format("支付订单号: %s", bcRefundOrder.getBillNum()));
+        viewHolder.txtRefundNum.setText(String.format("退款单号: %s", bcRefundOrder.getRefundNum()));
+        viewHolder.txtTotalFee.setText(String.format("订单支付金额/元: %.2f", (bcRefundOrder.getTotalFee()/100.0)));
+        viewHolder.txtRefundFee.setText(String.format("订单退款金额/元: %.2f", (bcRefundOrder.getRefundFee()/100.0)));
+        viewHolder.txtChannel.setText(String.format("支付渠道: %s",
+                BCReqParams.BCChannelTypes.getTranslatedChannelName(bcRefundOrder.getChannel())));
+        viewHolder.txtSubChannel.setText(String.format("支付渠道: %s",
+                BCReqParams.BCChannelTypes.getTranslatedChannelName(bcRefundOrder.getSubChannel())));
+        viewHolder.txtTitle.setText(String.format("订单标题: %s", bcRefundOrder.getTitle()));
+        viewHolder.txtRefundFinish.setText(String.format("退款订单是否受理完成: %s",
+                (bcRefundOrder.isRefundFinished()?"是":"否")));
+        viewHolder.txtRefundResult.setText(String.format("是否接受退款并完成退款: %s",
+                (bcRefundOrder.getRefundResult()?"是":"否")));
+        viewHolder.txtRefundCreatedTime.setText(String.format("退款订单生成时间: %s",
+                new Date(bcRefundOrder.getRefundCreatedTime())));
+        viewHolder.txtOptional.setText(String.format("退款订单生成时间: %s", bcRefundOrder.getOptional()));
 
         Log.w(TAG, "渠道返回的详细信息(需要通过QueryParams发起query请求，并且设置needDetail为true)，按需处理: "
                 + bcRefundOrder.getMessageDetail());
@@ -145,6 +153,7 @@ public class RefundOrdersAdapter extends BaseAdapter {
     }
 
     private class ViewHolder {
+        public TextView txtId;
         public TextView txtBillNum;
         public TextView txtRefundNum;
         public TextView txtTotalFee;

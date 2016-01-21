@@ -1,6 +1,6 @@
 ## BeeCloud Android SDK (Open Source)
 
-[![Build Status](https://travis-ci.org/beecloud/beecloud-android.svg)](https://travis-ci.org/beecloud/beecloud-android) ![license](https://img.shields.io/badge/license-MIT-brightgreen.svg) ![version](https://img.shields.io/badge/version-v2.1.1-blue.svg)
+[![Build Status](https://travis-ci.org/beecloud/beecloud-android.svg)](https://travis-ci.org/beecloud/beecloud-android) ![license](https://img.shields.io/badge/license-MIT-brightgreen.svg) ![version](https://img.shields.io/badge/version-v2.1.2-blue.svg)
 
 ## 简介
 
@@ -42,7 +42,7 @@
 银联需要引入`UPPayAssistEx.jar`，<br/>
 百度钱包支付需要引入`Cashier_SDK-v4.2.0.jar`，<br/>
 PayPal需要引入`PayPalAndroidSDK-2.11.2.jar`，<br/>
-最后添加`beecloud android sdk`：`beecloud-android\sdk\beecloud-2.1.1.jar`
+最后添加`beecloud android sdk`：`beecloud-android\sdk\beecloud-2.1.2.jar`
 
 2.对于微信支付，需要注意你的`AndroidManifest.xml`中`package`需要和微信平台创建的移动应用`应用包名`保持一致，关于其`应用签名`请参阅[创建微信应用->B.填写平台信息](https://beecloud.cn/doc/payapply/?index=0)，
 
@@ -61,9 +61,11 @@ PayPal需要引入`PayPalAndroidSDK-2.11.2.jar`，<br/>
 
 ### 1.初始化支付参数
 请参考`demo`中的`ShoppingCartActivity.java`
->1. 在主activity的onCreate函数中初始化BeeCloud账户中的AppID和secret，并设置是否开启测试模式（如果不设置默认不开启）；注意：如果是测试模式，secret应该填Test Secret，如果是上线版本，应该填APP Secret，例如
+>1. 在主activity或者application的onCreate函数中初始化BeeCloud账户中的AppID和secret，并设置是否开启测试模式（如果不设置默认不开启）；注意：如果是测试模式，secret应该填Test Secret，如果是上线版本，应该填App Secret，例如
 ```java
+//开启测试模式
 BeeCloud.setSandbox(true);
+//此处第二个参数是控制台的test secret
 BeeCloud.setAppIdAndSecret("c5d1cba1-5e3f-4ba0-941d-9b0a371fe719",
         "4bfdd244-574d-4bf3-b034-0c751ed34fee");
 ```
@@ -603,7 +605,7 @@ BCQuery.getInstance().queryOfflineBillStatusAsync(
 #第三方库的申明，注意在Android Studio中不需要
 #BeeCloud及依赖jar
 -libraryjars libs/beecloud-x.x.x.jar
--libraryjars libs/gson-2.2.4.jar
+-libraryjars libs/gson-2.4.jar
 -libraryjars libs/zxing-3.2.0.jar
 #支付宝
 -libraryjars libs/alipaysdk.jar
@@ -647,17 +649,20 @@ BCQuery.getInstance().queryOfflineBillStatusAsync(
 ## 常见问题
 * 微信支付返回`一般错误`，可能的原因：签名错误、未注册APPID、项目设置APPID不正确、注册的APPID与设置的不匹配、其他异常等，请按如下方法依次排查<br/>
 
->1. 项目包名与在微信申请的开发包名是否一致
->2. 订单流水号是否包含横杠`-`，如果有请去除
->3. 请尝试清除微信数据（设置->应用程序管理->找到微信，点击进入应用程序信息->清除数据），或者删除微信重新安装再试
->4. 项目签名与微信平台设置的签名是否一致，请到微信官网下载[签名工具](https://open.weixin.qq.com/zh_CN/htmledition/res/dev/download/sdk/Gen_Signature_Android.apk)校验
->5. 如果所有检查没问题，该错误可在正式发布后消除，而不需要用户清除微信数据
+>1. 项目包名与在微信开放平台填写的包名是否一致
+>2. 项目签名与微信开放平台填写的应用签名是否一致；获取项目签名的方法：到微信官网下载[签名工具](https://open.weixin.qq.com/zh_CN/htmledition/res/dev/download/sdk/Gen_Signature_Android.apk)，安装到手机后按提示操作
+>3. 订单流水号是否包含横杠`-`，如果有请去除
+>4. 请尝试清除微信数据（设置->应用程序管理->找到微信，点击进入应用程序信息-清除数据），或者删除微信重新安装再试
+>5. 如果所有检查没问题，尝试换一个手机测试，如果测试没问题，该错误可在正式发布后消除，而不需要用户清除微信数据
 
 * demo中支付宝支付，跳转到支付后提示“系统繁忙”：  
 由于支付宝对企业账号监控严格，故不再提供支付宝支付的测试功能，请在BeeCloud平台配置正确参数后，使用自行创建的APP的appID和appSecret。给您带来的不便，敬请谅解。
 
-* APP_INVALID, 根据app_id找不到对应的APP/keyspace或者app_sign不正确,或者timestamp不是当前UTC
-一般是测试设备时钟没有校准，或者你创建的APP出现了故障，请联系BeeCloud
+* APP_INVALID, 根据app_id找不到对应的APP/keyspace或者app_sign不正确,或者timestamp不是当前UTC：
+一般是测试设备时钟没有校准，或者你创建的APP出现了故障，请联系BeeCloud；如果你不需要BeeCloud为你做时间校验，你可以到控制台关闭该功能
+
+* BC验签失败：
+检查一下，是不是设置了测试模式（setSandbox(true)），但是secret填的是app secret
 
 ## 代码贡献
 我们非常欢迎大家来贡献代码，我们会向贡献者致以最诚挚的敬意。

@@ -11,3 +11,5 @@ demo_eclipse/bin/*
 UPPayPluginEx_old.apk
 sdk/sdk.iml
 demo/demo.iml
+*.apk
+*.iml

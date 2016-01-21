@@ -115,7 +115,7 @@ public class BCQueryTest {
         final BCHttpClientUtil.Response response = new BCHttpClientUtil.Response();
         response.code = 200;
         //please note this content is fake, there should be more content for bills, here just keep one record for the limit of space
-        response.content = "{\"result_msg\":\"OK\",\"err_detail\":\"\",\"count\":10,\"result_code\":0,\"bills\":[{\"spay_result\":false,\"create_time\":1447658025661,\"total_fee\":1,\"channel\":\"UN\",\"trade_no\":\"\",\"bill_no\":\"bc1447657931\",\"optional\":\"{\\\"test\\\":\\\"willreturn\\\"}\",\"revert_result\":false,\"title\":\"你的订单标题\",\"sub_channel\":\"UN_WEB\",\"refund_result\":false}]}";
+        response.content = "{\"result_msg\":\"OK\",\"err_detail\":\"\",\"result_code\":0,\"bills\":[{\"spay_result\":false,\"create_time\":1447658025661,\"total_fee\":1,\"channel\":\"UN\",\"trade_no\":\"\",\"bill_no\":\"bc1447657931\",\"optional\":\"{\\\"test\\\":\\\"willreturn\\\"}\",\"revert_result\":false,\"title\":\"你的订单标题\",\"sub_channel\":\"UN_WEB\",\"refund_result\":false}]}";
 
         //mock
         PowerMockito.stub(PowerMockito.method(BCHttpClientUtil.class, "httpGet", String.class)).toReturn(response);
@@ -128,9 +128,9 @@ public class BCQueryTest {
 
                         BCQueryBillsResult billsResult = (BCQueryBillsResult) result;
 
-                        Assert.assertEquals((Integer)0, billsResult.getResultCode());
+                        Assert.assertEquals((Integer) 0, billsResult.getResultCode());
                         //最多可以获取到limit条数据
-                        Assert.assertTrue(billsResult.getCount() == 10);
+                        Assert.assertTrue(billsResult.getCount() == billsResult.getBills().size());
 
                         BCBillOrder billOrder = billsResult.getBills().get(0);
 
@@ -161,7 +161,7 @@ public class BCQueryTest {
         final BCHttpClientUtil.Response response = new BCHttpClientUtil.Response();
         response.code = 200;
         //please note this content is fake, there should be content for bills, here delete the record for the limit of space
-        response.content = "{\"result_msg\":\"OK\",\"err_detail\":\"\",\"count\":10,\"result_code\":0}";
+        response.content = "{\"result_msg\":\"OK\",\"err_detail\":\"\",\"result_code\":0,\"bills\":[{\"bill_no\":\"bc1447657931\"}]}";
 
         //mock
         PowerMockito.stub(PowerMockito.method(BCHttpClientUtil.class, "httpGet", String.class)).toReturn(response);
@@ -174,8 +174,10 @@ public class BCQueryTest {
 
                         BCQueryBillsResult billsResult = (BCQueryBillsResult) result;
 
-                        Assert.assertEquals((Integer)0, billsResult.getResultCode());
-                        Assert.assertEquals((Integer)10, billsResult.getCount());
+                        Assert.assertEquals((Integer) 0, billsResult.getResultCode());
+                        Assert.assertEquals((int) billsResult.getCount(), billsResult.getBills().size());
+                        BCBillOrder billOrder = billsResult.getBills().get(0);
+                        Assert.assertEquals("bc1447657931", billOrder.getBillNum());
 
                         latch.countDown();
                     }
@@ -194,7 +196,7 @@ public class BCQueryTest {
         final BCHttpClientUtil.Response response = new BCHttpClientUtil.Response();
         response.code = 200;
         //please note this content is fake, there should be content for bills, here delete the record for the limit of space
-        response.content = "{\"result_msg\":\"OK\",\"err_detail\":\"\",\"count\":10,\"result_code\":0}";
+        response.content = "{\"result_msg\":\"OK\",\"err_detail\":\"\",\"result_code\":0,\"bills\":[{\"bill_no\":\"bc1447657931\"}]}";
 
         //mock
         PowerMockito.stub(PowerMockito.method(BCHttpClientUtil.class, "httpGet", String.class)).toReturn(response);
@@ -208,8 +210,10 @@ public class BCQueryTest {
 
                         BCQueryBillsResult billsResult = (BCQueryBillsResult) result;
 
-                        Assert.assertEquals((Integer)0, billsResult.getResultCode());
-                        Assert.assertEquals((Integer)10, billsResult.getCount());
+                        Assert.assertEquals((Integer) 0, billsResult.getResultCode());
+                        Assert.assertEquals((int) billsResult.getCount(), billsResult.getBills().size());
+                        BCBillOrder billOrder = billsResult.getBills().get(0);
+                        Assert.assertEquals("bc1447657931", billOrder.getBillNum());
 
                         latch.countDown();
                     }
@@ -228,7 +232,7 @@ public class BCQueryTest {
         final BCHttpClientUtil.Response response = new BCHttpClientUtil.Response();
         response.code = 200;
         //please note this content is fake, there should be content for bills, here delete the record for the limit of space
-        response.content = "{\"result_msg\":\"OK\",\"err_detail\":\"\",\"count\":10,\"result_code\":0}";
+        response.content = "{\"result_msg\":\"OK\",\"err_detail\":\"\",\"result_code\":0,\"bills\":[{\"bill_no\":\"bc1447657931\"}]}";
 
         //mock
         PowerMockito.stub(PowerMockito.method(BCHttpClientUtil.class, "httpGet", String.class)).toReturn(response);
@@ -246,8 +250,10 @@ public class BCQueryTest {
 
                         BCQueryBillsResult billsResult = (BCQueryBillsResult) result;
 
-                        Assert.assertEquals((Integer)0, billsResult.getResultCode());
-                        Assert.assertEquals((Integer)10, billsResult.getCount());
+                        Assert.assertEquals((Integer) 0, billsResult.getResultCode());
+                        Assert.assertEquals((int) billsResult.getCount(), billsResult.getBills().size());
+                        BCBillOrder billOrder = billsResult.getBills().get(0);
+                        Assert.assertEquals("bc1447657931", billOrder.getBillNum());
 
                         latch.countDown();
                     }
@@ -268,7 +274,7 @@ public class BCQueryTest {
         final BCHttpClientUtil.Response response = new BCHttpClientUtil.Response();
         response.code = 200;
         //please note this content is fake, there should be content for bills, here delete the record for the limit of space
-        response.content = "{\"result_msg\":\"OK\",\"err_detail\":\"\",\"count\":10,\"result_code\":0}";
+        response.content = "{\"result_msg\":\"OK\",\"err_detail\":\"\",\"result_code\":0,\"bills\":[{\"bill_no\":\"bc1447657931\"}]}";
 
         //mock
         PowerMockito.stub(PowerMockito.method(BCHttpClientUtil.class, "httpGet", String.class)).toReturn(response);
@@ -285,7 +291,9 @@ public class BCQueryTest {
                         BCQueryBillsResult billsResult = (BCQueryBillsResult) result;
 
                         Assert.assertEquals((Integer) 0, billsResult.getResultCode());
-                        Assert.assertEquals((Integer) 10, billsResult.getCount());
+                        Assert.assertEquals((int) billsResult.getCount(), billsResult.getBills().size());
+                        BCBillOrder billOrder = billsResult.getBills().get(0);
+                        Assert.assertEquals("bc1447657931", billOrder.getBillNum());
 
                         BeeCloud.setSandbox(false);
                         latch.countDown();
@@ -359,7 +367,7 @@ public class BCQueryTest {
         final BCHttpClientUtil.Response response = new BCHttpClientUtil.Response();
         response.code = 200;
         //please note this content is fake, there should be more content for refunds, here just keep one record for the limit of space
-        response.content = "{\"result_msg\":\"OK\",\"err_detail\":\"\",\"count\":10,\"result_code\":0,\"refunds\":[{\"result\":false,\"create_time\":1447430833318,\"refund_no\":\"201511141447430832000\",\"total_fee\":1,\"refund_fee\":1,\"channel\":\"WX\",\"bill_no\":\"20151113132244266\",\"finish\":false,\"optional\":\"\",\"title\":\"2015-10-21 Release\",\"sub_channel\":\"WX_APP\"}]}";
+        response.content = "{\"result_msg\":\"OK\",\"err_detail\":\"\",\"result_code\":0,\"refunds\":[{\"result\":false,\"create_time\":1447430833318,\"refund_no\":\"201511141447430832000\",\"total_fee\":1,\"refund_fee\":1,\"channel\":\"WX\",\"bill_no\":\"20151113132244266\",\"finish\":false,\"optional\":\"\",\"title\":\"2015-10-21 Release\",\"sub_channel\":\"WX_APP\"}]}";
 
         //mock
         PowerMockito.stub(PowerMockito.method(BCHttpClientUtil.class, "httpGet", String.class)).toReturn(response);
@@ -373,7 +381,7 @@ public class BCQueryTest {
                         BCQueryRefundsResult refundsResult = (BCQueryRefundsResult) result;
 
                         Assert.assertEquals((Integer) 0, refundsResult.getResultCode());
-                        Assert.assertTrue(refundsResult.getCount() == 10);
+                        Assert.assertTrue(refundsResult.getCount() == refundsResult.getRefunds().size());
 
                         BCRefundOrder refundOrder = refundsResult.getRefunds().get(0);
 
@@ -405,7 +413,7 @@ public class BCQueryTest {
         final BCHttpClientUtil.Response response = new BCHttpClientUtil.Response();
         response.code = 200;
         //please note this content is fake, there should be content for refunds, here delete the record for the limit of space
-        response.content = "{\"result_msg\":\"OK\",\"err_detail\":\"\",\"count\":10,\"result_code\":0}";
+        response.content = "{\"result_msg\":\"OK\",\"err_detail\":\"\",\"result_code\":0,\"refunds\":[{\"refund_no\":\"201511141447430832000\"}]}";
 
         //mock
         PowerMockito.stub(PowerMockito.method(BCHttpClientUtil.class, "httpGet", String.class)).toReturn(response);
@@ -418,9 +426,10 @@ public class BCQueryTest {
 
                         BCQueryRefundsResult refundsResult = (BCQueryRefundsResult) result;
 
-                        Assert.assertEquals((Integer)0, refundsResult.getResultCode());
-                        Assert.assertEquals((Integer)10, refundsResult.getCount());
-
+                        Assert.assertEquals((Integer) 0, refundsResult.getResultCode());
+                        Assert.assertEquals((int) refundsResult.getCount(), refundsResult.getRefunds().size());
+                        BCRefundOrder refundOrder = refundsResult.getRefunds().get(0);
+                        Assert.assertEquals("201511141447430832000", refundOrder.getRefundNum());
                         latch.countDown();
                     }
                 });
@@ -438,7 +447,7 @@ public class BCQueryTest {
         final BCHttpClientUtil.Response response = new BCHttpClientUtil.Response();
         response.code = 200;
         //please note this content is fake, there should be content for refunds, here delete the record for the limit of space
-        response.content = "{\"result_msg\":\"OK\",\"err_detail\":\"\",\"count\":10,\"result_code\":0}";
+        response.content = "{\"result_msg\":\"OK\",\"err_detail\":\"\",\"result_code\":0,\"refunds\":[{\"refund_no\":\"201511141447430832000\"}]}";
 
         //mock
         PowerMockito.stub(PowerMockito.method(BCHttpClientUtil.class, "httpGet", String.class)).toReturn(response);
@@ -454,8 +463,9 @@ public class BCQueryTest {
                         BCQueryRefundsResult refundsResult = (BCQueryRefundsResult) result;
 
                         Assert.assertEquals((Integer)0, refundsResult.getResultCode());
-                        Assert.assertEquals((Integer)10, refundsResult.getCount());
-
+                        Assert.assertEquals((int) refundsResult.getCount(), refundsResult.getRefunds().size());
+                        BCRefundOrder refundOrder = refundsResult.getRefunds().get(0);
+                        Assert.assertEquals("201511141447430832000", refundOrder.getRefundNum());
                         latch.countDown();
                     }
                 });
@@ -473,7 +483,7 @@ public class BCQueryTest {
         final BCHttpClientUtil.Response response = new BCHttpClientUtil.Response();
         response.code = 200;
         //please note this content is fake, there should be content for refunds, here delete the record for the limit of space
-        response.content = "{\"result_msg\":\"OK\",\"err_detail\":\"\",\"count\":10,\"result_code\":0}";
+        response.content = "{\"result_msg\":\"OK\",\"err_detail\":\"\",\"result_code\":0,\"refunds\":[{\"refund_no\":\"201511141447430832000\"}]}";
 
         //mock
         PowerMockito.stub(PowerMockito.method(BCHttpClientUtil.class, "httpGet", String.class)).toReturn(response);
@@ -491,9 +501,10 @@ public class BCQueryTest {
 
                         BCQueryRefundsResult refundsResult = (BCQueryRefundsResult) result;
 
-                        Assert.assertEquals((Integer)0, refundsResult.getResultCode());
-                        Assert.assertEquals((Integer)10, refundsResult.getCount());
-
+                        Assert.assertEquals((Integer) 0, refundsResult.getResultCode());
+                        Assert.assertEquals((int) refundsResult.getCount(), refundsResult.getRefunds().size());
+                        BCRefundOrder refundOrder = refundsResult.getRefunds().get(0);
+                        Assert.assertEquals("201511141447430832000", refundOrder.getRefundNum());
                         latch.countDown();
                     }
                 });

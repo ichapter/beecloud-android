@@ -220,7 +220,7 @@ public class BCReqParams {
          * 易宝充值卡支付
          * 仅用于查询订单
          */
-        YEE_NOBANKCARDB,
+        YEE_NOBANKCARD,
 
         /**
          * 易宝
@@ -354,7 +354,7 @@ public class BCReqParams {
                 return "易宝移动网页支付";
             else if (channel.equals(YEE_WEB.name()))
                 return "易宝PC网页支付";
-            else if (channel.equals(YEE_NOBANKCARDB.name()))
+            else if (channel.equals(YEE_NOBANKCARD.name()))
                 return "易宝充值卡支付";
             else if (channel.equals(KUAIQIAN.name()))
                 return "快钱支付";

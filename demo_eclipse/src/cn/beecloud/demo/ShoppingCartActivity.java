@@ -113,7 +113,7 @@ public class ShoppingCartActivity extends Activity {
                         //你可以把这个id存到你的订单中，下次直接通过这个id查询订单
                         Log.w(TAG, "bill id retrieved : " + bcPayResult.getId());
 
-                        //根据ID查询
+                        //根据ID查询，此处只是演示如何通过id查询订单，并非支付必要部分
                         getBillInfoByID(bcPayResult.getId());
                     }
                 }
@@ -168,8 +168,6 @@ public class ShoppingCartActivity extends Activity {
         setContentView(R.layout.activity_shopping_cart);
 
         // 推荐在主Activity或application里的onCreate函数中初始化BeeCloud.
-//        BeeCloud.setAppIdAndSecret("c5d1cba1-5e3f-4ba0-941d-9b0a371fe719",
-//                "39a7a518-9ac8-4a9e-87bc-7885f33cf18c");
         BeeCloud.setSandbox(true);
         BeeCloud.setAppIdAndSecret("c5d1cba1-5e3f-4ba0-941d-9b0a371fe719",
                 "4bfdd244-574d-4bf3-b034-0c751ed34fee");
@@ -404,6 +402,7 @@ public class ShoppingCartActivity extends Activity {
 
                         Log.d(TAG, "------- bill info ------");
                         BCBillOrder billOrder = billResult.getBill();
+                        Log.d(TAG, "订单唯一标识符：" + billOrder.getId());
                         Log.d(TAG, "订单号:" + billOrder.getBillNum());
                         Log.d(TAG, "订单金额, 单位为分:" + billOrder.getTotalFee());
                         Log.d(TAG, "渠道类型:" + BCReqParams.BCChannelTypes.getTranslatedChannelName(billOrder.getChannel()));
