@@ -655,13 +655,13 @@ BCQuery.getInstance().queryOfflineBillStatusAsync(
 >4. 请尝试清除微信数据（设置->应用程序管理->找到微信，点击进入应用程序信息-清除数据），或者删除微信重新安装再试
 >5. 如果所有检查没问题，尝试换一个手机测试，如果测试没问题，该错误可在正式发布后消除，而不需要用户清除微信数据
 
-* demo中支付宝支付，跳转到支付后提示“系统繁忙”：  
+* demo中支付宝无法支付，提示缺少参数类似错误信息：  
 由于支付宝对企业账号监控严格，故不再提供支付宝支付的测试功能，请在BeeCloud平台配置正确参数后，使用自行创建的APP的appID和appSecret。给您带来的不便，敬请谅解。
 
-* APP_INVALID, 根据app_id找不到对应的APP/keyspace或者app_sign不正确,或者timestamp不是当前UTC：
+* APP_INVALID, 根据app_id找不到对应的APP/keyspace或者app_sign不正确,或者timestamp不是当前UTC：<br/>
 一般是测试设备时钟没有校准，或者你创建的APP出现了故障，请联系BeeCloud；如果你不需要BeeCloud为你做时间校验，你可以到控制台关闭该功能
 
-* BC验签失败：
+* BC验签失败：<br/>
 检查一下，是不是设置了测试模式（setSandbox(true)），但是secret填的是app secret
 
 ## 代码贡献
