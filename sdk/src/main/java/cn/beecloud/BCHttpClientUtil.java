@@ -6,6 +6,8 @@
  */
 package cn.beecloud;
 
+import android.os.Build;
+
 import com.google.gson.Gson;
 
 import java.io.BufferedOutputStream;
@@ -204,12 +206,17 @@ class BCHttpClientUtil {
         try {
             URL urlObj = new URL(url);
 
-            //对于https的url底层为com.android.okhttp.internal.http.HttpsURLConnectionImpl
-            //对于http的url底层为com.android.okhttp.internal.http.HttpURLConnectionImpl
+            //4.4开始对于https的url底层为com.android.okhttp.internal.http.HttpsURLConnectionImpl
+            //4.4开始对于http的url底层为com.android.okhttp.internal.http.HttpURLConnectionImpl
             httpURLConnection = (HttpURLConnection) urlObj.openConnection();
 
             httpURLConnection.setConnectTimeout(BCCache.getInstance().connectTimeout);
             httpURLConnection.setDoInput(true);
+
+            // 4.0 ~ 4.3 存在EOFException
+            if (Build.VERSION.SDK_INT > 13 && Build.VERSION.SDK_INT < 19) {
+                httpURLConnection.setRequestProperty("Connection", "close");
+            }
 
             response = readStream(httpURLConnection);
 
@@ -370,8 +377,8 @@ class BCHttpClientUtil {
         try {
             URL urlObj = new URL(url);
 
-            //对于https的url底层为com.android.okhttp.internal.http.HttpsURLConnectionImpl
-            //对于http的url底层为com.android.okhttp.internal.http.HttpURLConnectionImpl
+            //4.4开始对于https的url底层为com.android.okhttp.internal.http.HttpsURLConnectionImpl
+            //4.4开始对于http的url底层为com.android.okhttp.internal.http.HttpURLConnectionImpl
             httpURLConnection = (HttpURLConnection) urlObj.openConnection();
 
             httpURLConnection.setRequestMethod("POST");
@@ -379,6 +386,11 @@ class BCHttpClientUtil {
             httpURLConnection.setRequestProperty("Content-Type", "application/json;charset=utf-8");
             httpURLConnection.setDoOutput(true);
             httpURLConnection.setChunkedStreamingMode(0);
+
+            // 4.0 ~ 4.3 存在EOFException
+            if (Build.VERSION.SDK_INT > 13 && Build.VERSION.SDK_INT < 19) {
+                httpURLConnection.setRequestProperty("Connection", "close");
+            }
 
             //start to post
             response = writeStream(httpURLConnection, jsonStr);
@@ -437,6 +449,10 @@ class BCHttpClientUtil {
             httpURLConnection.setConnectTimeout(BCCache.getInstance().connectTimeout);
             httpURLConnection.setRequestMethod("POST");
             httpURLConnection.setRequestProperty("Accept", "application/json");
+            // 4.0 ~ 4.3 存在EOFException
+            if (Build.VERSION.SDK_INT > 13 && Build.VERSION.SDK_INT < 19) {
+                httpURLConnection.setRequestProperty("Connection", "close");
+            }
             httpURLConnection.setRequestProperty("Authorization", BCSecurityUtil.getB64Auth(
                     BCCache.getInstance().paypalClientID, BCCache.getInstance().paypalSecret));
             httpURLConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");

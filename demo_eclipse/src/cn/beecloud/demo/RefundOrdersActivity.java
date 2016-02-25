@@ -227,7 +227,7 @@ public class RefundOrdersActivity extends Activity {
                         params.channel = BCReqParams.BCChannelTypes.ALL;
                         BCQuery.getInstance().queryRefundsAsync(params,
                                 bcCallback);
-
+                        break;
                     case 6: //通过ID查询
                         //注意此处的ID是列标识符，在调用退款(服务端)接口时返回，非订单号
                         BCQuery.getInstance().queryRefundByIDAsync("24035a33-6be2-4d55-b37c-84aaf2c5aeac",
@@ -269,7 +269,7 @@ public class RefundOrdersActivity extends Activity {
                                         mHandler.sendMessage(msg);
                                     }
                                 });
-
+                        break;
                     case 7:
                         params = new BCQuery.QueryParams();
 
