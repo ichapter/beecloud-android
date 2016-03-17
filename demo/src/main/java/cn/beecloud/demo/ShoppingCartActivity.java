@@ -210,12 +210,9 @@ public class ShoppingCartActivity extends Activity {
         setContentView(R.layout.activity_shopping_cart);
 
         // 推荐在主Activity或application里的onCreate函数中初始化BeeCloud.
-        //BeeCloud.setSandbox(true);
-//        BeeCloud.setAppIdAndSecret("c5d1cba1-5e3f-4ba0-941d-9b0a371fe719",
-//                "4bfdd244-574d-4bf3-b034-0c751ed34fee");
-
-        BeeCloud.setAppIdAndSecret("c37d661d-7e61-49ea-96a5-68c34e83db3b",
-                "c37d661d-7e61-49ea-96a5-68c34e83db3b");
+        BeeCloud.setSandbox(true);
+        BeeCloud.setAppIdAndSecret("c5d1cba1-5e3f-4ba0-941d-9b0a371fe719",
+                "4bfdd244-574d-4bf3-b034-0c751ed34fee");
 
         // 如果用到微信支付，在用到微信支付的Activity的onCreate函数里调用以下函数.
         // 第二个参数需要换成你自己的微信AppID.
