@@ -6,20 +6,22 @@
  */
 package cn.beecloud;
 
-import android.os.Build;
+import android.util.Log;
 
 import com.google.gson.Gson;
 
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Map;
-import java.util.Random;
+import java.util.concurrent.TimeUnit;
+
+import okhttp3.FormBody;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.ResponseBody;
 
 /**
  * 网络请求工具类
@@ -27,11 +29,8 @@ import java.util.Random;
 class BCHttpClientUtil {
 
     //主机地址
-    private static final String[] BEECLOUD_HOSTS = {"https://apibj.beecloud.cn",
-            "https://apisz.beecloud.cn",
-            "https://apiqd.beecloud.cn",
-            "https://apihz.beecloud.cn"
-    };
+    private static final String BEECLOUD_HOST = "https://apidynamic.beecloud.cn";
+    private static final String TAG = "BCHttpClientUtil";
 
     //Rest API版本号
     private static final String HOST_API_VERSION = "/2/";
@@ -84,8 +83,7 @@ class BCHttpClientUtil {
      * 随机获取主机, 并加入API版本号
      */
     private static String getRandomHost() {
-        Random r = new Random();
-        return BEECLOUD_HOSTS[r.nextInt(BEECLOUD_HOSTS.length)] + HOST_API_VERSION;
+        return BEECLOUD_HOST + HOST_API_VERSION;
     }
 
     /**
@@ -200,168 +198,39 @@ class BCHttpClientUtil {
      */
     public static Response httpGet(String url) {
 
-        Response response = null;
-
-        HttpURLConnection httpURLConnection = null;
-        try {
-            URL urlObj = new URL(url);
-
-            //4.4开始对于https的url底层为com.android.okhttp.internal.http.HttpsURLConnectionImpl
-            //4.4开始对于http的url底层为com.android.okhttp.internal.http.HttpURLConnectionImpl
-            httpURLConnection = (HttpURLConnection) urlObj.openConnection();
-
-            httpURLConnection.setConnectTimeout(BCCache.getInstance().connectTimeout);
-            httpURLConnection.setDoInput(true);
-
-            // 4.0 ~ 4.3 存在EOFException
-            if (Build.VERSION.SDK_INT > 13 && Build.VERSION.SDK_INT < 19) {
-                httpURLConnection.setRequestProperty("Connection", "close");
-            }
-
-            response = readStream(httpURLConnection);
-
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-
-            response = new Response();
-            response.content = e.getMessage();
-            response.code = -1;
-        } catch (IOException e) {
-            e.printStackTrace();
-
-            response = new Response();
-            response.content = e.getMessage();
-            response.code = -1;
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            response = new Response();
-            response.content = ex.getMessage();
-            response.code = -1;
-        } finally {
-            if (httpURLConnection != null)
-                httpURLConnection.disconnect();
-        }
-
-        return response;
-    }
-
-    static Response readStream(HttpURLConnection connection) {
         Response response = new Response();
 
-        StringBuilder stringBuilder = new StringBuilder();
+        OkHttpClient client = new OkHttpClient.Builder()
+                .connectTimeout(BCCache.getInstance().connectTimeout, TimeUnit.MILLISECONDS)
+                .build();
 
-        BufferedReader reader = null;
-        try {
+        Request request = new Request.Builder()
+                .url(url)
+                .build();
 
-            reader = new BufferedReader(new InputStreamReader(
-                    connection.getInputStream(), "UTF-8"));
-
-            int tmp;
-            while ((tmp = reader.read()) != -1) {
-                stringBuilder.append((char)tmp);
-            }
-
-            response.code = connection.getResponseCode();
-            response.content = stringBuilder.toString();
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-            response.code = -1;
-            response.content = e.getMessage();
-        } catch (IOException e) {
-            e.printStackTrace();
-
-            try {
-                //it could be caused by 400 and so on
-
-                reader = new BufferedReader(new InputStreamReader(
-                        connection.getErrorStream(), "UTF-8"));
-
-                //clear
-                stringBuilder.setLength(0);
-
-                int tmp;
-                while ((tmp = reader.read()) != -1) {
-                    stringBuilder.append((char)tmp);
-                }
-
-                response.code = connection.getResponseCode();
-                response.content = stringBuilder.toString();
-
-            } catch (IOException e1) {
-                response.content = e1.getMessage();
-                response.code = -1;
-                e1.printStackTrace();
-            } catch (Exception ex) {
-                //if user directly shuts down network when trying to write to server
-                //there could be NullPointerException or SSLException
-                response.content = ex.getMessage();
-                response.code = -1;
-                ex.printStackTrace();
-            }
-        } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
+        proceedRequest(client, request, response);
 
         return response;
     }
 
-    //return null means successfully write to server
-    static Response writeStream(HttpURLConnection connection, String content) {
-        BufferedOutputStream out=null;
-        Response response = null;
+    private static void proceedRequest(OkHttpClient client, Request request, Response response) {
         try {
-            out = new BufferedOutputStream(connection.getOutputStream());
-            out.write(content.getBytes("UTF-8"));
-            out.flush();
+            okhttp3.Response temp = client.newCall(request).execute();
+            response.code = temp.code();
+            ResponseBody body = temp.body();
+            if (temp.isSuccessful()) {
+                //call string auto close body
+                response.content = body.string();
+            } else {
+                response.content = "网络请求失败";
+                temp.body().close();
+            }
         } catch (IOException e) {
             e.printStackTrace();
-
-            try {
-                //it could be caused by 400 and so on
-                response = new Response();
-
-                BufferedReader reader = new BufferedReader(new InputStreamReader(
-                        connection.getErrorStream(), "UTF-8"));
-
-                StringBuilder stringBuilder = new StringBuilder();
-
-                int tmp;
-                while ((tmp = reader.read()) != -1) {
-                    stringBuilder.append((char)tmp);
-                }
-
-                response.code = connection.getResponseCode();
-                response.content = stringBuilder.toString();
-
-            } catch (IOException e1) {
-                response = new Response();
-                response.content = e1.getMessage();
-                response.code = -1;
-                e1.printStackTrace();
-            } catch (Exception ex) {
-                //if user directly shutdowns network when trying to write to server
-                //there could be NullPointerException or SSLException
-                response = new Response();
-                response.content = ex.getMessage();
-                response.code = -1;
-                ex.printStackTrace();
-            }
-        } finally {
-            try {
-                if (out!=null)
-                    out.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            Log.w(TAG, e.getMessage() == null ? " " : e.getMessage());
+            response.code = -1;
+            response.content = e.getMessage();
         }
-
-        return response;
     }
 
     /**
@@ -371,56 +240,20 @@ class BCHttpClientUtil {
      * @return          HttpResponse请求结果实例
      */
     public static Response httpPost(String url, String jsonStr) {
-        Response response = null;
+        Response response = new Response();
 
-        HttpURLConnection httpURLConnection = null;
-        try {
-            URL urlObj = new URL(url);
+        MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+        OkHttpClient client = new OkHttpClient.Builder()
+                .connectTimeout(BCCache.getInstance().connectTimeout, TimeUnit.MILLISECONDS)
+                .build();
 
-            //4.4开始对于https的url底层为com.android.okhttp.internal.http.HttpsURLConnectionImpl
-            //4.4开始对于http的url底层为com.android.okhttp.internal.http.HttpURLConnectionImpl
-            httpURLConnection = (HttpURLConnection) urlObj.openConnection();
+        RequestBody body = RequestBody.create(JSON, jsonStr);
+        Request request = new Request.Builder()
+                .url(url)
+                .post(body)
+                .build();
 
-            httpURLConnection.setRequestMethod("POST");
-            httpURLConnection.setConnectTimeout(BCCache.getInstance().connectTimeout);
-            httpURLConnection.setRequestProperty("Content-Type", "application/json;charset=utf-8");
-            httpURLConnection.setDoOutput(true);
-            httpURLConnection.setChunkedStreamingMode(0);
-
-            // 4.0 ~ 4.3 存在EOFException
-            if (Build.VERSION.SDK_INT > 13 && Build.VERSION.SDK_INT < 19) {
-                httpURLConnection.setRequestProperty("Connection", "close");
-            }
-
-            //start to post
-            response = writeStream(httpURLConnection, jsonStr);
-
-            if (response == null) { //if post successfully
-
-                response = readStream(httpURLConnection);
-
-            }
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-
-            response = new Response();
-            response.content = e.getMessage();
-            response.code = -1;
-        } catch (IOException e) {
-            e.printStackTrace();
-
-            response = new Response();
-            response.content = e.getMessage();
-            response.code = -1;
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            response = new Response();
-            response.content = ex.getMessage();
-            response.code = -1;
-        } finally {
-            if (httpURLConnection != null)
-                httpURLConnection.disconnect();
-        }
+        proceedRequest(client, request, response);
 
         return response;
     }
@@ -439,45 +272,39 @@ class BCHttpClientUtil {
     }
 
     public static Response getPayPalAccessToken() {
+        Response response = new Response();
 
-        Response response = null;
-
-        HttpURLConnection httpURLConnection = null;
         try {
-            URL urlObj = new URL(getPayPalAccessTokenUrl());
-            httpURLConnection = (HttpURLConnection)urlObj.openConnection();
-            httpURLConnection.setConnectTimeout(BCCache.getInstance().connectTimeout);
-            httpURLConnection.setRequestMethod("POST");
-            httpURLConnection.setRequestProperty("Accept", "application/json");
-            // 4.0 ~ 4.3 存在EOFException
-            if (Build.VERSION.SDK_INT > 13 && Build.VERSION.SDK_INT < 19) {
-                httpURLConnection.setRequestProperty("Connection", "close");
-            }
-            httpURLConnection.setRequestProperty("Authorization", BCSecurityUtil.getB64Auth(
-                    BCCache.getInstance().paypalClientID, BCCache.getInstance().paypalSecret));
-            httpURLConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-            httpURLConnection.setDoOutput(true);
-            httpURLConnection.setChunkedStreamingMode(0);
+            //PayPal needs TLS v1.2
+            OkHttpClient client =
+                    new OkHttpClient.Builder()
+                            .connectTimeout(BCCache.getInstance().connectTimeout, TimeUnit.MILLISECONDS)
+                            .sslSocketFactory(new BCTLSSocketFactory()).build();
 
-            response = writeStream(httpURLConnection, "grant_type=client_credentials");
-            if (response == null) {
+            FormBody.Builder form = new FormBody.Builder();
+            form.add("grant_type", "client_credentials");
+            RequestBody body = form.build();
 
-                response = readStream(httpURLConnection);
+            Request request = new Request.Builder()
+                    .url(getPayPalAccessTokenUrl())
+                    .header("Accept", "application/json")
+                    .header("Content-Type", "application/x-www-form-urlencoded")
+                    .header("Authorization", BCSecurityUtil.getB64Auth(
+                            BCCache.getInstance().paypalClientID, BCCache.getInstance().paypalSecret))
+                    .post(body)
+                    .build();
 
-            }
-        } catch (MalformedURLException e) {
+            proceedRequest(client, request, response);
+        } catch (KeyManagementException e) {
             e.printStackTrace();
-            response = new Response();
-            response.content = e.getMessage();
+            Log.w(TAG, e.getMessage() == null ? " " : e.getMessage());
             response.code = -1;
-        } catch (IOException e) {
+            response.content = e.getMessage();
+        } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
-            response = new Response();
-            response.content = e.getMessage();
+            Log.w(TAG, e.getMessage() == null ? " " : e.getMessage());
             response.code = -1;
-        } finally {
-            if (httpURLConnection != null)
-                httpURLConnection.disconnect();
+            response.content = e.getMessage();
         }
 
         return response;

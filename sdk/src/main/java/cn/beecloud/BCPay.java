@@ -23,9 +23,7 @@ import com.tencent.mm.sdk.openapi.IWXAPI;
 import com.tencent.mm.sdk.openapi.WXAPIFactory;
 
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -693,24 +691,27 @@ public class BCPay {
     /**
      * sync with server to verify the payment
      *
-     * @return if first item equals BCPayResult.RESULT_SUCCESS then it means sync successfully and payment is valid,
-     *         else second item contains error info
+     * @return if result equals BCPayResult.RESULT_SUCCESS then it means sync successfully and payment is valid
      */
-    String[] syncPayPalPayment(final String billTitle, final Integer billTotalFee, final String billNum,
-                               final String currency, final String optional, final PAYPAL_PAY_TYPE paypalType,
-                               final String token) {
+    public BCPayResult syncPayPalPayment(final String billTitle, final Integer billTotalFee, final String billNum,
+                               final String currency, final String optional) {
         if (BCCache.getInstance().isTestMode) {
-            return new String[]{BCPayResult.RESULT_FAIL,
-                    "PayPal支付暂不支持通过BeeCloud.setSandbox设置测试模式，你可以在BCPay.initPayPal中设置其原生的sandbox模式"};
+            return new BCPayResult(BCPayResult.RESULT_FAIL,
+                    BCPayResult.APP_INTERNAL_PARAMS_ERR_CODE,
+                    BCPayResult.FAIL_INVALID_PARAMS,
+                    "PayPal支付暂不支持通过BeeCloud.setSandbox设置测试模式，你可以在BCPay.initPayPal中设置其原生的sandbox模式");
         }
 
         //verify params
         BCPayReqParams parameters;
         try {
-            parameters = new BCPayReqParams(paypalType == PAYPAL_PAY_TYPE.LIVE ?
+            parameters = new BCPayReqParams(BCCache.getInstance().paypalPayType == PAYPAL_PAY_TYPE.LIVE ?
                     BCReqParams.BCChannelTypes.PAYPAL_LIVE : BCReqParams.BCChannelTypes.PAYPAL_SANDBOX);
         } catch (BCException e) {
-            return new String[]{BCPayResult.RESULT_FAIL, e.getMessage()};
+            return new BCPayResult(BCPayResult.RESULT_FAIL,
+                    BCPayResult.APP_INTERNAL_PARAMS_ERR_CODE,
+                    BCPayResult.FAIL_INVALID_PARAMS,
+                    e.getMessage());
         }
 
         Map<String, String> optionalMap = null;
@@ -724,18 +725,23 @@ public class BCPay {
                 billNum, optionalMap, parameters);
 
         if (paramValidRes != null) {
-            return new String[] {BCPayResult.RESULT_FAIL,paramValidRes};
+            return new BCPayResult(BCPayResult.RESULT_FAIL,
+                    BCPayResult.APP_INTERNAL_PARAMS_ERR_CODE,
+                    BCPayResult.FAIL_INVALID_PARAMS,
+                    paramValidRes);
         }
 
-        String accessToken = token;
-
-        if (accessToken == null)
-            accessToken = getPayPalAccessToken();
+        String accessToken = getPayPalAccessToken();
 
         //Log.w("BCPay", accessToken);
 
-        if (accessToken == null)
-            return new String[]{BCPayResult.RESULT_FAIL, "Can't get access Token"};
+        if (accessToken == null) {
+            Log.w(TAG, "fail to retrieve PayPal token");
+            return new BCPayResult(BCPayResult.RESULT_FAIL,
+                    BCPayResult.APP_INTERNAL_NETWORK_ERR_CODE,
+                    BCPayResult.FAIL_NETWORK_ISSUE,
+                    "Can't get access Token");
+        }
 
         parameters.currency=currency;
         parameters.accessToken = "Bearer " + accessToken;
@@ -761,8 +767,11 @@ public class BCPay {
 
                 BCCache.getInstance().billID=String.valueOf(responseMap.get("id"));
 
-                return new String[]{BCPayResult.RESULT_SUCCESS,
-                        String.valueOf(responseMap.get("id"))};
+                return new BCPayResult(BCPayResult.RESULT_SUCCESS,
+                        BCPayResult.APP_PAY_SUCC_CODE,
+                        BCPayResult.RESULT_SUCCESS,
+                        BCPayResult.RESULT_SUCCESS,
+                        String.valueOf(responseMap.get("id")));
             /*
             } else if (resultCode == 7 && errDetail != null && errDetail.startsWith("PAYPAL")) {
 
@@ -776,23 +785,29 @@ public class BCPay {
             */
             } else {
                 //return error info from server
-                return new String[] {BCPayResult.RESULT_FAIL,
-                        String.valueOf(responseMap.get("result_msg")) + " # " +
-                                String.valueOf(responseMap.get("err_detail"))};
+                String serverMsg = String.valueOf(responseMap.get("result_msg"));
+                String serverDetail = String.valueOf(responseMap.get("err_detail"));
+
+                return new BCPayResult(BCPayResult.RESULT_FAIL,
+                        resultCode.intValue(),
+                        serverMsg,
+                        serverDetail);
             }
 
         } else {
-            return new String[] {BCPayResult.RESULT_FAIL,"Network Error"};
+            return new BCPayResult(BCPayResult.RESULT_FAIL,
+                    BCPayResult.APP_INTERNAL_NETWORK_ERR_CODE,
+                    BCPayResult.FAIL_NETWORK_ISSUE,
+                    "Network Error");
         }
     }
 
     /**
      * sync with server to verify the payment
      *
-     * @return if first item equals BCPayResult.RESULT_SUCCESS then it means sync successfully and payment is valid,
-     *         else second item contains error info
+     * @return if result equals BCPayResult.RESULT_SUCCESS then it means sync successfully and payment is valid
      */
-    public String[] syncPayPalPayment(final String syncJson, final String token) {
+    public BCPayResult syncPayPalPayment(final String syncJson) {
         Gson gson = new Gson();
         Map<String, String> syncItem = gson.fromJson(syncJson, new TypeToken<Map<String,String>>() {}.getType());
 
@@ -804,49 +819,8 @@ public class BCPay {
             billTotalFee = -1;
         }
 
-        String[] result = syncPayPalPayment(syncItem.get("billTitle"), billTotalFee,
-                syncItem.get("billNum"), syncItem.get("currency"), syncItem.get("optional"),
-                PAYPAL_PAY_TYPE.valueOf(syncItem.get("channel")), token);
-
-        if (result[0].equals(BCPayResult.RESULT_SUCCESS)) {
-            List<String> syncedRecord = new ArrayList<String>(1);
-            syncedRecord.add(syncJson);
-            BCCache.getInstance().removeSyncedPalPalRecords(mContextActivity, syncedRecord);
-        }
-
-        return result;
-    }
-
-    /**
-     * batch sync PayPal local payments
-     *
-     * @return Map use key "cachedNum" to get the cached total number, use key "syncedNum" to get the successfully synced number(also payments are valid)
-     */
-    public Map<String, Integer> batchSyncPayPalPayment() {
-        List<String> allRecords = BCCache.getInstance().getUnSyncedPayPalRecords(mContextActivity);
-
-        Map<String, Integer> result = new HashMap<String, Integer>();
-        result.put("cachedNum", allRecords.size());
-
-        String accessToken = getPayPalAccessToken();
-
-        int syncedNum = 0;
-
-        for (String jsonStr : allRecords) {
-            if (syncPayPalPayment(jsonStr, accessToken)[0].equals(BCPayResult.RESULT_SUCCESS))
-                syncedNum++;
-        }
-
-        result.put("syncedNum", syncedNum);
-
-        return result;
-    }
-
-    /**
-     * used when you would like to know the sync result
-     */
-    public void addPayPalSyncObserver(BCPayPalSyncObserver observer) {
-        payPalSyncObserver = observer;
+        return syncPayPalPayment(syncItem.get("billTitle"), billTotalFee,
+                syncItem.get("billNum"), syncItem.get("currency"), syncItem.get("optional"));
     }
 
     /**

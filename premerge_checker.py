@@ -60,16 +60,7 @@ tmp = glob.glob('sdk/beecloud*.jar')[0]
 sdk_jar_ver = tmp[tmp.find('beecloud-') + len('beecloud-') : tmp.find('.jar')]
 print("sdk jar versionCode: " + sdk_jar_ver)
 
-
-if len(glob.glob('demo_eclipse/libs/beecloud*.jar')) != 1:
-	print('dumy jars!!!')
-	exit(-1)
-
-tmp = glob.glob('demo_eclipse/libs/beecloud*.jar')[0]
-demo_jar_ver = tmp[tmp.find('beecloud-') + len('beecloud-') : tmp.find('.jar')]
-print("eclipse demo jar versionCode: " + demo_jar_ver)
-
-if gradle_ver != beecloud_ver or beecloud_ver != readme_ver or readme_ver != readme_jar_ver or readme_jar_ver != changelog_ver or changelog_ver != sdk_jar_ver or sdk_jar_ver != demo_jar_ver:
+if gradle_ver != beecloud_ver or beecloud_ver != readme_ver or readme_ver != readme_jar_ver or readme_jar_ver != changelog_ver or changelog_ver != sdk_jar_ver:
 	print("inconsistent version code!!!")
 	exit(-1)
 else:
