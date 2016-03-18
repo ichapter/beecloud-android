@@ -27,11 +27,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import cn.beecloud.BCCache;
 import cn.beecloud.BCPay;
 import cn.beecloud.BCQuery;
 import cn.beecloud.BeeCloud;
 import cn.beecloud.async.BCCallback;
-import cn.beecloud.async.BCPayPalSyncObserver;
 import cn.beecloud.async.BCResult;
 import cn.beecloud.demo.util.BillUtils;
 import cn.beecloud.entity.BCBillOrder;
@@ -48,6 +48,11 @@ public class ShoppingCartActivity extends Activity {
     private ProgressDialog loadingDialog;
     private ListView payMethod;
 
+    private String toastMsg;
+
+    //记录一下是否是PayPal支付
+    private boolean isPayPal;
+
     //支付结果返回入口
     BCCallback bcCallback = new BCCallback() {
         @Override
@@ -57,67 +62,99 @@ public class ShoppingCartActivity extends Activity {
             loadingDialog.dismiss();
 
             //根据你自己的需求处理支付结果
-            //需要注意的是，此处如果涉及到UI的更新，请在UI主进程或者Handler操作
-            ShoppingCartActivity.this.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
+            String result = bcPayResult.getResult();
 
-                    String result = bcPayResult.getResult();
+            /*
+              注意！
+              所有支付渠道建议以服务端的状态金额为准，此处返回的RESULT_SUCCESS仅仅代表手机端支付成功
+            */
+            Message msg = mHandler.obtainMessage();
+            //单纯的显示支付结果
+            msg.what = 2;
+            if (result.equals(BCPayResult.RESULT_SUCCESS)) {
+                toastMsg = "用户支付成功";
+            } else if (result.equals(BCPayResult.RESULT_CANCEL))
+                toastMsg = "用户取消支付";
+            else if (result.equals(BCPayResult.RESULT_FAIL)) {
+                toastMsg = "支付失败, 原因: " + bcPayResult.getErrCode() +
+                        " # " + bcPayResult.getErrMsg() +
+                        " # " + bcPayResult.getDetailInfo();
 
-                    /*
-                      注意！
-                      所有支付渠道建议以服务端的状态金额为准，此处返回的RESULT_SUCCESS仅仅代表手机端支付成功
-                    */
-                    if (result.equals(BCPayResult.RESULT_SUCCESS)) {
-                        Toast.makeText(ShoppingCartActivity.this, "用户支付成功", Toast.LENGTH_LONG).show();
-
-                    } else if (result.equals(BCPayResult.RESULT_CANCEL))
-                        Toast.makeText(ShoppingCartActivity.this, "用户取消支付", Toast.LENGTH_LONG).show();
-                    else if (result.equals(BCPayResult.RESULT_FAIL)) {
-                        String toastMsg = "支付失败, 原因: " + bcPayResult.getErrCode() +
-                                " # " + bcPayResult.getErrMsg() +
-                                " # " + bcPayResult.getDetailInfo();
-
-                        /**
-                         * 你发布的项目中不应该出现如下错误，此处由于支付宝政策原因，
-                         * 不再提供支付宝支付的测试功能，所以给出提示说明
-                         */
-                        if (bcPayResult.getErrMsg().equals("PAY_FACTOR_NOT_SET") &&
-                                bcPayResult.getDetailInfo().startsWith("支付宝参数")) {
-                            toastMsg = "支付失败：由于支付宝政策原因，故不再提供支付宝支付的测试功能，给您带来的不便，敬请谅解";
-                        }
-
-                        /**
-                         * 以下是正常流程，请按需处理失败信息
-                         */
-
-                        Toast.makeText(ShoppingCartActivity.this, toastMsg, Toast.LENGTH_LONG).show();
-                        Log.e(TAG, toastMsg);
-
-                        if (bcPayResult.getErrMsg().equals(BCPayResult.FAIL_PLUGIN_NOT_INSTALLED) ||
-                                bcPayResult.getErrMsg().equals(BCPayResult.FAIL_PLUGIN_NEED_UPGRADE)) {
-                            //银联需要重新安装控件
-                            Message msg = mHandler.obtainMessage();
-                            msg.what = 1;
-                            mHandler.sendMessage(msg);
-                        }
-
-                    } else if (result.equals(BCPayResult.RESULT_UNKNOWN)) {
-                        //可能出现在支付宝8000返回状态
-                        Toast.makeText(ShoppingCartActivity.this, "订单状态未知", Toast.LENGTH_LONG).show();
-                    } else {
-                        Toast.makeText(ShoppingCartActivity.this, "invalid return", Toast.LENGTH_LONG).show();
-                    }
-
-                    if (bcPayResult.getId() != null) {
-                        //你可以把这个id存到你的订单中，下次直接通过这个id查询订单
-                        Log.w(TAG, "bill id retrieved : " + bcPayResult.getId());
-
-                        //根据ID查询，此处只是演示如何通过id查询订单，并非支付必要部分
-                        getBillInfoByID(bcPayResult.getId());
-                    }
+                /**
+                 * 你发布的项目中不应该出现如下错误，此处由于支付宝政策原因，
+                 * 不再提供支付宝支付的测试功能，所以给出提示说明
+                 */
+                if (bcPayResult.getErrMsg().equals("PAY_FACTOR_NOT_SET") &&
+                        bcPayResult.getDetailInfo().startsWith("支付宝参数")) {
+                    toastMsg = "支付失败：由于支付宝政策原因，故不再提供支付宝支付的测试功能，给您带来的不便，敬请谅解";
                 }
-            });
+
+                /**
+                 * 以下是正常流程，请按需处理失败信息
+                 */
+                Log.e(TAG, toastMsg);
+
+                if (bcPayResult.getErrMsg().equals(BCPayResult.FAIL_PLUGIN_NOT_INSTALLED)) {
+                    //银联需要重新安装控件
+                    msg.what = 1;
+                }
+
+            } else if (result.equals(BCPayResult.RESULT_UNKNOWN)) {
+                //可能出现在支付宝8000返回状态
+                toastMsg = "订单状态未知";
+            } else {
+                toastMsg = "invalid return";
+            }
+
+            mHandler.sendMessage(msg);
+
+            //如果是PayPal，手机端支付完成后还需要向BeeCloud服务器发送同步请求，并校验支付结果
+            if (isPayPal) {
+                //如果是PayPal，detail info里面包含订单的json字符串
+                final String syncStr = bcPayResult.getDetailInfo();
+                isPayPal = false;
+                Log.i(TAG, "start to sync PayPal result to BeeCloud server...");
+
+                loadingDialog.show();
+                //由于同步过程中需要向PayPal服务器请求token，请求失败的几率比较高，此处设置了三次循环
+                BCCache.executorService.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        int i = 0;
+                        BCPayResult syncResult;
+                        for (; i < 3; i++) {
+                            Log.i(TAG, String.format("sync for %d time(s)", i+1));
+                            syncResult = BCPay.getInstance(ShoppingCartActivity.this).syncPayPalPayment(syncStr);
+
+                            if (syncResult.getResult().equals(BCPayResult.RESULT_SUCCESS)) {
+                                Log.i(TAG, "sync succ!!!");
+                                Log.d(TAG, "this bill id can be stored for query by id: " + syncResult.getId());
+                                break;
+                            } else {
+                                Log.e(TAG, "sync fail reason: " + syncResult.getErrCode() + " # " +
+                                        syncResult.getErrMsg() + " # " + syncResult.getDetailInfo());
+                            }
+                        }
+
+                        loadingDialog.dismiss();
+
+                        //注意，如果一直失败，你需要将该json串保留起来，下次继续同步，否者在你在BeeCloud控制台看不到这笔订单
+                        if (i == 3) {
+                            Log.e(TAG, "BAD result!!! Sync failed for three times!!!");
+                            Log.w(TAG, "please store the json string to somewhere for later sync: " + syncStr);
+                        }
+                    }
+                });
+            }
+
+            if (bcPayResult.getId() != null) {
+                //你可以把这个id存到你的订单中，下次直接通过这个id查询订单
+                Log.w(TAG, "bill id retrieved : " + bcPayResult.getId());
+
+                //根据ID查询，此处只是演示如何通过id查询订单，并非支付必要部分
+                getBillInfoByID(bcPayResult.getId());
+            }
+
         }
     };
 
@@ -133,30 +170,35 @@ public class ShoppingCartActivity extends Activity {
          */
         @Override
         public boolean handleMessage(Message msg) {
-            if (msg.what == 1) {
-                //如果用户手机没有安装银联支付控件,则会提示用户安装
-                AlertDialog.Builder builder = new AlertDialog.Builder(ShoppingCartActivity.this);
-                builder.setTitle("提示");
-                builder.setMessage("完成支付需要安装或者升级银联支付控件，是否安装？");
+            switch (msg.what) {
+                case 1:
+                    //如果用户手机没有安装银联支付控件,则会提示用户安装
+                    AlertDialog.Builder builder = new AlertDialog.Builder(ShoppingCartActivity.this);
+                    builder.setTitle("提示");
+                    builder.setMessage("完成支付需要安装或者升级银联支付控件，是否安装？");
 
-                builder.setNegativeButton("确定",
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                UPPayAssistEx.installUPPayPlugin(ShoppingCartActivity.this);
-                                dialog.dismiss();
-                            }
-                        });
+                    builder.setNegativeButton("确定",
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    UPPayAssistEx.installUPPayPlugin(ShoppingCartActivity.this);
+                                    dialog.dismiss();
+                                }
+                            });
 
-                builder.setPositiveButton("取消",
-                        new DialogInterface.OnClickListener() {
+                    builder.setPositiveButton("取消",
+                            new DialogInterface.OnClickListener() {
 
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.dismiss();
-                            }
-                        });
-                builder.create().show();
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
+                                }
+                            });
+                    builder.create().show();
+                    break;
+                case 2:
+                    Toast.makeText(ShoppingCartActivity.this, toastMsg, Toast.LENGTH_SHORT).show();
+                    break;
             }
             return true;
         }
@@ -200,7 +242,7 @@ public class ShoppingCartActivity extends Activity {
 
         // 如果调起支付太慢, 可以在这里开启动画, 以progressdialog为例
         loadingDialog = new ProgressDialog(ShoppingCartActivity.this);
-        loadingDialog.setMessage("启动第三方支付，请稍候...");
+        loadingDialog.setMessage("处理中，请稍候...");
         loadingDialog.setIndeterminate(true);
         loadingDialog.setCancelable(true);
 
@@ -328,37 +370,14 @@ public class ShoppingCartActivity extends Activity {
                         break;
                     case 4: //通过PayPal支付
                         /*
-                         对于PayPal的每一次支付，sdk会自动帮你与服务端同步，
-                         如果与服务端同步失败，记录会被自动保存，此时你可以调用batchSyncPayPalPayment方法手动同步
-                         虽然这种情况比较少，但是建议参考PayPalUnSyncedListActivity做好同步，否则服务器将无法查阅到订单
+                         此处返回的是PayPal客户端返回的信息，
+                         请调用syncPayPalPayment获取校验结果，该方法会同时将支付订单同步到BeeCloud服务器
                          */
                         loadingDialog.show();
-
+                        isPayPal = true;
                         HashMap<String, String> hashMapOptional = new HashMap<String, String>();
                         hashMapOptional.put("PayPal key1", "PayPal value1");
                         hashMapOptional.put("PayPal key2", "PayPal value2");
-
-                        BCPay bcPay = BCPay.getInstance(ShoppingCartActivity.this);
-
-                        //this is only required if you want to get the bill id
-                        //or you want to know the sync result
-                        bcPay.addPayPalSyncObserver(new BCPayPalSyncObserver(){
-
-                            @Override
-                            public void onSyncSucceed(String id) {
-                                Log.w(TAG, "paypal bill id retrieved: " + id);
-                                getBillInfoByID(id);
-                            }
-
-                            @Override
-                            public boolean onSyncFailed(String billInfo, String failInfo) {
-                                Log.w(TAG, "billInfo: " + billInfo +
-                                    "#failInfo: "+failInfo);
-                                //return true if you have successfully dealt with the billInfo
-                                //else sdk will continue to store the un-synced billInfo into cache for later sync
-                                return false;
-                            }
-                        });
 
                         BCPay.getInstance(ShoppingCartActivity.this).reqPayPalPaymentAsync(
                                 "PayPal payment test",  //bill title

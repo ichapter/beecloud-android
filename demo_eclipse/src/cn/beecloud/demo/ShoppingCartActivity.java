@@ -31,14 +31,12 @@ import cn.beecloud.BCPay;
 import cn.beecloud.BCQuery;
 import cn.beecloud.BeeCloud;
 import cn.beecloud.async.BCCallback;
-import cn.beecloud.async.BCPayPalSyncObserver;
 import cn.beecloud.async.BCResult;
 import cn.beecloud.demo.util.BillUtils;
 import cn.beecloud.entity.BCBillOrder;
 import cn.beecloud.entity.BCPayResult;
 import cn.beecloud.entity.BCQueryBillResult;
 import cn.beecloud.entity.BCReqParams;
-
 
 public class ShoppingCartActivity extends Activity {
     private static final String TAG = "ShoppingCartActivity";
@@ -94,8 +92,7 @@ public class ShoppingCartActivity extends Activity {
                         Toast.makeText(ShoppingCartActivity.this, toastMsg, Toast.LENGTH_LONG).show();
                         Log.e(TAG, toastMsg);
 
-                        if (bcPayResult.getErrMsg().equals(BCPayResult.FAIL_PLUGIN_NOT_INSTALLED) ||
-                                bcPayResult.getErrMsg().equals(BCPayResult.FAIL_PLUGIN_NEED_UPGRADE)) {
+                        if (bcPayResult.getErrMsg().equals(BCPayResult.FAIL_PLUGIN_NOT_INSTALLED)) {
                             //银联需要重新安装控件
                             Message msg = mHandler.obtainMessage();
                             msg.what = 1;
@@ -179,22 +176,14 @@ public class ShoppingCartActivity extends Activity {
             Toast.makeText(this, "微信初始化失败：" + initInfo, Toast.LENGTH_LONG).show();
         }
 
-        // 如果使用PayPal需要在支付之前设置client id和应用secret
-        // BCPay.PAYPAL_PAY_TYPE.SANDBOX用于测试，BCPay.PAYPAL_PAY_TYPE.LIVE用于生产环境
-        //最后一个参数表示是否在paypal支付页面显示收货地址，如果地址不合法有可能造成无法支付
-        BCPay.initPayPal("AVT1Ch18aTIlUJIeeCxvC7ZKQYHczGwiWm8jOwhrREc4a5FnbdwlqEB4evlHPXXUA67RAAZqZM0H8TCR",
-                "EL-fkjkEUyxrwZAmrfn46awFXlX-h2nRkyCVhhpeVdlSRuhPJKXx3ZvUTTJqPQuAeomXA8PZ2MkX24vF",
-                BCPay.PAYPAL_PAY_TYPE.SANDBOX, Boolean.FALSE);
-
         payMethod = (ListView) this.findViewById(R.id.payMethod);
         Integer[] payIcons = new Integer[]{R.drawable.wechat, R.drawable.alipay,
-                R.drawable.unionpay, R.drawable.baidupay,
-                R.drawable.paypal, R.drawable.scan};
+                R.drawable.unionpay, R.drawable.baidupay, R.drawable.scan};
         final String[] payNames = new String[]{"微信支付", "支付宝支付",
-                "银联在线", "百度钱包", "PayPal支付", "二维码支付"};
+                "银联在线", "百度钱包", "二维码支付"};
         String[] payDescs = new String[]{"使用微信支付，以人民币CNY计费", "使用支付宝支付，以人民币CNY计费",
                 "使用银联在线支付，以人民币CNY计费", "使用百度钱包支付，以人民币CNY计费",
-                "使用PayPal支付，以美元USD计费", "通过扫描二维码支付"};
+                "通过扫描二维码支付"};
         PayMethodListItem adapter = new PayMethodListItem(this, payIcons, payNames, payDescs);
         payMethod.setAdapter(adapter);
 
@@ -297,9 +286,7 @@ public class ShoppingCartActivity extends Activity {
                         *  BCReqParams.BCChannelTypes.WX_APP，
                         *  BCReqParams.BCChannelTypes.ALI_APP，
                         *  BCReqParams.BCChannelTypes.UN_APP，
-                        *  BCReqParams.BCChannelTypes.BD_APP，
-                        *  BCReqParams.BCChannelTypes.PAYPAL_SANDBOX，
-                        *  BCReqParams.BCChannelTypes.PAYPAL_LIVE
+                        *  BCReqParams.BCChannelTypes.BD_APP
                         */
                         payParam.channelType = BCReqParams.BCChannelTypes.BD_APP;
 
@@ -326,48 +313,7 @@ public class ShoppingCartActivity extends Activity {
                         BCPay.getInstance(ShoppingCartActivity.this).reqPaymentAsync(payParam,
                                 bcCallback);
                         break;
-                    case 4: //通过PayPal支付
-                        /*
-                         对于PayPal的每一次支付，sdk会自动帮你与服务端同步，
-                         如果与服务端同步失败，记录会被自动保存，此时你可以调用batchSyncPayPalPayment方法手动同步
-                         虽然这种情况比较少，但是建议参考PayPalUnSyncedListActivity做好同步，否则服务器将无法查阅到订单
-                         */
-                        loadingDialog.show();
-
-                        HashMap<String, String> hashMapOptional = new HashMap<String, String>();
-                        hashMapOptional.put("PayPal key1", "PayPal value1");
-                        hashMapOptional.put("PayPal key2", "PayPal value2");
-
-                        BCPay bcPay = BCPay.getInstance(ShoppingCartActivity.this);
-
-                        //this is only required if you want to get the bill id
-                        //or you want to know the sync result
-                        bcPay.addPayPalSyncObserver(new BCPayPalSyncObserver(){
-
-                            @Override
-                            public void onSyncSucceed(String id) {
-                                Log.w(TAG, "paypal bill id retrieved: " + id);
-                                getBillInfoByID(id);
-                            }
-
-                            @Override
-                            public boolean onSyncFailed(String billInfo, String failInfo) {
-                                Log.w(TAG, "billInfo: " + billInfo +
-                                    "#failInfo: "+failInfo);
-                                //return true if you have successfully dealt with the billInfo
-                                //else sdk will continue to store the un-synced billInfo into cache for later sync
-                                return false;
-                            }
-                        });
-
-                        BCPay.getInstance(ShoppingCartActivity.this).reqPayPalPaymentAsync(
-                                "PayPal payment test",  //bill title
-                                1,                      //bill amount(use cents)
-                                "USD",                  //bill currency
-                                hashMapOptional,        //optional info
-                                bcCallback);
-                        break;
-                    case 5:
+                    case 4:
                         Intent intent = new Intent(ShoppingCartActivity.this, QRCodeEntryActivity.class);
                         startActivity(intent);
                 }

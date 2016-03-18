@@ -50,19 +50,6 @@
             android:textSize="20sp"
             android:layout_width="match_parent" />
 
-        <Button
-            android:id="@+id/btnPayPalUnSynced"
-            android:layout_height="wrap_content"
-            android:padding="5dp"
-            android:background="@drawable/orange_radius"
-            android:layout_marginLeft="20dp"
-            android:layout_marginRight="20dp"
-            android:layout_marginTop="20dp"
-            android:text="PayPal未同步服务器的订单"
-            android:textColor="#ffffff"
-            android:textSize="20sp"
-            android:layout_width="match_parent" />
-
     </LinearLayout>
 
 </LinearLayout>

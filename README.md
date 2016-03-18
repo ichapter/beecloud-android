@@ -1,6 +1,6 @@
 ## BeeCloud Android SDK (Open Source)
 
-[![Build Status](https://travis-ci.org/beecloud/beecloud-android.svg)](https://travis-ci.org/beecloud/beecloud-android) ![license](https://img.shields.io/badge/license-MIT-brightgreen.svg) ![version](https://img.shields.io/badge/version-v2.1.3-blue.svg)
+[![Build Status](https://travis-ci.org/beecloud/beecloud-android.svg)](https://travis-ci.org/beecloud/beecloud-android) ![license](https://img.shields.io/badge/license-MIT-brightgreen.svg) ![version](https://img.shields.io/badge/version-v2.2.0-blue.svg)
 
 ## 简介
 
@@ -30,27 +30,28 @@
 ## 安装
 1. 添加依赖<br/>
 
->1. 对于通过添加`model`的方式（适用于`gradle`，推荐直接使用`Android Studio`）
-引入`sdk model`，在`project`的`settings.gradle`中`include ':sdk'`，并在需要支付的`model`（比如本项目中的`demo`） `build.gradle`中添加依赖`compile project(':sdk')`。
+>1. 推荐通过添加`model`的方式（适用于`gradle`，推荐直接使用`Android Studio`）
+引入`sdk model`，在`project`的`settings.gradle`中`include ':sdk'`，并在需要支付的`model`（比如本项目中的`demo`） `build.gradle`中添加依赖`compile project(':sdk')`，需要JDK版本7或以上。
 
 >2. 对于需要以`jar`方式引入的情况<br/>
-添加第三方的支付类，在`beecloud-android\sdk\libs`目录下<br/>
+添加第三方的支付类，在`beecloud-android\demo_eclipse\libs`目录下<br/>
 `gson-2.4.jar`为必须引入的jar，<br/>
 `zxing-3.2.0.jar`为生成二维码必须引入的jar，<br/>
 微信支付需要引入`libammsdk.jar`，<br/>
 支付宝需要引入`alipaysdk.jar`、`alipayutdid.jar`、`alipaysecsdk.jar`，<br/>
 银联需要引入`UPPayAssistEx.jar`，<br/>
 百度钱包支付需要引入`Cashier_SDK-v4.2.0.jar`，<br/>
-PayPal需要引入`PayPalAndroidSDK-2.11.2.jar`，<br/>
-最后添加`beecloud android sdk`：`beecloud-android\sdk\beecloud-2.1.3.jar`
+最后添加`beecloud android sdk`：`beecloud-2.1.3.jar`
 
-2.对于微信支付，需要注意你的`AndroidManifest.xml`中`package`需要和微信平台创建的移动应用`应用包名`保持一致，关于其`应用签名`请参阅[创建微信应用->B.填写平台信息](https://beecloud.cn/doc/payapply/?index=0)，
+2.对于微信支付，需要注意你的`AndroidManifest.xml`中`package`需要和微信平台创建的移动应用`应用包名`保持一致，关于其`应用签名`请参阅[创建微信应用->B.填写平台信息](https://beecloud.cn/doc/payapply/?index=0)
 
 3.对于银联支付需要将银联插件`beecloud-android\demo\src\main\assets\UPPayPluginEx.apk`引入你的工程`assets`目录下
 
 4.对于百度钱包支付，需要
 >1. 将`beecloud-android\sdk\manualres\baidupay\res`添加到你的`res`目录下；
->2. 另外，对于使用`Android Studio`的用户，需要将`beecloud-android\sdk\manualres\baidupay\`目录下的`armeabi`文件夹拷贝到`src\main\jniLibs`目录下，如果没有`jniLibs`目录，请手动创建；对用使用`Eclipse`的用户，需要将`beecloud-android\sdk\manualres\baidupay\`目录下的`armeabi`文件夹拷贝到`libs`目录下。
+>2. 另外，对于使用`Android Studio`的用户，需要将`beecloud-android\sdk\manualres\baidupay\`目录下的`armeabi`文件夹拷贝到`src\main\jniLibs`目录下，如果没有`jniLibs`目录，请手动创建；对用使用`Eclipse`的用户，需要将`beecloud-android\sdk\manualres\baidupay\`目录下的`armeabi`文件夹拷贝到`libs`目录下。  
+  
+5.对于需要使用PayPal的用户，由于PayPal官方不再提供单独的jar文件，请通过添加model的方式引入依赖。
 
 ## 注册
 1. 注册开发者：猛击[这里](http://www.beecloud.cn/register)注册成为BeeCloud开发者。  
@@ -97,16 +98,11 @@ BCPay.initPayPal(
 <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
-<!-- for Baidu and PayPal pay -->
+<!-- for Baidu -->
 <uses-permission android:name="android.permission.READ_PHONE_STATE" />
-
-<!--for Baidu pay -->
 <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 <uses-permission android:name="android.permission.WRITE_SETTINGS" />
 <uses-permission android:name="android.permission.READ_SMS" />
-
-<!-- for PayPal -->
-<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 ```
 
 ### 3. 在`AndroidManifest.xml`中注册`activity`
@@ -152,16 +148,6 @@ BCPay.initPayPal(
 ```
 > 对于PayPal，需要添加
 ```java
-<service
-    android:name="com.paypal.android.sdk.payments.PayPalService"
-    android:exported="false" />
-<activity android:name="com.paypal.android.sdk.payments.PaymentActivity" />
-<activity android:name="com.paypal.android.sdk.payments.LoginActivity" />
-<activity android:name="com.paypal.android.sdk.payments.PaymentMethodActivity" />
-<activity android:name="com.paypal.android.sdk.payments.PaymentConfirmActivity" />
-<activity android:name="io.card.payment.CardIOActivity"
-            android:configChanges="keyboardHidden|orientation" />
-<activity android:name="io.card.payment.DataEntryActivity" />
 <activity
     android:name="cn.beecloud.BCPayPalPaymentActivity"
     android:configChanges="orientation|keyboardHidden"
@@ -251,32 +237,47 @@ BCPay.getInstance(ShoppingCartActivity.this).reqWXPaymentAsync(
     mapOptional,            //扩展参数(可以null)
     bcCallback);            //支付完成后回调入口
 ```
-##### 对于PayPal支付的补充说明（非强制，但建议执行）
-PayPal回调返回的成功表示手机支付已经完成，但是PayPal官方推荐服务端进一步校验以防止非法欺诈行为，为此每次PayPal支付完成之后，SDK都会主动向服务端发送同步请求，所以在生产环境中`建议`以服务端的订单状态为标准。<br />
-另外在同步过程中为防止网络故障导致的同步失败，每次同步失败的PayPal订单都会保留在缓存，这种情况属于小概率事件，但是周全起见，可以参考`demo`中的`PayPalUnSyncedListActivity`如何进行手动同步，可以直接调用`batchSyncPayPalPayment`，例如
+##### 对于PayPal支付的补充说明
+PayPal回调返回的成功表示手机支付已经完成，但是订单还没有同步到BeeCloud服务器，由于同步过程中sdk需要先向PayPal服务器请求token，该请求过程失败几率相对比较大，所以可能需要多次请求同步，如果依然失败，请保留订单数据用于下次同步，同步接口为`syncPayPalPayment`，例如：
 ```java
-BCCache.executorService.execute(new Runnable() {
-    @Override
-    public void run() {
-        //batch sync
-        Map<String, Integer> result = BCPay.getInstance(PayPalUnSyncedListActivity.this).
-                batchSyncPayPalPayment();
+//如果是PayPal，手机端支付完成后还需要向BeeCloud服务器发送同步请求，并校验支付结果
+if (isPayPal) {
+    //如果是PayPal，detail info里面包含订单的json字符串
+    final String syncStr = bcPayResult.getDetailInfo();
+    isPayPal = false;
+    Log.i(TAG, "start to sync PayPal result to BeeCloud server...");
 
-        //total cached number
-        Integer allCached = result.get("cachedNum");
-        //total successfully synced number
-        Integer synced = result.get("syncedNum");
+    loadingDialog.show();
+    //由于同步过程中需要向PayPal服务器请求token，请求失败的几率比较高，此处设置了三次循环
+    BCCache.executorService.execute(new Runnable() {
+        @Override
+        public void run() {
+            int i = 0;
+            BCPayResult syncResult;
+            for (; i < 3; i++) {
+                Log.i(TAG, String.format("sync for %d time(s)", i+1));
+                syncResult = BCPay.getInstance(ShoppingCartActivity.this).syncPayPalPayment(syncStr);
 
-        if (allCached.equals(synced)) {
-            //成功全部同步
-        } else {
-            //没有成功同步的订单
-            Set<String> unSynced = BCCache.getInstance().getUnSyncedPayPalRecords(activity));
+                if (syncResult.getResult().equals(BCPayResult.RESULT_SUCCESS)) {
+                    Log.i(TAG, "sync succ!!!");
+                    Log.d(TAG, "this bill id can be stored for query by id: " + syncResult.getId());
+                    break;
+                } else {
+                    Log.e(TAG, "sync fail reason: " + syncResult.getDetailInfo());
+                }
+            }
+
+            loadingDialog.dismiss();
+
+            //注意，如果一直失败，你需要将该json串保留起来，下次继续同步，否者在你在BeeCloud控制台看不到这笔订单
+            if (i == 3) {
+                Log.e(TAG, "BAD result!!! Sync failed for three times!!!");
+                Log.w(TAG, "please store the json string to somewhere for later sync: " + syncStr);
+            }
         }
-    }
-});
+    });
+}
 ```
-如果想手动清除未同步订单，调用`BCCache.getInstance().clearUnSyncedPayPalRecords(activity)`
 
 ### 5.线下支付
 请查看`doc`中的`API`，线下支付类`BCOfflinePay`，参照`demo`中`QRCodeEntryActivity`和其关联的activity；一般用于线下门店通过出示二维码由用户扫描付款，或者通过用户出示的付款码收款。<br/><br/>
@@ -617,15 +618,10 @@ BCQuery.getInstance().queryOfflineBillStatusAsync(
 -libraryjars libs/UPPayAssistEx.jar
 #百度
 -libraryjars libs/Cashier_SDK-v4.2.0.jar
-#PayPal
--libraryjars libs/PayPalAndroidSDK-2.11.2.jar
 
 #以下是Android Studio和Eclipse都必须的
 #BeeCloud
 -dontwarn cn.beecloud.**
-#PayPal
--dontwarn com.paypal.**
--dontwarn io.card.payment.**
 
 #保留类签名声明
 -keepattributes Signature
@@ -641,9 +637,21 @@ BCQuery.getInstance().queryOfflineBillStatusAsync(
 #百度
 -keep class com.baidu.** { *; }
 -keep class com.dianxinos.** { *; }
-#PayPal
+
+#Android Studio中包含PayPal依赖，需要添加
+-dontwarn com.paypal.**
+-dontwarn io.card.payment.**
+-dontwarn okhttp3.**
+-dontwarn okio.**
+
 -keep class com.paypal.** { *; }
 -keep class io.card.payment.** { *; }
+
+-keep interface okhttp3.** { *; }
+-keep interface okio.** { *; }
+
+-keep class okhttp3.** { *; }
+-keep class okio.** { *; }
 ```
 
 ## 常见问题
@@ -686,8 +694,8 @@ Pull Request要求
 - 清晰的commit历史 - 保证你的pull请求的每次commit操作都是有意义的。如果你开发中需要执行多次的即时commit操作，那么请把它们放到一起再提交pull请求。
 
 ## 联系我们
-- 如果有什么问题，可以到BeeCloud开发者1群:**321545822** 或 BeeCloud开发者2群:**427128840** 或 BeeCloud开发者3群:**102350518** 提问
-- 更详细的文档，见源代码的注释以及[官方文档](https://beecloud.cn/doc/?index=2)
+- 如果有什么问题，请查看[联系我们](https://beecloud.cn/about/contact.php)，到BeeCloud开发者群提问
+- 更详细的文档，见源代码的注释以及[官方文档](https://beecloud.cn/doc/)
 - 如果发现了bug，欢迎提交[issue](https://github.com/beecloud/beecloud-android/issues)
 - 如果有新的需求，欢迎提交[issue](https://github.com/beecloud/beecloud-android/issues)
 

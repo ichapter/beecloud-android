@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="cn.beecloud.demo" >
+    package="cn.beecloud.demo" android:versionCode="19" 
+    android:versionName="2.1.3">
 
-    <!-- would be overridden by gradle -->
     <uses-sdk
         android:minSdkVersion="11"
         android:targetSdkVersion="22" />
@@ -13,16 +13,11 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
-    <!-- for Baidu and PayPal pay -->
-    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
-
     <!-- for Baidu pay -->
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.WRITE_SETTINGS" />
     <uses-permission android:name="android.permission.READ_SMS" />
-
-    <!-- for PayPal -->
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
@@ -264,31 +259,6 @@
         </activity>
         <!-- baidu pay end -->
 
-
-        <!-- PayPal start -->
-        <service
-            android:name="com.paypal.android.sdk.payments.PayPalService"
-            android:exported="false" />
-
-        <activity android:name="com.paypal.android.sdk.payments.PaymentActivity" />
-        <activity android:name="com.paypal.android.sdk.payments.LoginActivity" />
-        <activity android:name="com.paypal.android.sdk.payments.PaymentMethodActivity" />
-        <activity android:name="com.paypal.android.sdk.payments.PaymentConfirmActivity" />
-
-        <activity android:name="io.card.payment.CardIOActivity"
-            android:configChanges="keyboardHidden|orientation" />
-        <activity android:name="io.card.payment.DataEntryActivity" />
-
-        <activity
-            android:name="cn.beecloud.BCPayPalPaymentActivity"
-            android:configChanges="orientation|keyboardHidden"
-            android:excludeFromRecents="true"
-            android:launchMode="singleTop"
-            android:screenOrientation="portrait"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar"
-            android:windowSoftInputMode="adjustResize" />
-        <!-- PayPal end -->
-
         <!-- for test mode start -->
         <activity
             android:name="cn.beecloud.BCMockPayActivity"
@@ -320,10 +290,6 @@
         <activity
             android:name=".OrdersEntryActivity"
             android:label="@string/title_activity_orders_entry" >
-        </activity>
-        <activity
-            android:name=".PayPalUnSyncedListActivity"
-            android:label="@string/title_activity_pay_pal_un_synced_list" >
         </activity>
         <activity android:name=".PayViaAuthCodeActivity"
             android:screenOrientation="portrait">

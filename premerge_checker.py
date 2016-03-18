@@ -28,18 +28,10 @@ with open('README.md', encoding = 'utf-8') as f:
 			readme_ver = line[line.find('version-v')+len('version-v')
 				:line.rfind('-blue')]
 
-			continue;
-
-		tmp = line.find(r'sdk\beecloud-')
-		if tmp != -1:
-			readme_jar_ver = line[line.find(r'sdk\beecloud-')+len(r'sdk\beecloud-')
-				:line.rfind('.jar')]
-
-			break;
+			break
 
 
 print("Readme versionCode: " + readme_ver)
-print("Readme jar versionCode: " + readme_jar_ver)
 
 with open('changelog.txt', encoding = 'utf-8') as f:
 	for line in f:
@@ -60,16 +52,7 @@ tmp = glob.glob('sdk/beecloud*.jar')[0]
 sdk_jar_ver = tmp[tmp.find('beecloud-') + len('beecloud-') : tmp.find('.jar')]
 print("sdk jar versionCode: " + sdk_jar_ver)
 
-
-if len(glob.glob('demo_eclipse/libs/beecloud*.jar')) != 1:
-	print('dumy jars!!!')
-	exit(-1)
-
-tmp = glob.glob('demo_eclipse/libs/beecloud*.jar')[0]
-demo_jar_ver = tmp[tmp.find('beecloud-') + len('beecloud-') : tmp.find('.jar')]
-print("eclipse demo jar versionCode: " + demo_jar_ver)
-
-if gradle_ver != beecloud_ver or beecloud_ver != readme_ver or readme_ver != readme_jar_ver or readme_jar_ver != changelog_ver or changelog_ver != sdk_jar_ver or sdk_jar_ver != demo_jar_ver:
+if gradle_ver != beecloud_ver or beecloud_ver != readme_ver or readme_ver != changelog_ver or changelog_ver != sdk_jar_ver:
 	print("inconsistent version code!!!")
 	exit(-1)
 else:
@@ -101,7 +84,7 @@ print('checking host...')
 with open('sdk/src/main/java/cn/beecloud/BCHttpClientUtil.java', encoding = 'utf-8') as f:
 	for line in f:
 		if line.find('https') != -1 and line.find('beecloud') != -1:
-			if line.strip() != r'private static final String[] BEECLOUD_HOSTS = {"https://apibj.beecloud.cn",' and line.strip() != r'"https://apisz.beecloud.cn",' and line.strip() != r'"https://apiqd.beecloud.cn",' and line.strip() != r'"https://apihz.beecloud.cn"':
+			if line.strip() != r'private static final String BEECLOUD_HOST = "https://apidynamic.beecloud.cn";':
 				print("host init error!!!")
 				exit(-3);
 

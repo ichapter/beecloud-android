@@ -15,9 +15,7 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -430,17 +428,15 @@ public class BCPayTest {
         PowerMockito.stub(PowerMockito.method(BCHttpClientUtil.class, "httpPost",
                 String.class, Map.class)).toReturn(syncResp);
 
-        String[] res = pay.syncPayPalPayment("billTitle",
+        BCPayResult res = pay.syncPayPalPayment("billTitle",
                 1111,
                 "billNum123456",
                 "USD",
-                null,
-                BCPay.PAYPAL_PAY_TYPE.LIVE,
                 null);
 
         //System.out.println(res[1]);
-        Assert.assertEquals(BCPayResult.RESULT_SUCCESS, res[0]);
-        Assert.assertEquals("0b1c193c-7aef-484d-985a-e3c7bcdb86b3", res[1]);
+        Assert.assertEquals(BCPayResult.RESULT_SUCCESS, res.getResult());
+        Assert.assertEquals("0b1c193c-7aef-484d-985a-e3c7bcdb86b3", res.getId());
     }
 
     /**
@@ -469,42 +465,10 @@ public class BCPayTest {
 
         String jsonStr = "{\"storeDate\":\"2015-11-20 11:07:35\",\"billTitle\":\"PayPal payment test\",\"billNum\":\"1TF328031A3869241KZHI42I\",\"channel\":\"SANDBOX\",\"currency\":\"USD\",\"optional\":\"{\\\"PayPal key2\\\":\\\"PayPal value2\\\",\\\"PayPal key1\\\":\\\"PayPal value1\\\"}\",\"billTotalFee\":\"1\"}";
 
-        String res[] = pay.syncPayPalPayment(jsonStr, null);
+        BCPayResult res = pay.syncPayPalPayment(jsonStr);
 
-        Assert.assertEquals(BCPayResult.RESULT_SUCCESS, res[0]);
-        Assert.assertEquals("0b1c193c-7aef-484d-985a-e3c7bcdb86b3", res[1]);
-    }
-
-    @Test
-    public void testBatchSyncPayPalPayment() throws Exception {
-        final BCHttpClientUtil.Response tokenResp = new BCHttpClientUtil.Response();
-        tokenResp.code = 200;
-        tokenResp.content = "{\"access_token\":\"mocked-token\"}";
-
-        //mock paypal token
-        PowerMockito.stub(PowerMockito.method(BCHttpClientUtil.class, "getPayPalAccessToken"))
-                .toReturn(tokenResp);
-
-        //mock sync
-        final BCHttpClientUtil.Response syncResp = new BCHttpClientUtil.Response();
-        syncResp.code = 200;
-        syncResp.content = "{\"result_msg\":\"OK\",\"result_code\":0}";
-
-        PowerMockito.stub(PowerMockito.method(BCHttpClientUtil.class, "httpPost",
-                String.class, Map.class)).toReturn(syncResp);
-
-        //mock cache
-        PowerMockito.stub(PowerMockito.method(BCCache.class, "removeSyncedPalPalRecords")).toReturn(null);
-
-        List<String> cached = new ArrayList<String>(2);
-        cached.add("{\"storeDate\":\"2015-11-20 11:07:35\",\"billTitle\":\"PayPal payment test\",\"billNum\":\"1TF328031A3869241KZHI42I\",\"channel\":\"SANDBOX\",\"currency\":\"USD\",\"optional\":\"{\\\"PayPal key2\\\":\\\"PayPal value2\\\",\\\"PayPal key1\\\":\\\"PayPal value1\\\"}\",\"billTotalFee\":\"1\"}");
-        cached.add("{\"storeDate\":\"2015-11-19 11:07:35\",\"billTitle\":\"PayPal payment test2\",\"billNum\":\"2TF328031A3869241KZHI42I\",\"channel\":\"LIVE\",\"currency\":\"USD\",\"billTotalFee\":\"2\"}");
-        PowerMockito.stub(PowerMockito.method(BCCache.class, "getUnSyncedPayPalRecords")).toReturn(cached);
-
-        Map<String, Integer> res = pay.batchSyncPayPalPayment();
-
-        Assert.assertEquals((Integer)2, res.get("cachedNum"));
-        Assert.assertEquals((Integer)2, res.get("syncedNum"));
+        Assert.assertEquals(BCPayResult.RESULT_SUCCESS, res.getResult());
+        Assert.assertEquals("0b1c193c-7aef-484d-985a-e3c7bcdb86b3", res.getId());
     }
 
     /**
