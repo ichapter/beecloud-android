@@ -671,6 +671,3 @@ BCQuery.getInstance().queryOfflineBillStatusAsync(
 
 * BC验签失败：<br/>
 检查一下，是不是设置了测试模式（setSandbox(true)），但是secret填的是app secret
-
-## 代码许可
-The MIT License (MIT).
