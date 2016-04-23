@@ -23,7 +23,7 @@
 
 付款完成或取消之后，会回到客户app中，需要做相应界面展示的更新（比如弹出框告诉用户"支付成功"或"支付失败")。非常不推荐用同步回调的结果来作为最终的支付结果，因为同步回调可能（虽然可能性不大）出现结果不准确的情况，最终支付结果应以下面的异步回调为准。
 
-步骤7：**（在客户服务端）处理异步回调结果（[Webhook](https://beecloud.cn/doc/?index=8)）**
+步骤7：**（在客户服务端）处理异步回调结果（[Webhook](https://beecloud.cn/doc/?index=webhook)）**
  
 付款完成之后，根据客户在BeeCloud后台的设置，BeeCloud会向客户服务端发送一个Webhook请求，里面包括了数字签名，订单号，订单金额等一系列信息。客户需要在服务端依据规则要验证**数字签名是否正确，购买的产品与订单金额是否匹配，这两个验证缺一不可**。验证结束后即可开始走支付完成后的逻辑。
 
@@ -671,34 +671,3 @@ BCQuery.getInstance().queryOfflineBillStatusAsync(
 
 * BC验签失败：<br/>
 检查一下，是不是设置了测试模式（setSandbox(true)），但是secret填的是app secret
-
-## 代码贡献
-我们非常欢迎大家来贡献代码，我们会向贡献者致以最诚挚的敬意。
-
-一般可以通过在Github上提交[Pull Request](https://github.com/beecloud/beecloud-android)来贡献代码。
-
-Pull Request要求
-
-- 代码规范 
-
-- 代码格式化 
-
-- 必须添加测试！ - 如果没有测试（单元测试、集成测试都可以），那么提交的补丁是不会通过的。
-
-- 记得更新文档 - 保证`README.md`以及其他相关文档及时更新，和代码的变更保持一致性。
-
-- 创建feature分支 - 最好不要从你的master分支提交 pull request。
-
-- 一个feature提交一个pull请求 - 如果你的代码变更了多个操作，那就提交多个pull请求吧。
-
-- 清晰的commit历史 - 保证你的pull请求的每次commit操作都是有意义的。如果你开发中需要执行多次的即时commit操作，那么请把它们放到一起再提交pull请求。
-
-## 联系我们
-- 如果有什么问题，请查看[联系我们](https://beecloud.cn/about/contact.php)，到BeeCloud开发者群提问
-- 更详细的文档，见源代码的注释以及[官方文档](https://beecloud.cn/doc/)
-- 如果发现了bug，欢迎提交[issue](https://github.com/beecloud/beecloud-android/issues)
-- 如果有新的需求，欢迎提交[issue](https://github.com/beecloud/beecloud-android/issues)
-
-## 代码许可
-The MIT License (MIT).
-
