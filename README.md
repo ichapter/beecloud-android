@@ -28,20 +28,20 @@
 付款完成之后，根据客户在BeeCloud后台的设置，BeeCloud会向客户服务端发送一个Webhook请求，里面包括了数字签名，订单号，订单金额等一系列信息。客户需要在服务端依据规则要验证**数字签名是否正确，购买的产品与订单金额是否匹配，这两个验证缺一不可**。验证结束后即可开始走支付完成后的逻辑。
 
 ## 安装
-1. 添加依赖<br/>
+1. 添加依赖  
 
 >1. 推荐通过添加`model`的方式（适用于`gradle`，推荐直接使用`Android Studio`）
 引入`sdk model`，在`project`的`settings.gradle`中`include ':sdk'`，并在需要支付的`model`（比如本项目中的`demo`） `build.gradle`中添加依赖`compile project(':sdk')`，需要JDK版本7或以上。
 
->2. 对于需要以`jar`方式引入的情况<br/>
-添加第三方的支付类，在`beecloud-android\demo_eclipse\libs`目录下<br/>
-`gson-2.4.jar`为必须引入的jar，<br/>
-`zxing-3.2.0.jar`为生成二维码必须引入的jar，<br/>
-微信支付需要引入`libammsdk.jar`，<br/>
-支付宝需要引入`alipaysdk.jar`、`alipayutdid.jar`、`alipaysecsdk.jar`，<br/>
-银联需要引入`UPPayAssistEx.jar`，<br/>
-百度钱包支付需要引入`Cashier_SDK-v4.2.0.jar`，<br/>
-最后添加`beecloud android sdk`：`beecloud-2.1.3.jar`
+>2. 对于需要以`jar`方式引入的情况  
+添加第三方的支付类，在`beecloud-android\demo_eclipse\libs`目录下  
+`gson-2.4.jar`为必须引入的jar，  
+`zxing-3.2.0.jar`为生成二维码必须引入的jar，  
+微信支付需要引入`libammsdk.jar`，  
+支付宝需要引入`alipaysdk.jar`、`alipayutdid.jar`、`alipaysecsdk.jar`，  
+银联需要引入`UPPayAssistEx.jar`，  
+百度钱包支付需要引入`Cashier_SDK-v4.2.0.jar`，  
+最后添加`beecloud android sdk`：`beecloud-2.1.4.jar`
 
 2.对于微信支付，需要注意你的`AndroidManifest.xml`中`package`需要和微信平台创建的移动应用`应用包名`保持一致，关于其`应用签名`请参阅[创建微信应用->B.填写平台信息](https://beecloud.cn/doc/payapply/?index=0)
 

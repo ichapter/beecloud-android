@@ -73,6 +73,45 @@ public class ShoppingCartActivity extends Activity {
             msg.what = 2;
             if (result.equals(BCPayResult.RESULT_SUCCESS)) {
                 toastMsg = "用户支付成功";
+
+                //如果是PayPal，手机端支付完成后还需要向BeeCloud服务器发送同步请求，并校验支付结果
+                if (isPayPal) {
+                    //如果是PayPal，detail info里面包含订单的json字符串
+                    final String syncStr = bcPayResult.getDetailInfo();
+                    isPayPal = false;
+                    Log.w(TAG, "start to sync PayPal result to BeeCloud server...");
+
+                    loadingDialog.show();
+                    //由于同步过程中需要向PayPal服务器请求token，请求失败的几率比较高，此处设置了三次循环
+                    BCCache.executorService.execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            int i = 0;
+                            BCPayResult syncResult;
+                            for (; i < 3; i++) {
+                                Log.w(TAG, String.format("sync for %d time(s)", i+1));
+                                syncResult = BCPay.getInstance(ShoppingCartActivity.this).syncPayPalPayment(syncStr);
+
+                                if (syncResult.getResult().equals(BCPayResult.RESULT_SUCCESS)) {
+                                    Log.w(TAG, "sync succ!!!");
+                                    Log.w(TAG, "this bill id can be stored for query by id: " + syncResult.getId());
+                                    break;
+                                } else {
+                                    Log.e(TAG, "sync fail reason: " + syncResult.getErrCode() + " # " +
+                                            syncResult.getErrMsg() + " # " + syncResult.getDetailInfo());
+                                }
+                            }
+
+                            loadingDialog.dismiss();
+
+                            //注意，如果一直失败，你需要将该json串保留起来，下次继续同步，否者在你在BeeCloud控制台看不到这笔订单
+                            if (i == 3) {
+                                Log.e(TAG, "BAD result!!! Sync failed for three times!!!");
+                                Log.w(TAG, "please store the json string to somewhere for later sync: " + syncStr);
+                            }
+                        }
+                    });
+                }
             } else if (result.equals(BCPayResult.RESULT_CANCEL))
                 toastMsg = "用户取消支付";
             else if (result.equals(BCPayResult.RESULT_FAIL)) {
@@ -108,44 +147,6 @@ public class ShoppingCartActivity extends Activity {
 
             mHandler.sendMessage(msg);
 
-            //如果是PayPal，手机端支付完成后还需要向BeeCloud服务器发送同步请求，并校验支付结果
-            if (isPayPal) {
-                //如果是PayPal，detail info里面包含订单的json字符串
-                final String syncStr = bcPayResult.getDetailInfo();
-                isPayPal = false;
-                Log.i(TAG, "start to sync PayPal result to BeeCloud server...");
-
-                loadingDialog.show();
-                //由于同步过程中需要向PayPal服务器请求token，请求失败的几率比较高，此处设置了三次循环
-                BCCache.executorService.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        int i = 0;
-                        BCPayResult syncResult;
-                        for (; i < 3; i++) {
-                            Log.i(TAG, String.format("sync for %d time(s)", i+1));
-                            syncResult = BCPay.getInstance(ShoppingCartActivity.this).syncPayPalPayment(syncStr);
-
-                            if (syncResult.getResult().equals(BCPayResult.RESULT_SUCCESS)) {
-                                Log.i(TAG, "sync succ!!!");
-                                Log.d(TAG, "this bill id can be stored for query by id: " + syncResult.getId());
-                                break;
-                            } else {
-                                Log.e(TAG, "sync fail reason: " + syncResult.getErrCode() + " # " +
-                                        syncResult.getErrMsg() + " # " + syncResult.getDetailInfo());
-                            }
-                        }
-
-                        loadingDialog.dismiss();
-
-                        //注意，如果一直失败，你需要将该json串保留起来，下次继续同步，否者在你在BeeCloud控制台看不到这笔订单
-                        if (i == 3) {
-                            Log.e(TAG, "BAD result!!! Sync failed for three times!!!");
-                            Log.w(TAG, "please store the json string to somewhere for later sync: " + syncStr);
-                        }
-                    }
-                });
-            }
 
             if (bcPayResult.getId() != null) {
                 //你可以把这个id存到你的订单中，下次直接通过这个id查询订单
@@ -210,9 +211,11 @@ public class ShoppingCartActivity extends Activity {
         setContentView(R.layout.activity_shopping_cart);
 
         // 推荐在主Activity或application里的onCreate函数中初始化BeeCloud.
-        BeeCloud.setSandbox(true);
-        BeeCloud.setAppIdAndSecret("c5d1cba1-5e3f-4ba0-941d-9b0a371fe719",
-                "4bfdd244-574d-4bf3-b034-0c751ed34fee");
+        //BeeCloud.setSandbox(true);
+        BeeCloud.setAppIdAndSecret("c37d661d-7e61-49ea-96a5-68c34e83db3b",
+                "c37d661d-7e61-49ea-96a5-68c34e83db3b");
+//        BeeCloud.setAppIdAndSecret("83e72fc0-f028-4a6b-8aea-a9cb63ed4334",
+//                "e5f0a2a4-ca85-485a-a6d0-16e884590bf8");
 
         // 如果用到微信支付，在用到微信支付的Activity的onCreate函数里调用以下函数.
         // 第二个参数需要换成你自己的微信AppID.
@@ -312,7 +315,7 @@ public class ShoppingCartActivity extends Activity {
                         payParam.billTitle = "安卓银联支付测试";
 
                         //支付金额，以分为单位，必须是正整数
-                        payParam.billTotalFee = 1;
+                        payParam.billTotalFee = 10;
 
                         //商户自定义订单号
                         payParam.billNum = BillUtils.genBillNum();

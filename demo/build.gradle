@@ -8,19 +8,40 @@ android {
         applicationId "cn.beecloud.demo"
         minSdkVersion 10
         targetSdkVersion 22
-        versionCode 20
-        versionName "2.2.0"
+        versionCode 21
+        versionName "2.2.1"
     }
-//    compileOptions {
-//        encoding "UTF-8"
-//        sourceCompatibility JavaVersion.VERSION_1_6
-//        targetCompatibility JavaVersion.VERSION_1_6
-//    }
+
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+    }
+
+    packagingOptions {  //if no effects, clean project then rebuild
+        exclude 'lib/arm64-v8a/libcardioDecider.so'
+        exclude 'lib/arm64-v8a/libcardioRecognizer.so'
+        exclude 'lib/arm64-v8a/libcardioRecognizer_tegra2.so'
+        exclude 'lib/arm64-v8a/libopencv_core.so'
+        exclude 'lib/arm64-v8a/libopencv_imgproc.so'
+        exclude 'lib/armeabi/libcardioDecider.so'
+        exclude 'lib/armeabi-v7a/libcardioDecider.so'
+        exclude 'lib/armeabi-v7a/libcardioRecognizer.so'
+        exclude 'lib/armeabi-v7a/libcardioRecognizer_tegra2.so'
+        exclude 'lib/armeabi-v7a/libopencv_core.so'
+        exclude 'lib/armeabi-v7a/libopencv_imgproc.so'
+        exclude 'lib/mips/libcardioDecider.so'
+        exclude 'lib/x86/libcardioDecider.so'
+        exclude 'lib/x86/libcardioRecognizer.so'
+        exclude 'lib/x86/libcardioRecognizer_tegra2.so'
+        exclude 'lib/x86/libopencv_core.so'
+        exclude 'lib/x86/libopencv_imgproc.so'
+        exclude 'lib/x86_64/libcardioDecider.so'
+        exclude 'lib/x86_64/libcardioRecognizer.so'
+        exclude 'lib/x86_64/libcardioRecognizer_tegra2.so'
+        exclude 'lib/x86_64/libopencv_core.so'
+        exclude 'lib/x86_64/libopencv_imgproc.so'
     }
 }
 
