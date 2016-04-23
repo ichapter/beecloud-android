@@ -154,7 +154,7 @@ public class ShoppingCartActivity extends Activity {
                             }
                         });
                 builder.create().show();
-            }
+            } 
             return true;
         }
     });
