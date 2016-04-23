@@ -8,6 +8,6 @@ demo_eclipse/bin/*
 
 *.zip
 *.keystore
-*.apk
+/*.apk
 *.iml
 *.py
