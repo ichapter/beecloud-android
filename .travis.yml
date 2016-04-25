@@ -24,6 +24,12 @@ android:
     - sys-img-armeabi-v7a-android-22
     - sys-img-x86-android-22
 
+before_script:
+    - wget http://services.gradle.org/distributions/gradle-2.12-bin.zip
+    - unzip gradle-2.12-bin.zip
+    - export GRADLE_HOME=$PWD/gradle-2.12
+    - export PATH=$GRADLE_HOME/bin:$PATH
+
 before_install:
   - chmod +x gradlew
   - echo yes | android update sdk --filter extra-android-support --no-ui --force > /dev/null

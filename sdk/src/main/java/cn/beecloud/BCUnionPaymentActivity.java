@@ -26,11 +26,6 @@ public class BCUnionPaymentActivity extends Activity {
     private static final String UN_APK_PACKAGE = "com.unionpay.uppay";
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
-
-    @Override
     public void onStart(){
         super.onStart();
 
@@ -62,6 +57,8 @@ public class BCUnionPaymentActivity extends Activity {
 
                 this.finish();
             }
+        } else {
+            finish();
         }
     }
 
@@ -70,25 +67,29 @@ public class BCUnionPaymentActivity extends Activity {
      */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (data == null) {
-            return;
-        }
-
         String result = null;
         int errCode = -99;
         String errMsg = null;
         String detailInfo = "银联支付:";
-        /*
-         * 支付控件返回字符串:success、fail、cancel 分别代表支付成功，支付失败，支付取消
-         */
-        String str = data.getExtras().getString("pay_result");
-        if (str == null) {
+
+        //银联插件内部升级会出现data为null的情况
+        if (data == null) {
             result = BCPayResult.RESULT_FAIL;
             errCode = BCPayResult.APP_INTERNAL_THIRD_CHANNEL_ERR_CODE;
             errMsg = BCPayResult.FAIL_ERR_FROM_CHANNEL;
-            detailInfo += "invalid pay_result";
+            detailInfo += "invalid pay result";
         } else {
-            if (str.equalsIgnoreCase("success")) {
+            /*
+             * 支付控件返回字符串:success、fail、cancel 分别代表支付成功，支付失败，支付取消
+             */
+            String str = data.getExtras().getString("pay_result");
+
+            if (str == null) {
+                result = BCPayResult.RESULT_FAIL;
+                errCode = BCPayResult.APP_INTERNAL_THIRD_CHANNEL_ERR_CODE;
+                errMsg = BCPayResult.FAIL_ERR_FROM_CHANNEL;
+                detailInfo += "invalid pay result";
+            } else if (str.equalsIgnoreCase("success")) {
                 result = BCPayResult.RESULT_SUCCESS;
                 errCode = BCPayResult.APP_PAY_SUCC_CODE;
                 errMsg = BCPayResult.RESULT_SUCCESS;
