@@ -89,23 +89,21 @@ public class BCUnionPaymentActivity extends Activity {
                 errCode = BCPayResult.APP_INTERNAL_THIRD_CHANNEL_ERR_CODE;
                 errMsg = BCPayResult.FAIL_ERR_FROM_CHANNEL;
                 detailInfo += "invalid pay result";
-            } else {
-                if (str.equalsIgnoreCase("success")) {
-                    result = BCPayResult.RESULT_SUCCESS;
-                    errCode = BCPayResult.APP_PAY_SUCC_CODE;
-                    errMsg = BCPayResult.RESULT_SUCCESS;
-                    detailInfo += "支付成功！";
-                } else if (str.equalsIgnoreCase("fail")) {
-                    result = BCPayResult.RESULT_FAIL;
-                    errCode = BCPayResult.APP_INTERNAL_THIRD_CHANNEL_ERR_CODE;
-                    errMsg = BCPayResult.RESULT_FAIL;
-                    detailInfo += "支付失败！";
-                } else if (str.equalsIgnoreCase("cancel")) {
-                    result = BCPayResult.RESULT_CANCEL;
-                    errCode = BCPayResult.APP_PAY_CANCEL_CODE;
-                    errMsg = BCPayResult.RESULT_CANCEL;
-                    detailInfo += "用户取消了支付";
-                }
+            } else if (str.equalsIgnoreCase("success")) {
+                result = BCPayResult.RESULT_SUCCESS;
+                errCode = BCPayResult.APP_PAY_SUCC_CODE;
+                errMsg = BCPayResult.RESULT_SUCCESS;
+                detailInfo += "支付成功！";
+            } else if (str.equalsIgnoreCase("fail")) {
+                result = BCPayResult.RESULT_FAIL;
+                errCode = BCPayResult.APP_INTERNAL_THIRD_CHANNEL_ERR_CODE;
+                errMsg = BCPayResult.RESULT_FAIL;
+                detailInfo += "支付失败！";
+            } else if (str.equalsIgnoreCase("cancel")) {
+                result = BCPayResult.RESULT_CANCEL;
+                errCode = BCPayResult.APP_PAY_CANCEL_CODE;
+                errMsg = BCPayResult.RESULT_CANCEL;
+                detailInfo += "用户取消了支付";
             }
         }
 
