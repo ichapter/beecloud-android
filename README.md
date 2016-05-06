@@ -38,7 +38,6 @@ SDK支持以下支付渠道:
 
 ## 导入SDK
 1. 添加依赖  
-
 >1. 推荐通过添加`model`的方式（适用于`gradle`，推荐直接使用`Android Studio`）
 引入`sdk model`，在`project`的`settings.gradle`中`include ':sdk'`，并在需要支付的`model`（比如本项目中的`demo`） `build.gradle`中添加依赖`compile project(':sdk')`，需要JDK版本7或以上。
 
@@ -66,7 +65,7 @@ SDK支持以下支付渠道:
 > 具体使用请参考项目中的`demo`
 
 ### 1.初始化支付参数
-请参考`demo`中的`ShoppingCartActivity.java`
+请参考`demo`中的`ShoppingCartActivity.java`  
 >1. 在主activity或者application的onCreate函数中初始化BeeCloud账户中的AppID和secret，并设置是否开启测试模式（如果不设置默认不开启）；注意：如果是测试模式，secret应该填Test Secret，如果是上线版本，应该填App Secret，例如
 ```java
 //开启测试模式
@@ -94,7 +93,7 @@ BCPay.initPayPal(
     Boolean.FALSE
     );
 ```
-
+  
 ### 2. 在`AndroidManifest.xml`中添加`permission`
 ```java
 <!-- for all -->
