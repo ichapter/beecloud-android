@@ -4,32 +4,41 @@
 
 ## 简介
 
-本项目的官方GitHub地址是 [https://github.com/beecloud/beecloud-android](https://github.com/beecloud/beecloud-android)
+本项目的官方GitHub地址是 [https://github.com/beecloud/beecloud-android](https://github.com/beecloud/beecloud-android)  
 
-本SDK是根据[BeeCloud Rest API](https://github.com/beecloud/beecloud-rest-api) 开发的 Android SDK。目前已经包含微信支付、支付宝支付、银联在线支付、百度钱包支付、PayPal支付和生成二维码方式支付，以及支付订单和退款订单的查询功能，可以作为调用BeeCloud Rest API的示例或者直接用于生产。
+SDK支持以下支付渠道: 
+ 
+ * 微信APP
+ * 支付宝APP
+ * 银联在线APP
+ * PayPal
+ * 百度钱包   
+
+包含支付订单以及退款订单的查询功能。  
+还提供了线下收款功能(包括微信扫码、微信刷卡、支付宝扫码、支付宝条形码)，订单状态的查询以及订单撤销。 
 
 ## 流程
 
 下图为整个支付的流程:
-![pic](http://7xavqo.com1.z0.glb.clouddn.com/UML.png)
+![pic](http://7xavqo.com1.z0.glb.clouddn.com/UML01.png)
 
-其中需要开发者开发的只有：
 
-步骤1：**（在App端）发送支付要素**
+
+步骤①：**（在App端）发送订单信息**
 
 做完这一步之后就会跳到相应的支付页面（如微信app中），让用户继续后续的支付步骤
 
-步骤5：**（在App端）处理同步回调结果**
+步骤②：**（在App端）处理同步回调结果**
 
 付款完成或取消之后，会回到客户app中，需要做相应界面展示的更新（比如弹出框告诉用户"支付成功"或"支付失败")。非常不推荐用同步回调的结果来作为最终的支付结果，因为同步回调可能（虽然可能性不大）出现结果不准确的情况，最终支付结果应以下面的异步回调为准。
 
-步骤7：**（在客户服务端）处理异步回调结果（[Webhook](https://beecloud.cn/doc/?index=webhook)）**
+步骤③：**（在客户服务端）处理异步回调结果（[Webhook](https://beecloud.cn/doc/?index=webhook)）**
  
-付款完成之后，根据客户在BeeCloud后台的设置，BeeCloud会向客户服务端发送一个Webhook请求，里面包括了数字签名，订单号，订单金额等一系列信息。客户需要在服务端依据规则要验证**数字签名是否正确，购买的产品与订单金额是否匹配，这两个验证缺一不可**。验证结束后即可开始走支付完成后的逻辑。
+付款完成之后，根据客户在BeeCloud后台的设置，BeeCloud会向客户服务端发送一个Webhook请求，里面包括了数字签名，订单号，订单金额等一系列信息。客户需要在服务端依据规则要验证**数字签名是否正确，购买的产品与订单金额是否匹配，这两个验证缺一不可**。验证结束后即可开始走支付完成后的逻辑。  
 
-## 安装
+## 导入SDK
 1. 添加依赖  
-
+  
 >1. 推荐通过添加`model`的方式（适用于`gradle`，推荐直接使用`Android Studio`）
 引入`sdk model`，在`project`的`settings.gradle`中`include ':sdk'`，并在需要支付的`model`（比如本项目中的`demo`） `build.gradle`中添加依赖`compile project(':sdk')`，需要JDK版本7或以上。
 
@@ -43,7 +52,7 @@
 百度钱包支付需要引入`Cashier_SDK-v4.2.0.jar`，  
 最后添加`beecloud android sdk`：`beecloud-2.1.4.jar`
 
-2.对于微信支付，需要注意你的`AndroidManifest.xml`中`package`需要和微信平台创建的移动应用`应用包名`保持一致，关于其`应用签名`请参阅[创建微信应用->B.填写平台信息](https://beecloud.cn/doc/payapply/?index=0)
+2.对于微信支付，需要注意你的`AndroidManifest.xml`中`package`需要和微信平台创建的移动应用`应用包名`保持一致，否则会遭遇[`一般错误`](http://help.beecloud.cn/hc/kb/article/157111/)  
 
 3.对于银联支付需要将银联插件`beecloud-android\demo\src\main\assets\UPPayPluginEx.apk`引入你的工程`assets`目录下
 
@@ -53,30 +62,25 @@
   
 5.对于需要使用PayPal的用户，由于PayPal官方不再提供单独的jar文件，请通过添加model的方式引入依赖。
 
-## 注册
-1. 注册开发者：猛击[这里](http://www.beecloud.cn/register)注册成为BeeCloud开发者。  
-2. 注册应用：使用注册的账号登陆[控制台](http://www.beecloud.cn/dashboard/)后，点击"+创建App"创建新应用，并配置支付参数。  
-
 ## 使用方法
->具体使用请参考项目中的`demo`
+> 具体使用请参考项目中的`demo`
 
 ### 1.初始化支付参数
-请参考`demo`中的`ShoppingCartActivity.java`
->1. 在主activity或者application的onCreate函数中初始化BeeCloud账户中的AppID和secret，并设置是否开启测试模式（如果不设置默认不开启）；注意：如果是测试模式，secret应该填Test Secret，如果是上线版本，应该填App Secret，例如
+请参考`demo`中的`ShoppingCartActivity.java`  
+  
+>1 在主activity或者application的onCreate函数中初始化BeeCloud账户中的AppID和secret，并设置是否开启测试模式（如果不设置默认不开启）；注意：如果是测试模式，secret应该填Test Secret，如果是上线版本，应该填App Secret，例如
 ```java
 //开启测试模式
 BeeCloud.setSandbox(true);
 //此处第二个参数是控制台的test secret
 BeeCloud.setAppIdAndSecret("c5d1cba1-5e3f-4ba0-941d-9b0a371fe719",
         "4bfdd244-574d-4bf3-b034-0c751ed34fee");
-```
-<br/>
->2. 如果用到微信支付，在用到微信支付的Activity的onCreate函数里调用以下函数，第二个参数需要换成你自己的微信AppID，例如
+```    
+>2 如果用到微信支付，在用到微信支付的Activity的onCreate函数里调用以下函数，第二个参数需要换成你自己的微信AppID，例如
 ```java
 BCPay.initWechatPay(ShoppingCartActivity.this, "wxf1aa465362b4c8f1");
-```
-<br/>
->3. 如果用到PayPal，在用到PayPal的Activity的onCreate函数里调用函数，例如
+```    
+>3 如果用到PayPal，在用到PayPal的Activity的onCreate函数里调用函数，例如
 ```java
 BCPay.initPayPal(
     //在PayPal官网申请的APP Client ID
@@ -89,7 +93,7 @@ BCPay.initPayPal(
     Boolean.FALSE
     );
 ```
-
+  
 ### 2. 在`AndroidManifest.xml`中添加`permission`
 ```java
 <!-- for all -->
@@ -165,25 +169,25 @@ BCPay.initPayPal(
 
 **原型：** 
  
-通过`BCPay`的实例，以`reqWXPaymentAsync`方法发起微信支付请求。 <br/>
-通过`BCPay`的实例，以`reqAliPaymentAsync`方法发起支付宝支付请求。<br/>
-通过`BCPay`的实例，以`reqUnionPaymentAsync`方法发起银联支付请求。<br/>
-通过`BCPay`的实例，以`reqBaiduPaymentAsync`方法发起百度钱包支付请求。<br/>
-通过`BCPay`的实例，以`reqPayPalPaymentAsync`方法发起PayPal支付请求。<br/>
+通过`BCPay`的实例，以`reqWXPaymentAsync`方法发起微信支付请求。  
+通过`BCPay`的实例，以`reqAliPaymentAsync`方法发起支付宝支付请求。  
+通过`BCPay`的实例，以`reqUnionPaymentAsync`方法发起银联支付请求。  
+通过`BCPay`的实例，以`reqBaiduPaymentAsync`方法发起百度钱包支付请求。  
+通过`BCPay`的实例，以`reqPayPalPaymentAsync`方法发起PayPal支付请求。  
 
 参数依次为
-> billTitle       商品描述, 32个字节内, 汉字以2个字节计<br/>
-> billTotalFee    支付金额，以分为单位，必须是正整数<br/>
-> billNum         商户自定义订单号，PayPal不需要该参数<br/>
-> optional        为扩展参数，可以传入任意数量的key/value对来补充对业务逻辑<br/>
+> billTitle       商品描述, 32个字节内, 汉字以2个字节计  
+> billTotalFee    支付金额，以分为单位，必须是正整数  
+> billNum         商户自定义订单号，PayPal不需要该参数  
+> optional        为扩展参数，可以传入任意数量的key/value对来补充对业务逻辑  
 > callback        支付完成后的回调入口
 
-或者，通过`BCPay`的实例，以`reqPaymentAsync`方法发起所有支持的支付请求，该方法的调用请参考demo中百度钱包的支付调用，BCPay.PayParams参数请参阅[API](https://beecloud.cn/doc/api/beecloud-android/cn/beecloud/BCPay.PayParams.html)。<br/>
+或者，通过`BCPay`的实例，以`reqPaymentAsync`方法发起所有支持的支付请求，该方法的调用请参考demo中百度钱包的支付调用，BCPay.PayParams参数请参阅[API](https://beecloud.cn/doc/api/beecloud-android/cn/beecloud/BCPay.PayParams.html)。  
 参数依次为
-> payParam        BCPay.PayParams类型<br/>
+> payParam        BCPay.PayParams类型  
 > callback        支付完成后的回调入口
 
-在回调函数中将`BCResult`转化成`BCPayResult`之后做后续处理<br/>
+在回调函数中将`BCResult`转化成`BCPayResult`之后做后续处理  
 **调用：（以微信为例）**
 
 ```java
@@ -193,41 +197,23 @@ BCCallback bcCallback = new BCCallback() {
     public void done(final BCResult bcResult) {
         //此处根据业务需要处理支付结果
         final BCPayResult bcPayResult = (BCPayResult)bcResult;
-
-        ShoppingCartActivity.this.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-            	//对于JRE6的用户请参考demo中使用if else判断
-                switch (bcPayResult.getResult()) {
-                    case BCPayResult.RESULT_SUCCESS:
-                        Toast.makeText(ShoppingCartActivity.this, "用户支付成功", Toast.LENGTH_LONG).show();
-                        break;
-                    case BCPayResult.RESULT_CANCEL:
-                        Toast.makeText(ShoppingCartActivity.this, "用户取消支付", Toast.LENGTH_LONG).show();
-                        break;
-                    case BCPayResult.RESULT_FAIL:
-                        Toast.makeText(ShoppingCartActivity.this, "支付失败, 原因: " + bcPayResult.getErrMsg()
-                                + ", " + bcPayResult.getDetailInfo(), Toast.LENGTH_LONG).show();
-                }
-                
-                if (bcPayResult.getId() != null) {
-                    //你可以把这个id存到你的订单中，下次直接通过这个id查询订单
-                    Log.w(TAG, "bill id retrieved : " + bcPayResult.getId());
-
-                    //根据ID查询，详细请查看demo
-                    getBillInfoByID(bcPayResult.getId());
-                }
-            }
-        });
+        
+        switch (bcPayResult.getResult()) {
+            case BCPayResult.RESULT_SUCCESS:
+                //用户支付成功
+                break;
+            case BCPayResult.RESULT_CANCEL:
+                //用户取消支付"
+                break;
+            case BCPayResult.RESULT_FAIL:
+                //支付失败
+        }
     }
 };
 
 //调用支付接口
 Map<String, String> mapOptional = new HashMap<>();
-String optionalKey = "testkey1";
-String optionalValue = "测试value值1";
-
-mapOptional.put(optionalKey, optionalValue);
+mapOptional.put("testkey1", "测试value值1");
 
 //发起支付
 BCPay.getInstance(ShoppingCartActivity.this).reqWXPaymentAsync(
@@ -240,77 +226,66 @@ BCPay.getInstance(ShoppingCartActivity.this).reqWXPaymentAsync(
 ##### 对于PayPal支付的补充说明
 PayPal回调返回的成功表示手机支付已经完成，但是订单还没有同步到BeeCloud服务器，由于同步过程中sdk需要先向PayPal服务器请求token，该请求过程失败几率相对比较大，所以可能需要多次请求同步，如果依然失败，请保留订单数据用于下次同步，同步接口为`syncPayPalPayment`，例如：
 ```java
-//如果是PayPal，手机端支付完成后还需要向BeeCloud服务器发送同步请求，并校验支付结果
-if (isPayPal) {
-    //如果是PayPal，detail info里面包含订单的json字符串
-    final String syncStr = bcPayResult.getDetailInfo();
-    isPayPal = false;
-    Log.i(TAG, "start to sync PayPal result to BeeCloud server...");
+//如果是PayPal，detail info里面包含订单的json字符串
+final String syncStr = bcPayResult.getDetailInfo();
 
-    loadingDialog.show();
-    //由于同步过程中需要向PayPal服务器请求token，请求失败的几率比较高，此处设置了三次循环
-    BCCache.executorService.execute(new Runnable() {
-        @Override
-        public void run() {
-            int i = 0;
-            BCPayResult syncResult;
-            for (; i < 3; i++) {
-                Log.i(TAG, String.format("sync for %d time(s)", i+1));
-                syncResult = BCPay.getInstance(ShoppingCartActivity.this).syncPayPalPayment(syncStr);
+BCCache.executorService.execute(new Runnable() {
+    @Override
+    public void run() {
+        BCPayResult syncResult;
+        int i = 0;
+        //由于同步过程中需要向PayPal服务器请求token，请求失败的几率比较高，此处设置了三次循环
+        for (; i < 3; i++) {
+            syncResult = BCPay.getInstance(ShoppingCartActivity.this).syncPayPalPayment(syncStr);
 
-                if (syncResult.getResult().equals(BCPayResult.RESULT_SUCCESS)) {
-                    Log.i(TAG, "sync succ!!!");
-                    Log.d(TAG, "this bill id can be stored for query by id: " + syncResult.getId());
-                    break;
-                } else {
-                    Log.e(TAG, "sync fail reason: " + syncResult.getDetailInfo());
-                }
-            }
-
-            loadingDialog.dismiss();
-
-            //注意，如果一直失败，你需要将该json串保留起来，下次继续同步，否者在你在BeeCloud控制台看不到这笔订单
-            if (i == 3) {
-                Log.e(TAG, "BAD result!!! Sync failed for three times!!!");
-                Log.w(TAG, "please store the json string to somewhere for later sync: " + syncStr);
+            if (syncResult.getResult().equals(BCPayResult.RESULT_SUCCESS)) {
+                //sync succ
+                break;
+            } else {
+                //sync fail reason: syncResult.getDetailInfo());
             }
         }
-    });
-}
+
+        //注意，如果一直失败，你需要将该json串保留起来，下次继续同步，否者在你在BeeCloud控制台看不到这笔订单
+        if (i == 3) {
+            //please store the json string to somewhere for later sync: syncStr
+        }
+    }
+});
 ```
 
 ### 5.线下支付
-请查看`doc`中的`API`，线下支付类`BCOfflinePay`，参照`demo`中`QRCodeEntryActivity`和其关联的activity；一般用于线下门店通过出示二维码由用户扫描付款，或者通过用户出示的付款码收款。<br/><br/>
+请查看`doc`中的`API`，线下支付类`BCOfflinePay`，参照`demo`中`QRCodeEntryActivity`和其关联的activity；一般用于线下门店通过出示二维码由用户扫描付款，或者通过用户出示的付款码收款。  
 线下支付基本流程：
-> 1 通过二维码或者付款码发起支付；<br/>
-> 2 支付结束后调用查询接口确认`BCQuery.getInstance().queryOfflineBillStatusAsync`,请参考查询部分说明。<br/>
+> 1 通过二维码或者付款码发起支付；  
+> 2 支付结束后调用查询接口确认`BCQuery.getInstance().queryOfflineBillStatusAsync`,请参考查询部分说明。  
 第二步必不可少。
 
 **原型：** 
  
-通过`BCOfflinePay`的实例，以`reqQRCodeAsync`方法请求生成支付二维码。 <br/>
-通过`BCOfflinePay`的实例，以`reqOfflinePayAsync`方法通过获取到的付款码发起收款。<br/>
+通过`BCOfflinePay`的实例，以`reqQRCodeAsync`方法请求生成支付二维码。   
+通过`BCOfflinePay`的实例，以`reqOfflinePayAsync`方法通过获取到的付款码发起收款。  
 
 公用参数依次为
-> channelType     BCChannelTypes类型，二维码支持WX_NATIVE，ALI_OFFLINE_QRCODE，扫码支付支持WX_SCAN, ALI_SCAN<br/>
-> billTitle       商品描述, 32个字节内, 汉字以2个字节计<br/>
-> billTotalFee    支付金额，以分为单位，必须是正整数<br/>
-> billNum         商户自定义订单号<br/>
-> optional        为扩展参数，可以传入任意数量的key/value对来补充对业务逻辑<br/>
+> channelType     BCChannelTypes类型，二维码支持WX_NATIVE，ALI_OFFLINE_QRCODE，扫码支付支持WX_SCAN, ALI_SCAN  
+> billTitle       商品描述, 32个字节内, 汉字以2个字节计  
+> billTotalFee    支付金额，以分为单位，必须是正整数  
+> billNum         商户自定义订单号  
+> optional        为扩展参数，可以传入任意数量的key/value对来补充对业务逻辑  
 > callback        支付完成后的回调入口
 
 请求生成支付二维码的额外参数
 > genQRCode       是否生成QRCode Bitmap
->>如果为false，请自行根据getQrCodeRawContent返回的URL，使用BCPay.generateBitmap方法生成支付二维码，你也可以使用自己熟悉的二维码生成工具
+> 如果为false，请自行根据getQrCodeRawContent返回的URL，使用BCPay.generateBitmap方法生成支付二维码，你也可以使用自己熟悉的二维码生成工具
 
 > qrCodeWidth     如果生成二维码(genQRCode为true), QRCode的宽度(以px为单位), null则使用默认参数360px
 
 请求通过获取到的付款码发起收款的额外参数
-> authCode        用户出示的收款码<br/>
-> terminalId      机具终端编号，支付宝扫码(ALI_SCAN)的选填参数<br/>
+> authCode        用户出示的收款码  
+> terminalId      机具终端编号，支付宝扫码(ALI_SCAN)的选填参数  
 > storeId         商户门店编号，支付宝扫码(ALI_SCAN)的选填参数
 
-对于生成二维码的请求，在回调函数中将`BCResult`转化成`BCQRCodeResult`之后做后续处理<br/>
+对于生成二维码的请求，在回调函数中将`BCResult`转化成`BCQRCodeResult`之后做后续处理  
 **调用：**
 ```java
 BCOfflinePay.getInstance().reqQRCodeAsync(
@@ -335,16 +310,13 @@ BCOfflinePay.getInstance().reqQRCodeAsync(
                     //否则通过 bcqrCodeResult.getQrCodeRawContent() 获取二维码的内容，自己去生成对应的二维码
 
                 } else {
-                    errMsg = "err code:" + bcqrCodeResult.getResultCode() +
-                            "; err msg: " + bcqrCodeResult.getResultMsg() +
-                            "; err detail: " + bcqrCodeResult.getErrDetail();
-                    //work with err msg
+                    //deal with err msg
                 }
             }
         });
 ```
 
-对于通过用户出示的付款码收款，在回调函数中将`BCResult`转化成`BCPayResult`之后做后续处理<br/>
+对于通过用户出示的付款码收款，在回调函数中将`BCResult`转化成`BCPayResult`之后做后续处理  
 **调用：**
 ```java
 BCOfflinePay.getInstance().reqOfflinePayAsync(
@@ -356,39 +328,22 @@ BCOfflinePay.getInstance().reqOfflinePayAsync(
         authCode,           		//付款码
         "fake-terminalId",  		//若机具商接入terminalId(机具终端编号)必填
         null,               		//若系统商接入，storeId(商户门店编号)必填
-        new BCCallback() {     	//回调入口
-            @Override
-            public void done(BCResult bcResult) {
-
-                final BCPayResult payResult = (BCPayResult) bcResult;
-
-                //RESULT_SUCCESS表示请求成功，任然需要查询支付结果
-                if (payResult.getResult().equals(BCPayResult.RESULT_SUCCESS)) {
-                	//TODO
-                } else {
-
-                    errMsg = "支付失败，请重试；错误信息：" +
-                            "err code:" + payResult.getResult() +
-                            "; err msg: " + payResult.getErrMsg() +
-                            "; err detail: " + payResult.getDetailInfo();
-                }
-            }
-        });
+        new BCCallback(){...});
 ```
 
 * **关于订单的撤销**
-<br/>
-支持WX_SCAN, ALI_OFFLINE_QRCODE, ALI_SCAN <br/>
+  
+支持WX_SCAN, ALI_OFFLINE_QRCODE, ALI_SCAN   
 订单撤销后，用户将不能继续支付，这和退款是不同的操作，具体请参考`GenQRCodeActivity`
 ```java
 BCOfflinePay.getInstance().reqRevertBillAsync(
     channelType,
     billNum,        //需要撤销的订单号
-    callback)
+    new BCCallback(){...})
 ```
 
 * **关于支付宝内嵌二维码**
-<br/>
+  
 支付宝内嵌二维码属于线上产品，支付结果会及时反馈，并不需要额外的查询操作，具体可以参考`QRCodeEntryActivity`和`ALIQRCodeActivity`，注意需要通过`BCPay`调用
 ```java
 BCPay.getInstance(QRCodeEntryActivity.this).reqAliInlineQRCodeAsync(
@@ -398,15 +353,15 @@ BCPay.getInstance(QRCodeEntryActivity.this).reqAliInlineQRCodeAsync(
         mapOptional,                    //扩展参数
         "https://beecloud.cn/",  		//returnUrl，支付成功之后的返回url
         "1",                          	//qrPayMode，二维码类型
-        callback);
+        new BCCallback(){...});
 ```
 请求生成支付宝内嵌支付二维码的特有参数说明
-> returnUrl       支付成功后的同步跳转页面, 必填<br/>
+> returnUrl       支付成功后的同步跳转页面, 必填  
 > qrPayMode       支付宝内嵌二维码类型
->>>可选项<br/>
-   "0": 订单码-简约前置模式, 对应 iframe 宽度不能小于 600px, 高度不能小于 300px<br/>
-   "1": 订单码-前置模式, 对应 iframe 宽度不能小于 300px, 高度不能小于 600px<br/>
-   "3": 订单码-迷你前置模式, 对应 iframe 宽度不能小于 75px, 高度不能小于 75px<br/>
+>>>可选项  
+   "0": 订单码-简约前置模式, 对应 iframe 宽度不能小于 600px, 高度不能小于 300px  
+   "1": 订单码-前置模式, 对应 iframe 宽度不能小于 300px, 高度不能小于 600px  
+   "3": 订单码-迷你前置模式, 对应 iframe 宽度不能小于 75px, 高度不能小于 75px  
    
 ### 6.查询
 
@@ -430,23 +385,11 @@ final BCCallback bcCallback = new BCCallback() {
         final BCQueryBillsResult bcQueryResult = (BCQueryBillsResult) bcResult;
 
         //resultCode为0表示请求成功
-        //count包含返回的订单个数
         if (bcQueryResult.getResultCode() == 0) {
-
 			//订单列表
 	        bills = bcQueryResult.getBills();
-            Log.i(BillListActivity.TAG, "bill count: " + bcQueryResult.getCount());
         } else {
-            bills = null;
-            BillListActivity.this.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    //错误信息
-                    Toast.makeText(BillListActivity.this, "err code:" + bcQueryResult.getResultCode() +
-                            "; err msg: " + bcQueryResult.getResultMsg() +
-                            "; err detail: " + bcQueryResult.getErrDetail(), Toast.LENGTH_LONG).show();
-                }
-            });
+            //deal with err msg
         }
     }
 };
@@ -470,7 +413,7 @@ BCQuery.getInstance().queryBillsAsync(
 
 通过构造`BCQuery`的实例，使用`queryRefundsAsync`方法发起退款查询，`channel`指代何种支付方式，为`BCReqParams.BCChannelTypes.ALL`时则查询所有的支付渠道退款订单；在回调函数中将`BCResult`转化成`BCQueryRefundsResult`之后做后续处理
 
-**调用：**<br/>
+**调用：**  
 同上，首先初始化回调入口BCCallback
 ```java
 BCQuery.getInstance().queryRefundsAsync(
@@ -481,7 +424,7 @@ BCQuery.getInstance().queryRefundsAsync(
     endTime.getTime(),                      //退款订单完成时间
     1,                                      //跳过满足条件的前1条数据
     15,                                     //返回满足条件的15条数据
-    bcCallback);
+    new BCCallback(){...});
 ```
 
 * **查询订单数目**
@@ -492,7 +435,7 @@ BCQuery.getInstance().queryRefundsAsync(
 
 通过构造`BCQuery`的实例，使用`queryBillsCountAsync`方法发起支付订单数目查询，使用`queryRefundsCountAsync`方法发起退款订单数目查询；在回调函数中将`BCResult`转化成`BCQueryCountResult`之后做后续处理
 
-**调用：**<br/>
+**调用：**  
 以查询支付订单数目为例
 ```java
 BCQuery.QueryParams params = new BCQuery.QueryParams();
@@ -513,18 +456,7 @@ params.startTime = startTime.getTime();
 //限制结束时间
 params.endTime = endTime.getTime();
 
-BCQuery.getInstance().queryBillsCountAsync(params, new BCCallback() {
-    @Override
-    public void done(BCResult result) {
-        
-        final BCQueryCountResult countResult = (BCQueryCountResult) result;
-
-        if (countResult.getResultCode() == 0) {
-            //TODO with
-            countResult.getCount();
-        }
-    }
-});
+BCQuery.getInstance().queryBillsCountAsync(params, new BCCallback(){...});
 ```
 
 * **查询订单退款状态**
@@ -535,13 +467,13 @@ BCQuery.getInstance().queryBillsCountAsync(params, new BCCallback() {
 
 通过构造`BCQuery`的实例，使用`queryRefundStatusAsync`方法发起支付查询，该方法所有参数都必填，`channel`指代何种支付方式，目前由于第三方API的限制仅支持微信、易宝、快钱和百度；在回调函数中将`BCResult`转化成`BCRefundStatus`之后做后续处理
 
-**调用：**<br/>
+**调用：**  
 同上，首先初始化回调入口BCCallback
 ```java
 BCQuery.getInstance().queryRefundStatusAsync(
     BCReqParams.BCChannelTypes.WX,     //目前仅支持WX、YEE、KUAIQIAN、BD
     "20150520refund001",                   //退款单号
-    bcCallback);                           //回调入口
+    new BCCallback(){...});                           //回调入口
 ```
 
 * **根据ID查询订单**
@@ -550,10 +482,10 @@ BCQuery.getInstance().queryRefundStatusAsync(
 
 **原型：**
 
-通过`BCQuery`的实例，以`queryBillByIDAsync`方法发起支付订单查询，查询结果转化成`BCQueryBillResult`做后续处理，请参照`demo`中`ShoppingCartActivity`。 <br/>
-通过`BCQuery`的实例，以`queryRefundByIDAsync`方法发起退款订单查询，查询结果转化成`BCQueryRefundResult`做后续处理，请参照`demo`中`RefundOrdersActivity`。<br/>
+通过`BCQuery`的实例，以`queryBillByIDAsync`方法发起支付订单查询，查询结果转化成`BCQueryBillResult`做后续处理，请参照`demo`中`ShoppingCartActivity`。  
+通过`BCQuery`的实例，以`queryRefundByIDAsync`方法发起退款订单查询，查询结果转化成`BCQueryRefundResult`做后续处理，请参照`demo`中`RefundOrdersActivity`。  
 
-**调用：**<br/>
+**调用：**  
 同上，首先初始化回调入口BCCallback
 ```java
 BCQuery.getInstance().queryBillByIDAsync(
@@ -567,9 +499,9 @@ BCQuery.getInstance().queryBillByIDAsync(
 
 **原型：**
 
-通过`BCQuery`的实例，以`queryOfflineBillStatusAsync`方法发起支付订单查询，查询结果转化成`BCBillStatus`做后续处理，请参照`demo`中`ShoppingCartActivity`。 <br/>
+通过`BCQuery`的实例，以`queryOfflineBillStatusAsync`方法发起支付订单查询，查询结果转化成`BCBillStatus`做后续处理，请参照`demo`中`ShoppingCartActivity`。   
 
-**调用：**<br/>
+**调用：**  
 同上，首先初始化回调入口BCCallback
 ```java
 BCQuery.getInstance().queryOfflineBillStatusAsync(
@@ -578,17 +510,13 @@ BCQuery.getInstance().queryOfflineBillStatusAsync(
         new BCCallback() {
             @Override
             public void done(BCResult result) {
-
                 BCBillStatus billStatus = (BCBillStatus) result;
-
                 //表示支付成功
                 if (billStatus.getResultCode() == 0 &&
                         billStatus.getPayResult()) {
                     //TODO
                 } else {
-                    errMsg = "支付失败：" + billStatus.getResultCode() + " # " +
-                                    billStatus.getResultMsg() + " # " +
-                                    billStatus.getErrDetail();
+                    //deal with err msg
                 }
             }
         }
@@ -655,19 +583,4 @@ BCQuery.getInstance().queryOfflineBillStatusAsync(
 ```
 
 ## 常见问题
-* 微信支付返回`一般错误`，可能的原因：签名错误、未注册APPID、项目设置APPID不正确、注册的APPID与设置的不匹配、其他异常等，请按如下方法依次排查<br/>
-
->1. 项目包名与在微信开放平台填写的包名是否一致
->2. 项目签名与微信开放平台填写的应用签名是否一致；获取项目签名的方法：到微信官网下载[签名工具](https://open.weixin.qq.com/zh_CN/htmledition/res/dev/download/sdk/Gen_Signature_Android.apk)，安装到手机后按提示操作
->3. 订单流水号是否包含横杠`-`，如果有请去除
->4. 请尝试清除微信数据（设置->应用程序管理->找到微信，点击进入应用程序信息-清除数据），或者删除微信重新安装再试
->5. 如果所有检查没问题，尝试换一个手机测试，如果测试没问题，该错误可在正式发布后消除，而不需要用户清除微信数据
-
-* demo中支付宝无法支付，提示缺少参数类似错误信息：  
-由于支付宝对企业账号监控严格，故不再提供支付宝支付的测试功能，请在BeeCloud平台配置正确参数后，使用自行创建的APP的appID和appSecret。给您带来的不便，敬请谅解。
-
-* APP_INVALID, 根据app_id找不到对应的APP/keyspace或者app_sign不正确,或者timestamp不是当前UTC：<br/>
-一般是测试设备时钟没有校准，或者你创建的APP出现了故障，请联系BeeCloud；如果你不需要BeeCloud为你做时间校验，你可以到控制台关闭该功能
-
-* BC验签失败：<br/>
-检查一下，是不是设置了测试模式（setSandbox(true)），但是secret填的是app secret
+请查看[帮助中心](http://help.beecloud.cn/hc/)
