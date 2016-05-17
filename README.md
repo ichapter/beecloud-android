@@ -38,6 +38,7 @@ SDK支持以下支付渠道:
 
 ## 导入SDK
 1. 添加依赖  
+  
 >1. 推荐通过添加`model`的方式（适用于`gradle`，推荐直接使用`Android Studio`）
 引入`sdk model`，在`project`的`settings.gradle`中`include ':sdk'`，并在需要支付的`model`（比如本项目中的`demo`） `build.gradle`中添加依赖`compile project(':sdk')`，需要JDK版本7或以上。
 
@@ -66,21 +67,20 @@ SDK支持以下支付渠道:
 
 ### 1.初始化支付参数
 请参考`demo`中的`ShoppingCartActivity.java`  
->1. 在主activity或者application的onCreate函数中初始化BeeCloud账户中的AppID和secret，并设置是否开启测试模式（如果不设置默认不开启）；注意：如果是测试模式，secret应该填Test Secret，如果是上线版本，应该填App Secret，例如
+  
+>1 在主activity或者application的onCreate函数中初始化BeeCloud账户中的AppID和secret，并设置是否开启测试模式（如果不设置默认不开启）；注意：如果是测试模式，secret应该填Test Secret，如果是上线版本，应该填App Secret，例如
 ```java
 //开启测试模式
 BeeCloud.setSandbox(true);
 //此处第二个参数是控制台的test secret
 BeeCloud.setAppIdAndSecret("c5d1cba1-5e3f-4ba0-941d-9b0a371fe719",
         "4bfdd244-574d-4bf3-b034-0c751ed34fee");
-```
-  
->2. 如果用到微信支付，在用到微信支付的Activity的onCreate函数里调用以下函数，第二个参数需要换成你自己的微信AppID，例如
+```    
+>2 如果用到微信支付，在用到微信支付的Activity的onCreate函数里调用以下函数，第二个参数需要换成你自己的微信AppID，例如
 ```java
 BCPay.initWechatPay(ShoppingCartActivity.this, "wxf1aa465362b4c8f1");
-```
-  
->3. 如果用到PayPal，在用到PayPal的Activity的onCreate函数里调用函数，例如
+```    
+>3 如果用到PayPal，在用到PayPal的Activity的onCreate函数里调用函数，例如
 ```java
 BCPay.initPayPal(
     //在PayPal官网申请的APP Client ID
