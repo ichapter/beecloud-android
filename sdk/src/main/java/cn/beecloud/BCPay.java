@@ -289,6 +289,7 @@ public class BCPay {
                                     reqAliPaymentViaAPP(responseMap);
                                     break;
                                 case UN_APP:
+                                case BC_APP:
                                     reqUnionPaymentViaAPP(responseMap);
                                     break;
                                 case BD_APP:

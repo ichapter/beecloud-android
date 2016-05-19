@@ -131,7 +131,7 @@ public class RefundOrdersActivity extends Activity {
 
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(
                 this,android.R.layout.simple_spinner_item,
-                new String[]{"微信", "支付宝", "银联", "百度", "PayPal", "全渠道", "通过ID查询", "退款订单总数"});
+                new String[]{"微信", "支付宝", "银联", "BeeCloud", "百度", "PayPal", "全渠道", "通过ID查询", "退款订单总数"});
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         channelChooser.setAdapter(adapter);
 
@@ -183,7 +183,15 @@ public class RefundOrdersActivity extends Activity {
                                 15,                                     //最多返回满足条件的15条数据
                                 bcCallback);
                         break;
-                    case 3: //百度
+                    case 3: //BeeCloud
+                        params = new BCQuery.QueryParams();
+                        params.channel = BCReqParams.BCChannelTypes.BC;
+
+                        BCQuery.getInstance().queryRefundsAsync(params,
+                                bcCallback);
+
+                        break;
+                    case 4: //百度
                         //以下演示通过PayParams发起请求
                         params = new BCQuery.QueryParams();
                         params.channel = BCReqParams.BCChannelTypes.BD;
@@ -215,20 +223,20 @@ public class RefundOrdersActivity extends Activity {
                                 bcCallback);
 
                         break;
-                    case 4: //PayPal
+                    case 5: //PayPal
                         params = new BCQuery.QueryParams();
                         params.channel = BCReqParams.BCChannelTypes.PAYPAL;
                         BCQuery.getInstance().queryRefundsAsync(params,
                                 bcCallback);
 
                         break;
-                    case 5: //全部的渠道类型
+                    case 6: //全部的渠道类型
                         params = new BCQuery.QueryParams();
                         params.channel = BCReqParams.BCChannelTypes.ALL;
                         BCQuery.getInstance().queryRefundsAsync(params,
                                 bcCallback);
                         break;
-                    case 6: //通过ID查询
+                    case 7: //通过ID查询
                         //注意此处的ID是列标识符，在调用退款(服务端)接口时返回，非订单号
                         BCQuery.getInstance().queryRefundByIDAsync("24035a33-6be2-4d55-b37c-84aaf2c5aeac",
                                 new BCCallback() {
@@ -270,7 +278,7 @@ public class RefundOrdersActivity extends Activity {
                                     }
                                 });
                         break;
-                    case 7:
+                    case 8:
                         params = new BCQuery.QueryParams();
 
                         //以下为可用的限制参数
