@@ -149,6 +149,26 @@ public class BCReqParams {
         UN_WEB,
 
         /**
+         * BeeCloud快捷渠道
+         */
+        BC,
+
+        /**
+         * BeeCloud APP快捷支付
+         */
+        BC_APP,
+
+        /**
+         * BeeCloud网关支付
+         */
+        BC_GATEWAY,
+
+        /**
+         * BeeCloud快捷支付
+         */
+        BC_EXPRESS,
+
+        /**
          * for PayPal query
          */
         PAYPAL,
@@ -258,7 +278,8 @@ public class BCReqParams {
                     channel == UN_APP ||
                     channel == PAYPAL_SANDBOX ||
                     channel == PAYPAL_LIVE ||
-                    channel == BD_APP;
+                    channel == BD_APP ||
+                    channel == BC_APP;
         }
 
         /**
@@ -362,8 +383,16 @@ public class BCReqParams {
                 return "快钱移动网页支付";
             else if (channel.equals(KUAIQIAN_WEB.name()))
                 return "快钱PC网页支付";
+            else if (channel.equals(BC.name()))
+                return "BeeCloud快捷支付";
+            else if (channel.equals(BC_APP.name()))
+                return "BeeCloud APP支付";
+            else if (channel.equals(BC_GATEWAY.name()))
+                return "BeeCloud网关支付";
+            else if (channel.equals(BC_EXPRESS.name()))
+                return "BeeCloud快捷支付";
             else
-                return "非法的支付类型";
+                return "其他支付类型";
         }
     }
 

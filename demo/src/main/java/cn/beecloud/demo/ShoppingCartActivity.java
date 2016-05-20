@@ -231,12 +231,12 @@ public class ShoppingCartActivity extends Activity {
 
         payMethod = (ListView) this.findViewById(R.id.payMethod);
         Integer[] payIcons = new Integer[]{R.drawable.wechat, R.drawable.alipay,
-                R.drawable.unionpay, R.drawable.baidupay,
+                R.drawable.unionpay, R.drawable.beecloud_logo, R.drawable.baidupay,
                 R.drawable.paypal, R.drawable.scan};
         final String[] payNames = new String[]{"微信支付", "支付宝支付",
-                "银联在线", "百度钱包", "PayPal支付", "二维码支付"};
+                "银联在线", "BeeCloud支付", "百度钱包", "PayPal支付", "二维码支付"};
         String[] payDescs = new String[]{"使用微信支付，以人民币CNY计费", "使用支付宝支付，以人民币CNY计费",
-                "使用银联在线支付，以人民币CNY计费", "使用百度钱包支付，以人民币CNY计费",
+                "使用银联在线支付，以人民币CNY计费", "通过BeeCloud快捷支付", "使用百度钱包支付，以人民币CNY计费",
                 "使用PayPal支付，以美元USD计费", "通过扫描二维码支付"};
         PayMethodListItem adapter = new PayMethodListItem(this, payIcons, payNames, payDescs);
         payMethod.setAdapter(adapter);
@@ -323,10 +323,30 @@ public class ShoppingCartActivity extends Activity {
 
 
                         break;
-                    case 3: //通过百度钱包支付
+                    case 3: //BeeCloud支付
                         loadingDialog.show();
 
-                        mapOptional = new HashMap<String, String>();
+                        BCPay.PayParams bcPayParam = new BCPay.PayParams();
+
+                        bcPayParam.channelType = BCReqParams.BCChannelTypes.BC_APP;
+
+                        //商品描述, 32个字节内, 汉字以2个字节计
+                        bcPayParam.billTitle = "安卓BC_APP支付测试";
+
+                        //支付金额，以分为单位，必须是正整数，BC_APP最低1元
+                        bcPayParam.billTotalFee = 100;
+
+                        //商户自定义订单号
+                        bcPayParam.billNum = BillUtils.genBillNum();
+
+                        BCPay.getInstance(ShoppingCartActivity.this).reqPaymentAsync(bcPayParam,
+                                bcCallback);
+
+                        break;
+                    case 4: //通过百度钱包支付
+                        loadingDialog.show();
+
+                        mapOptional = new HashMap<>();
                         mapOptional.put("goods desc", "商品详细描述");
 
                         Map<String, String> analysis;
@@ -369,7 +389,7 @@ public class ShoppingCartActivity extends Activity {
                         BCPay.getInstance(ShoppingCartActivity.this).reqPaymentAsync(payParam,
                                 bcCallback);
                         break;
-                    case 4: //通过PayPal支付
+                    case 5: //通过PayPal支付
                         /*
                          此处返回的是PayPal客户端返回的信息，
                          请调用syncPayPalPayment获取校验结果，该方法会同时将支付订单同步到BeeCloud服务器
@@ -387,7 +407,7 @@ public class ShoppingCartActivity extends Activity {
                                 hashMapOptional,        //optional info
                                 bcCallback);
                         break;
-                    case 5:
+                    case 6:
                         Intent intent = new Intent(ShoppingCartActivity.this, QRCodeEntryActivity.class);
                         startActivity(intent);
                 }

@@ -128,7 +128,7 @@ public class BillListActivity extends Activity {
 
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(
                 this,android.R.layout.simple_spinner_item,
-                new String[]{"微信", "支付宝", "银联", "百度", "PayPal", "全渠道", "订单总数"});
+                new String[]{"微信", "支付宝", "银联", "BeeCloud", "百度", "PayPal", "全渠道", "订单总数"});
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         channelChooser.setAdapter(adapter);
 
@@ -179,7 +179,14 @@ public class BillListActivity extends Activity {
                                 15,                                     //最多返回满足条件的15条数据
                                 bcCallback);
                         break;
-                    case 3: //百度
+                    case 3: //BeeCloud
+                        params = new BCQuery.QueryParams();
+                        params.channel = BCReqParams.BCChannelTypes.BC;
+                        BCQuery.getInstance().queryBillsAsync(params,
+                                bcCallback);
+
+                        break;
+                    case 4: //百度
                         //以下演示通过PayParams发起请求
                         params = new BCQuery.QueryParams();
                         params.channel = BCReqParams.BCChannelTypes.BD;
@@ -211,14 +218,14 @@ public class BillListActivity extends Activity {
                                 bcCallback);
 
                         break;
-                    case 4: //PayPal
+                    case 5: //PayPal
                         params = new BCQuery.QueryParams();
                         params.channel = BCReqParams.BCChannelTypes.PAYPAL;
                         BCQuery.getInstance().queryBillsAsync(params,
                                 bcCallback);
 
                         break;
-                    case 5: //全部的渠道类型
+                    case 6: //全部的渠道类型
                         params = new BCQuery.QueryParams();
                         params.channel = BCReqParams.BCChannelTypes.ALL;
 
@@ -232,7 +239,7 @@ public class BillListActivity extends Activity {
                                 bcCallback);
                         break;
 
-                    case 6:
+                    case 7:
                         params = new BCQuery.QueryParams();
 
                         //以下为可用的限制参数
