@@ -23,6 +23,7 @@ import com.tencent.mm.sdk.openapi.IWXAPI;
 import com.tencent.mm.sdk.openapi.WXAPIFactory;
 
 import java.lang.reflect.Type;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -33,6 +34,7 @@ import cn.beecloud.async.BCPayPalSyncObserver;
 import cn.beecloud.entity.BCPayReqParams;
 import cn.beecloud.entity.BCPayResult;
 import cn.beecloud.entity.BCQRCodeResult;
+import cn.beecloud.entity.BCRefundResult;
 import cn.beecloud.entity.BCReqParams;
 import cn.beecloud.entity.BCRestfulCommonResult;
 
@@ -938,6 +940,76 @@ public class BCPay {
         });
     }
 
+    public void reqRefund(final RefundParams params, final BCCallback callback) {
+        if (callback == null) {
+            Log.e(TAG, "请初始化callback");
+            return;
+        }
+
+        if (params.needApproval == null || !params.needApproval) {
+            Log.e(TAG, "手机端只支持预退款，RefundParams中needApproval必须是true");
+            return;
+        }
+
+        BCCache.executorService.execute(new Runnable() {
+            @Override
+            public void run() {
+                if (BCCache.getInstance().isTestMode) {
+                    callback.done(new BCRefundResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
+                            BCRestfulCommonResult.APP_INNER_FAIL, "该功能暂不支持测试模式"));
+                    return;
+                }
+
+                if (params.channelType != null &&
+                        params.channelType != BCReqParams.BCChannelTypes.WX &&
+                        params.channelType != BCReqParams.BCChannelTypes.ALI &&
+                        params.channelType != BCReqParams.BCChannelTypes.UN &&
+                        params.channelType != BCReqParams.BCChannelTypes.BD &&
+                        params.channelType != BCReqParams.BCChannelTypes.KUAIQIAN &&
+                        params.channelType != BCReqParams.BCChannelTypes.JD &&
+                        params.channelType != BCReqParams.BCChannelTypes.YEE) {
+                    callback.done(new BCRefundResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
+                            BCRestfulCommonResult.APP_INNER_FAIL, "选择的渠道类型不正确"));
+                    return;
+                }
+
+                Map<String, Object> reqMap = new HashMap<String, Object>();
+
+                BCCache mCache = BCCache.getInstance();
+                String appId = mCache.appId;
+                Long timestamp = (new Date()).getTime();
+                String appSign = BCSecurityUtil.getMessageMD5Digest(appId +
+                        timestamp + mCache.secret);
+                reqMap.put("app_id", appId);
+                reqMap.put("timestamp", timestamp);
+                reqMap.put("app_sign", appSign);
+                if (params.channelType != null)
+                    reqMap.put("channel", params.channelType.name());
+                reqMap.put("refund_no", params.refundNum);
+                reqMap.put("bill_no", params.billNum);
+                reqMap.put("refund_fee", params.refundFee);
+                reqMap.put("optional", params.optional);
+                reqMap.put("need_approval", params.needApproval);
+
+                String reqURL = BCHttpClientUtil.getRefundUrl();
+
+                BCHttpClientUtil.Response response = BCHttpClientUtil
+                        .httpPost(reqURL, reqMap);
+
+                if (response.code == 200) {
+                    //反序列化json
+                    Gson gson = new Gson();
+
+                    callback.done(gson.fromJson(response.content, BCRefundResult.class));
+                } else {
+                    callback.done(new BCRefundResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
+                            BCRestfulCommonResult.APP_INNER_FAIL,
+                            "Network Error:" + response.code + " # " + response.content));
+                }
+            }
+        });
+    }
+
     /**
      * 外部支付参数实例
      */
@@ -990,5 +1062,49 @@ public class BCPay {
          * 目前key只有是"category"时才会进行分析
          */
         public Map<String, String> analysis;
+    }
+
+    /**
+     * 外部支付参数实例
+     */
+    public static class RefundParams {
+        /**
+         *  选填参数
+         *  BCReqParams.BCChannelTypes.WX，
+         *  BCReqParams.BCChannelTypes.ALI，
+         *  BCReqParams.BCChannelTypes.UN，
+         *  BCReqParams.BCChannelTypes.BD，
+         *  BCReqParams.BCChannelTypes.KUAIQIAN，
+         *  BCReqParams.BCChannelTypes.JD，
+         *  BCReqParams.BCChannelTypes.YEE
+         */
+        public BCReqParams.BCChannelTypes channelType;
+
+        /**
+         * 商户退款单号
+         */
+        public String refundNum;
+
+        /**
+         * 发起支付时填写的订单号
+         */
+        public String billNum;
+
+        /**
+         * 退款金额，必须为正整数，单位为分
+         */
+        public Integer refundFee;
+
+        /**
+         * 扩展参数，可以传入任意数量的key/value对来补充对业务逻辑的需求，可以为null，
+         * 对于PayPal请以HashMap实例化
+         */
+        public Map<String, String> optional;
+
+        /**
+         * 是否为预退款，
+         * 手机端必须是true
+         */
+        public Boolean needApproval = Boolean.TRUE;
     }
 }

@@ -7,7 +7,9 @@
 package cn.beecloud.demo;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -22,16 +24,21 @@ import android.widget.Toast;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
+import cn.beecloud.BCPay;
 import cn.beecloud.BCQuery;
 import cn.beecloud.async.BCCallback;
 import cn.beecloud.async.BCResult;
+import cn.beecloud.demo.util.BillUtils;
 import cn.beecloud.demo.util.DisplayUtils;
 import cn.beecloud.entity.BCBillOrder;
 import cn.beecloud.entity.BCQueryBillsResult;
 import cn.beecloud.entity.BCQueryCountResult;
+import cn.beecloud.entity.BCRefundResult;
 import cn.beecloud.entity.BCReqParams;
 
 /**
@@ -42,6 +49,10 @@ public class BillListActivity extends Activity {
 
     Spinner channelChooser;
     ListView listViewOrder;
+    BillListAdapter adapter;
+    String errMsg;
+
+    BCReqParams.BCChannelTypes selectedChannel = BCReqParams.BCChannelTypes.ALL;
 
     private Handler mHandler = new Handler(new Handler.Callback() {
         /**
@@ -54,10 +65,10 @@ public class BillListActivity extends Activity {
         @Override
         public boolean handleMessage(Message msg) {
             if (msg.what == 1) {
-
-                BillListAdapter adapter = new BillListAdapter(
-                        BillListActivity.this, bills);
-                listViewOrder.setAdapter(adapter);
+                adapter.setBills(bills);
+                adapter.notifyDataSetChanged();
+            } else {
+                Toast.makeText(BillListActivity.this, errMsg, Toast.LENGTH_SHORT).show();
             }
             return true;
         }
@@ -76,32 +87,26 @@ public class BillListActivity extends Activity {
 
             final BCQueryBillsResult bcQueryResult = (BCQueryBillsResult) bcResult;
 
+            Message msg = mHandler.obtainMessage();
+
             //resultCode为0表示请求成功
             //count包含返回的订单个数
             if (bcQueryResult.getResultCode() == 0) {
 
                 //订单列表
                 bills = bcQueryResult.getBills();
-
+                msg.what = 1;
                 Log.i(BillListActivity.TAG, "bill count: " + bcQueryResult.getCount());
 
             } else {
                 //订单列表
                 bills = null;
-
-                BillListActivity.this.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(BillListActivity.this, "err code:" + bcQueryResult.getResultCode() +
+                msg.what = 2;
+                errMsg = "err code:" + bcQueryResult.getResultCode() +
                                 "; err msg: " + bcQueryResult.getResultMsg() +
-                                "; err detail: " + bcQueryResult.getErrDetail(), Toast.LENGTH_LONG).show();
-                    }
-                });
+                                "; err detail: " + bcQueryResult.getErrDetail();
 
             }
-
-            Message msg = mHandler.obtainMessage();
-            msg.what = 1;
             mHandler.sendMessage(msg);
         }
     };
@@ -119,7 +124,91 @@ public class BillListActivity extends Activity {
         DisplayUtils.initBack(this);
 
         listViewOrder = (ListView) findViewById(R.id.listViewOrder);
+        adapter = new BillListAdapter(
+                BillListActivity.this, bills);
+        listViewOrder.setAdapter(adapter);
 
+        listViewOrder.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
+                final BCBillOrder bill = bills.get(position);
+
+                if (!bill.getPayResult()) {
+                    Log.w(TAG, "支付成功的才可以发起退款");
+                    return;
+                }
+
+                if (selectedChannel != BCReqParams.BCChannelTypes.WX &&
+                        selectedChannel != BCReqParams.BCChannelTypes.ALI &&
+                        selectedChannel != BCReqParams.BCChannelTypes.UN &&
+                        selectedChannel != BCReqParams.BCChannelTypes.BD &&
+                        selectedChannel != BCReqParams.BCChannelTypes.ALL)
+                    return;
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(BillListActivity.this);
+                builder.setTitle("提示");
+                builder.setMessage("你正在发起预退款，预退款结束后需要在server端发起[预退款批量审核]来进行真实的退款，是否继续？");
+
+                builder.setNegativeButton("确定",
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+
+                                //预退款示例
+                                //预退款不会发生真实的退款交易，预退款结束后需要在server端发起[预退款批量审核]来进行真实的退款
+                                BCPay.RefundParams params = new BCPay.RefundParams();
+                                if (selectedChannel == BCReqParams.BCChannelTypes.ALL) {
+                                    //channel可以为null，支持WX ALI UN KUAIQIAN BD JD YEE
+                                    params.channelType = null;
+                                } else {
+                                    params.channelType = selectedChannel;
+                                }
+
+                                //退款单号
+                                params.refundNum = BillUtils.genBillNum();
+                                //需要退款的订单号
+                                params.billNum = bill.getBillNum();
+                                //退款金额，必须为正整数，单位为分
+                                params.refundFee = bill.getTotalFee();
+                                //扩展参数，可以不初始化
+                                Map<String, String> optional = new HashMap<String, String>();
+                                optional.put("扩展参数", "可以为null");
+                                params.optional = optional;
+                                //手机端need approval必须是true(RefundParams默认值)
+                                //params.needApproval = Boolean.TRUE;
+
+                                BCPay.getInstance(BillListActivity.this).reqRefund(params, new BCCallback() {
+                                    @Override
+                                    public void done(BCResult result) {
+                                        BCRefundResult refundResult = (BCRefundResult) result;
+                                        Message message = mHandler.obtainMessage();
+                                        if (refundResult.getResultCode() == 0) {
+                                            Log.w(TAG, "预退款成功，唯一标识符：" + refundResult.getId());
+                                            errMsg = "预退款成功";
+                                        } else {
+                                            errMsg = refundResult.getResultCode() + " # " +
+                                                    refundResult.getResultMsg() + " # " +
+                                                    refundResult.getErrDetail();
+                                        }
+                                        message.what = 2;
+                                        mHandler.sendMessage(message);
+                                    }
+                                });
+                            }
+                        });
+
+                builder.setPositiveButton("取消",
+                        new DialogInterface.OnClickListener() {
+
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        });
+                builder.create().show();
+            }
+        });
         initSpinner();
     }
 
@@ -158,28 +247,35 @@ public class BillListActivity extends Activity {
 
                 switch (position) {
                     case 0: //微信
+                        selectedChannel = BCReqParams.BCChannelTypes.WX;
+
                         BCQuery.getInstance().queryBillsAsync(
                                 BCReqParams.BCChannelTypes.WX,  //此处表示微信支付的查询
                                 bcCallback);
                         break;
                     case 1: //支付宝
+                        selectedChannel = BCReqParams.BCChannelTypes.ALI;
+
                         BCQuery.getInstance().queryBillsAsync(
                                 BCReqParams.BCChannelTypes.ALI_APP, //渠道，此处表示ALI客户端渠道
                                 //"20150820102712150", //此处表示限制订单号
                                 bcCallback);
                         break;
                     case 2: //银联
+                        selectedChannel = BCReqParams.BCChannelTypes.UN;
 
                         BCQuery.getInstance().queryBillsAsync(
                                 BCReqParams.BCChannelTypes.UN_APP,          //渠道, 此处表示银联手机APP客户端支付
                                 null,                                   //订单号
                                 startTime.getTime(),                    //起始时间
                                 null,                                   //结束时间
-                                2,                                      //跳过满足条件的前2条数据
+                                null,                                      //跳过满足条件的前2条数据
                                 15,                                     //最多返回满足条件的15条数据
                                 bcCallback);
                         break;
                     case 3: //BeeCloud
+                        selectedChannel = BCReqParams.BCChannelTypes.BC;
+
                         params = new BCQuery.QueryParams();
                         params.channel = BCReqParams.BCChannelTypes.BC;
                         BCQuery.getInstance().queryBillsAsync(params,
@@ -187,6 +283,8 @@ public class BillListActivity extends Activity {
 
                         break;
                     case 4: //百度
+                        selectedChannel = BCReqParams.BCChannelTypes.BD;
+
                         //以下演示通过PayParams发起请求
                         params = new BCQuery.QueryParams();
                         params.channel = BCReqParams.BCChannelTypes.BD;
@@ -219,6 +317,8 @@ public class BillListActivity extends Activity {
 
                         break;
                     case 5: //PayPal
+                        selectedChannel = BCReqParams.BCChannelTypes.PAYPAL;
+
                         params = new BCQuery.QueryParams();
                         params.channel = BCReqParams.BCChannelTypes.PAYPAL;
                         BCQuery.getInstance().queryBillsAsync(params,
@@ -226,11 +326,13 @@ public class BillListActivity extends Activity {
 
                         break;
                     case 6: //全部的渠道类型
+                        selectedChannel = BCReqParams.BCChannelTypes.ALL;
+
                         params = new BCQuery.QueryParams();
                         params.channel = BCReqParams.BCChannelTypes.ALL;
 
                         //跳过满足条件的数目
-                        params.skip = 10;
+                        //params.skip = 10;
 
                         //最多返回的数目
                         params.limit = 20;

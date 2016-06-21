@@ -192,6 +192,13 @@ class BCHttpClientUtil {
     }
 
     /**
+     * @return 退款
+     */
+    public static String getRefundUrl() {
+        return getRandomHost() + "rest/refund";
+    }
+
+    /**
      * http get 请求
      * @param url   请求uri
      * @return      HttpResponse请求结果实例

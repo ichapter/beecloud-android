@@ -1,6 +1,6 @@
 ## BeeCloud Android SDK (Open Source)
 
-[![Build Status](https://travis-ci.org/beecloud/beecloud-android.svg)](https://travis-ci.org/beecloud/beecloud-android) ![license](https://img.shields.io/badge/license-MIT-brightgreen.svg) ![version](https://img.shields.io/badge/version-v2.3.0-blue.svg)
+[![Build Status](https://travis-ci.org/beecloud/beecloud-android.svg)](https://travis-ci.org/beecloud/beecloud-android) ![license](https://img.shields.io/badge/license-MIT-brightgreen.svg) ![version](https://img.shields.io/badge/version-v2.4.0-blue.svg)
 
 ## 简介
 
@@ -14,7 +14,7 @@ SDK支持以下支付渠道:
  * PayPal
  * 百度钱包   
 
-包含支付订单以及退款订单的查询功能。  
+包含预退款、支付订单以及退款订单的查询功能。  
 还提供了线下收款功能(包括微信扫码、微信刷卡、支付宝扫码、支付宝条形码)，订单状态的查询以及订单撤销。 
 
 ## 流程
@@ -50,7 +50,7 @@ SDK支持以下支付渠道:
 支付宝需要引入`alipaysdk.jar`、`alipayutdid.jar`、`alipaysecsdk.jar`，  
 银联需要引入`UPPayAssistEx.jar`，  
 百度钱包支付需要引入`Cashier_SDK-v4.2.0.jar`，  
-最后添加`beecloud android sdk`：`beecloud-2.1.4.jar`
+最后添加`beecloud android sdk`：`beecloud-2.1.4.jar`（如果你添加的是sdk目录下最新的jar，请手动添加其同级目录下依赖的`okhttp-3.3.1.jar`和`okio-1.8.0.jar`）
 
 2.对于微信支付，需要注意你的`AndroidManifest.xml`中`package`需要和微信平台创建的移动应用`应用包名`保持一致，否则会遭遇[`一般错误`](http://help.beecloud.cn/hc/kb/article/157111/)  
 
@@ -363,7 +363,28 @@ BCPay.getInstance(QRCodeEntryActivity.this).reqAliInlineQRCodeAsync(
    "1": 订单码-前置模式, 对应 iframe 宽度不能小于 300px, 高度不能小于 600px  
    "3": 订单码-迷你前置模式, 对应 iframe 宽度不能小于 75px, 高度不能小于 75px  
    
-### 6.查询
+### 6.退款
+手机端目前只允许发起`预退款`，预退款结束后仍然需要在server端发起`预退款批量审核`，以达到真实退款的目的。  
+  
+**原型：**
+
+通过构造`BCPay`的实例，使用`reqRefund`方法发起预退款；在回调函数中将`BCResult`转化成`BCRefundResult`之后做后续处理；可参照`demo`中`BillListActivity`  
+  
+**调用：**
+
+```java
+BCPay.RefundParams params = new BCPay.RefundParams();
+//退款单号
+params.refundNum = "20160621162753241";
+//需要退款的订单号
+params.billNum = "20160621162735489";
+//退款金额，必须为正整数，单位为分
+params.refundFee = 10;
+BCPay.getInstance(YourActivity.this).reqRefund(params, bccallback);
+```
+
+   
+### 7.查询
 
 * **查询支付订单**
 
