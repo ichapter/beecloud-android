@@ -258,14 +258,13 @@ public class BCPay {
                 BCHttpClientUtil.Response response = BCHttpClientUtil
                         .httpPost(payURL, parameters.transToBillReqMapParams());
 
-                if (response.code == 200) {
+                if (response.code != -1 && response.code < 500) {
                     String ret = response.content;
 
                     //反序列化json串
                     Gson res = new Gson();
 
-                    Type type = new TypeToken<Map<String, Object>>() {
-                    }.getType();
+                    Type type = new TypeToken<Map<String, Object>>() {}.getType();
                     Map<String, Object> responseMap = res.fromJson(ret, type);
 
                     //判断后台返回结果
@@ -754,7 +753,7 @@ public class BCPay {
         BCHttpClientUtil.Response response = BCHttpClientUtil
                 .httpPost(payURL, parameters.transToBillReqMapParams());
 
-        if (response.code == 200) {
+        if (response.code != -1 && response.code < 500) {
             String ret = response.content;
 
             Gson res = new Gson();
@@ -894,14 +893,13 @@ public class BCPay {
                 BCHttpClientUtil.Response response = BCHttpClientUtil
                         .httpPost(qrCodeReqURL, parameters.transToBillReqMapParams());
 
-                if (response.code == 200) {
+                if (response.code != -1 && response.code < 500) {
                     String ret = response.content;
 
                     //反序列化json
                     Gson res = new Gson();
 
-                    Type type = new TypeToken<Map<String, Object>>() {
-                    }.getType();
+                    Type type = new TypeToken<Map<String, Object>>() {}.getType();
                     Map<String, Object> responseMap = res.fromJson(ret, type);
 
                     //判断后台返回结果
@@ -996,7 +994,7 @@ public class BCPay {
                 BCHttpClientUtil.Response response = BCHttpClientUtil
                         .httpPost(reqURL, reqMap);
 
-                if (response.code == 200) {
+                if (response.code != -1 && response.code < 500) {
                     //反序列化json
                     Gson gson = new Gson();
 

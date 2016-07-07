@@ -225,8 +225,8 @@ public class ShoppingCartActivity extends Activity {
         // 如果使用PayPal需要在支付之前设置client id和应用secret
         // BCPay.PAYPAL_PAY_TYPE.SANDBOX用于测试，BCPay.PAYPAL_PAY_TYPE.LIVE用于生产环境
         //最后一个参数表示是否在paypal支付页面显示收货地址，如果地址不合法有可能造成无法支付
-        BCPay.initPayPal("AVT1Ch18aTIlUJIeeCxvC7ZKQYHczGwiWm8jOwhrREc4a5FnbdwlqEB4evlHPXXUA67RAAZqZM0H8TCR",
-                "EL-fkjkEUyxrwZAmrfn46awFXlX-h2nRkyCVhhpeVdlSRuhPJKXx3ZvUTTJqPQuAeomXA8PZ2MkX24vF",
+        BCPay.initPayPal("AdvoLpBgtfNrLx9NCzLtIOR4ShGxwzStnAw8Ja-fytk5iy_-Wfy7hARHcRIr6eWksLoutuXfksy7ge9U",
+                "EJP-yD2lHnf4SSIpZr2xGYTjRbzqBe2jBWnex3rL17Nz7yN1pjMeVYP1bi8HvzQaWbmmVo3oKPlzgivW",
                 BCPay.PAYPAL_PAY_TYPE.SANDBOX, Boolean.FALSE);
 
         payMethod = (ListView) this.findViewById(R.id.payMethod);

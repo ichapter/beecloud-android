@@ -225,13 +225,7 @@ class BCHttpClientUtil {
             okhttp3.Response temp = client.newCall(request).execute();
             response.code = temp.code();
             ResponseBody body = temp.body();
-            if (temp.isSuccessful()) {
-                //call string auto close body
-                response.content = body.string();
-            } else {
-                response.content = "网络请求失败";
-                temp.body().close();
-            }
+            response.content = body.string();
         } catch (IOException e) {
             e.printStackTrace();
             Log.w(TAG, e.getMessage() == null ? " " : e.getMessage());

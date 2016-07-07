@@ -130,7 +130,7 @@ public class BCWechatPaymentActivity extends Activity implements IWXAPIEventHand
                 detailInfo += "发送被拒绝";
                 break;
             case BaseResp.ErrCode.ERR_COMM:
-                detailInfo += "一般错误，微信Debug版本常见错误，请查看BeeCloud技术FAQ:https://beecloud.cn/faq/?index=1";
+                detailInfo += "一般错误，微信Debug版本常见错误，请查看工单http://help.beecloud.cn/hc/kb/article/157111";
                 break;
             case BaseResp.ErrCode.ERR_UNSUPPORT:
                 detailInfo += "不支持错误";
