@@ -258,7 +258,7 @@ public class BCPay {
                 BCHttpClientUtil.Response response = BCHttpClientUtil
                         .httpPost(payURL, parameters.transToBillReqMapParams());
 
-                if (response.code != -1 && response.code < 500) {
+                if (response.code == 200 || (response.code >= 400 && response.code < 500)) {
                     String ret = response.content;
 
                     //反序列化json串
@@ -753,7 +753,7 @@ public class BCPay {
         BCHttpClientUtil.Response response = BCHttpClientUtil
                 .httpPost(payURL, parameters.transToBillReqMapParams());
 
-        if (response.code != -1 && response.code < 500) {
+        if (response.code == 200 || (response.code >= 400 && response.code < 500)) {
             String ret = response.content;
 
             Gson res = new Gson();
@@ -893,7 +893,7 @@ public class BCPay {
                 BCHttpClientUtil.Response response = BCHttpClientUtil
                         .httpPost(qrCodeReqURL, parameters.transToBillReqMapParams());
 
-                if (response.code != -1 && response.code < 500) {
+                if (response.code == 200 || (response.code >= 400 && response.code < 500)) {
                     String ret = response.content;
 
                     //反序列化json
@@ -994,7 +994,7 @@ public class BCPay {
                 BCHttpClientUtil.Response response = BCHttpClientUtil
                         .httpPost(reqURL, reqMap);
 
-                if (response.code != -1 && response.code < 500) {
+                if (response.code == 200 || (response.code >= 400 && response.code < 500)) {
                     //反序列化json
                     Gson gson = new Gson();
 

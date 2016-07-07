@@ -245,7 +245,7 @@ public class BCMockPayActivity extends Activity {
                         BCHttpClientUtil.Response response = BCHttpClientUtil.httpGet(notifyUrl);
 
                         loadingDialog.dismiss();
-                        if (response.code != -1 && response.code < 500) {
+                        if (response.code == 200 || (response.code >= 400 && response.code < 500)) {
                             String ret = response.content;
 
                             //反序列化json

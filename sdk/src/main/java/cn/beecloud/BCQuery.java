@@ -159,7 +159,7 @@ public class BCQuery {
                 BCHttpClientUtil.Response response = BCHttpClientUtil.httpGet(queryURL +
                         bcQueryReqParams.transToEncodedJsonString());
 
-                if (response.code != -1 && response.code < 500) {
+                if (response.code == 200 || (response.code >= 400 && response.code < 500)) {
                     String ret = response.content;
                     //Log.w("BCQuery", ret);
 
@@ -419,7 +419,7 @@ public class BCQuery {
                 BCHttpClientUtil.Response response = BCHttpClientUtil.httpGet(queryURL +
                         bcQueryReqParams.transToEncodedJsonString());
 
-                if (response.code != -1 && response.code < 500) {
+                if (response.code == 200 || (response.code >= 400 && response.code < 500)) {
 
                     String ret = response.content;
                     callback.done(BCRefundStatus.transJsonToObject(ret));
@@ -473,7 +473,7 @@ public class BCQuery {
                 BCHttpClientUtil.Response response = BCHttpClientUtil.httpGet(queryURL +
                         bcQueryReqParams.transToEncodedJsonString());
 
-                if (response.code != -1 && response.code < 500) {
+                if (response.code == 200 || (response.code >= 400 && response.code < 500)) {
                     callback.done(BCQueryBillResult.transJsonToResultObject(response.content));
                 } else {
                     callback.done(new BCQueryBillResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
@@ -529,7 +529,7 @@ public class BCQuery {
                 BCHttpClientUtil.Response response = BCHttpClientUtil.httpGet(queryURL +
                         bcQueryReqParams.transToEncodedJsonString());
 
-                if (response.code != -1 && response.code < 500) {
+                if (response.code == 200 || (response.code >= 400 && response.code < 500)) {
                     callback.done(BCQueryRefundResult.transJsonToResultObject(response.content));
                 } else {
                     callback.done(new BCQueryRefundResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
@@ -593,7 +593,7 @@ public class BCQuery {
 
                 BCHttpClientUtil.Response response = BCHttpClientUtil.httpPost(queryURL, reqMap);
 
-                if (response.code != -1 && response.code < 500) {
+                if (response.code == 200 || (response.code >= 400 && response.code < 500)) {
 
                     //返回后台结果
                     callback.done(BCBillStatus.transJsonToObject(response.content));
