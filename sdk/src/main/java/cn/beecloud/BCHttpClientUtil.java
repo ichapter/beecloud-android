@@ -16,12 +16,15 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import javax.net.ssl.X509TrustManager;
+
 import okhttp3.FormBody;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
+import okhttp3.internal.platform.Platform;
 
 /**
  * 网络请求工具类
@@ -275,27 +278,9 @@ class BCHttpClientUtil {
     public static Response getPayPalAccessToken() {
         Response response = new Response();
 
+        BCTLSSocketFactory socketFactory = null;
         try {
-            //PayPal needs TLS v1.2
-            OkHttpClient client =
-                    new OkHttpClient.Builder()
-                            .connectTimeout(BCCache.getInstance().connectTimeout, TimeUnit.MILLISECONDS)
-                            .sslSocketFactory(new BCTLSSocketFactory()).build();
-
-            FormBody.Builder form = new FormBody.Builder();
-            form.add("grant_type", "client_credentials");
-            RequestBody body = form.build();
-
-            Request request = new Request.Builder()
-                    .url(getPayPalAccessTokenUrl())
-                    .header("Accept", "application/json")
-                    .header("Content-Type", "application/x-www-form-urlencoded")
-                    .header("Authorization", BCSecurityUtil.getB64Auth(
-                            BCCache.getInstance().paypalClientID, BCCache.getInstance().paypalSecret))
-                    .post(body)
-                    .build();
-
-            proceedRequest(client, request, response);
+            socketFactory = new BCTLSSocketFactory();
         } catch (KeyManagementException e) {
             e.printStackTrace();
             Log.w(TAG, e.getMessage() == null ? " " : e.getMessage());
@@ -307,6 +292,37 @@ class BCHttpClientUtil {
             response.code = -1;
             response.content = e.getMessage();
         }
+
+        if (socketFactory == null)
+            return response;
+
+        X509TrustManager trustManager = Platform.get().trustManager(socketFactory);
+
+        if (trustManager == null) {
+            response.code = -1;
+            return response;
+        }
+
+        //PayPal needs TLS v1.2
+        OkHttpClient client =
+                new OkHttpClient.Builder()
+                        .connectTimeout(BCCache.getInstance().connectTimeout, TimeUnit.MILLISECONDS)
+                        .sslSocketFactory(socketFactory, trustManager).build();
+
+        FormBody.Builder form = new FormBody.Builder();
+        form.add("grant_type", "client_credentials");
+        RequestBody body = form.build();
+
+        Request request = new Request.Builder()
+                .url(getPayPalAccessTokenUrl())
+                .header("Accept", "application/json")
+                .header("Content-Type", "application/x-www-form-urlencoded")
+                .header("Authorization", BCSecurityUtil.getB64Auth(
+                        BCCache.getInstance().paypalClientID, BCCache.getInstance().paypalSecret))
+                .post(body)
+                .build();
+
+        proceedRequest(client, request, response);
 
         return response;
     }
