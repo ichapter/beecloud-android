@@ -1,6 +1,6 @@
 /**
  * BCHttpClientUtil.java
- *
+ * <p/>
  * Created by xuanzhui on 2015/7/27.
  * Copyright (c) 2015 BeeCloud. All rights reserved.
  */
@@ -11,8 +11,12 @@ import android.util.Log;
 import com.google.gson.Gson;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Field;
+import java.net.URLEncoder;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -77,100 +81,103 @@ class BCHttpClientUtil {
     //线下订单查询
     private static final String OFFLINE_BILL_STATUS_URL = "rest/offline/bill/status";
 
+    private static final String PLAN_URL = "plan";
+    private static final String SUBSCRIPTION_URL = "subscription";
+
     private final static String PAYPAL_LIVE_BASE_URL = "https://api.paypal.com/v1/";
     private final static String PAYPAL_SANDBOX_BASE_URL = "https://api.sandbox.paypal.com/v1/";
 
-    private final static String PAYPAL_ACCESS_TOKEN_URL= "oauth2/token";
+    private final static String PAYPAL_ACCESS_TOKEN_URL = "oauth2/token";
 
     /**
      * 随机获取主机, 并加入API版本号
      */
-    private static String getRandomHost() {
+    private static String getRootHost() {
         return BEECLOUD_HOST + HOST_API_VERSION;
     }
 
     /**
-     * @return  支付请求URL
+     * @return 支付请求URL
      */
     public static String getBillPayURL() {
         if (BCCache.getInstance().isTestMode) {
-            return getRandomHost() + BILL_PAY_SANDBOX_URL;
+            return getRootHost() + BILL_PAY_SANDBOX_URL;
         } else {
-            return getRandomHost() + BILL_PAY_URL;
+            return getRootHost() + BILL_PAY_URL;
         }
     }
 
     public static String getNotifyPayResultSandboxUrl() {
-        return getRandomHost() + NOTIFY_PAY_RESULT_SANDBOX_URL
+        return getRootHost() + NOTIFY_PAY_RESULT_SANDBOX_URL
                 + "/" + BCCache.getInstance().appId;
     }
 
     /**
-     * @return  获取扫码信息URL
+     * @return 获取扫码信息URL
      */
     public static String getQRCodeReqURL() {
-        return getRandomHost() + BILL_PAY_URL;
+        return getRootHost() + BILL_PAY_URL;
     }
 
     /**
-     * @return  查询支付订单部分URL
+     * @return 查询支付订单部分URL
      */
     public static String getBillQueryURL() {
         if (BCCache.getInstance().isTestMode) {
-            return getRandomHost() + BILL_PAY_SANDBOX_URL;
+            return getRootHost() + BILL_PAY_SANDBOX_URL;
         } else {
-            return getRandomHost() + BILL_PAY_URL;
+            return getRootHost() + BILL_PAY_URL;
         }
     }
 
     /**
-     * @return  查询支付订单列表URL
+     * @return 查询支付订单列表URL
      */
     public static String getBillsQueryURL() {
         if (BCCache.getInstance().isTestMode) {
-            return getRandomHost() + BILLS_QUERY_SANDBOX_URL;
+            return getRootHost() + BILLS_QUERY_SANDBOX_URL;
         } else {
-            return getRandomHost() + BILLS_QUERY_URL;
+            return getRootHost() + BILLS_QUERY_URL;
         }
     }
 
     /**
-     * @return  查询支付订单数目URL
+     * @return 查询支付订单数目URL
      */
     public static String getBillsCountQueryURL() {
         if (BCCache.getInstance().isTestMode) {
-            return getRandomHost() + BILLS_COUNT_QUERY_SANDBOX_URL;
+            return getRootHost() + BILLS_COUNT_QUERY_SANDBOX_URL;
         } else {
-            return getRandomHost() + BILLS_COUNT_QUERY_URL;
+            return getRootHost() + BILLS_COUNT_QUERY_URL;
         }
     }
 
     /**
-     * @return  查询退款订单部分URL
+     * @return 查询退款订单部分URL
      */
     public static String getRefundQueryURL() {
-        return getRandomHost() + REFUND_QUERY_URL;
+        return getRootHost() + REFUND_QUERY_URL;
     }
 
     /**
-     * @return  查询退款订单列表URL
+     * @return 查询退款订单列表URL
      */
     public static String getRefundsQueryURL() {
-        return getRandomHost() + REFUNDS_QUERY_URL;
+        return getRootHost() + REFUNDS_QUERY_URL;
     }
 
     /**
-     * @return  查询退款订单数目URL
+     * @return 查询退款订单数目URL
      */
     public static String getRefundsCountQueryURL() {
-        return getRandomHost() + REFUNDS_COUNT_QUERY_URL;
+        return getRootHost() + REFUNDS_COUNT_QUERY_URL;
     }
 
     /**
-     * @return  查询退款订单状态URL
+     * @return 查询退款订单状态URL
      */
     public static String getRefundStatusURL() {
-        return getRandomHost() + REFUND_STATUS_QUERY_URL;
+        return getRootHost() + REFUND_STATUS_QUERY_URL;
     }
 
     public static String getPayPalAccessTokenUrl() {
@@ -181,30 +188,47 @@ class BCHttpClientUtil {
     }
 
     /**
-     * @return  线下支付
+     * @return 线下支付
      */
     public static String getBillOfflinePayURL() {
-        return getRandomHost() + BILL_OFFLINE_PAY_URL;
+        return getRootHost() + BILL_OFFLINE_PAY_URL;
     }
 
     /**
-     * @return  线下订单查询
+     * @return 线下订单查询
      */
     public static String getOfflineBillStatusURL() {
-        return getRandomHost() + OFFLINE_BILL_STATUS_URL;
+        return getRootHost() + OFFLINE_BILL_STATUS_URL;
     }
 
     /**
      * @return 退款
      */
     public static String getRefundUrl() {
-        return getRandomHost() + "rest/refund";
+        return getRootHost() + "rest/refund";
+    }
+
+    public static String getPlanUrl() {
+        return getRootHost() + PLAN_URL;
+    }
+
+    public static String getSubscriptionUrl() {
+        return getRootHost() + SUBSCRIPTION_URL;
+    }
+
+    public static String getSubscriptionBanksUrl() {
+        return getRootHost() + "subscription_banks";
+    }
+
+    public static String getSmsCodeUrl() {
+        return getRootHost() + "sms";
     }
 
     /**
      * http get 请求
-     * @param url   请求uri
-     * @return      HttpResponse请求结果实例
+     *
+     * @param url 请求uri，如有参数在原始url后面通过 ?k1=v1&k2=v2 连接
+     * @return BCHttpClientUtil.Response请求结果实例
      */
     public static Response httpGet(String url) {
 
@@ -239,9 +263,10 @@ class BCHttpClientUtil {
 
     /**
      * http post 请求
-     * @param url       请求url
-     * @param jsonStr    post参数
-     * @return          HttpResponse请求结果实例
+     *
+     * @param url     请求url
+     * @param jsonStr post参数
+     * @return BCHttpClientUtil.Response请求结果实例
      */
     public static Response httpPost(String url, String jsonStr) {
         Response response = new Response();
@@ -263,10 +288,35 @@ class BCHttpClientUtil {
     }
 
     /**
+     * http delete 请求
+     *
+     * @param url 请求uri，如有参数在原始url后面通过 ?k1=v1&k2=v2 连接
+     * @return BCHttpClientUtil.Response请求结果实例
+     */
+    public static Response httpDelete(String url) {
+
+        Response response = new Response();
+
+        OkHttpClient client = new OkHttpClient.Builder()
+                .connectTimeout(BCCache.getInstance().connectTimeout, TimeUnit.MILLISECONDS)
+                .build();
+
+        Request request = new Request.Builder()
+                .url(url)
+                .delete()
+                .build();
+
+        proceedRequest(client, request, response);
+
+        return response;
+    }
+
+    /**
      * http post 请求
-     * @param url       请求url
-     * @param para      post参数
-     * @return          HttpResponse请求结果实例
+     *
+     * @param url  请求url
+     * @param para post参数
+     * @return BCHttpClientUtil.Response请求结果实例
      */
     public static Response httpPost(String url, Map<String, Object> para) {
         Gson gson = new Gson();
@@ -275,18 +325,16 @@ class BCHttpClientUtil {
         return httpPost(url, param);
     }
 
+    /**
+     * @return paypal token
+     */
     public static Response getPayPalAccessToken() {
         Response response = new Response();
 
         BCTLSSocketFactory socketFactory = null;
         try {
             socketFactory = new BCTLSSocketFactory();
-        } catch (KeyManagementException e) {
-            e.printStackTrace();
-            Log.w(TAG, e.getMessage() == null ? " " : e.getMessage());
-            response.code = -1;
-            response.content = e.getMessage();
-        } catch (NoSuchAlgorithmException e) {
+        } catch (KeyManagementException | NoSuchAlgorithmException e) {
             e.printStackTrace();
             Log.w(TAG, e.getMessage() == null ? " " : e.getMessage());
             response.code = -1;
@@ -327,9 +375,56 @@ class BCHttpClientUtil {
         return response;
     }
 
+    static Map<String, Object> objectToMap(Object object) {
+        Map<String, Object> map = new HashMap<>();
+
+        Class cls = object.getClass();
+
+        for (Field field : cls.getDeclaredFields()) {
+            field.setAccessible(true);
+
+            Object value = null;
+            try {
+                value = field.get(object);
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+            if (value != null)
+                map.put(field.getName(), value);
+        }
+
+        return map;
+    }
+
+    static void attachAppSign(Map<String, Object> target) {
+        BCCache mCache = BCCache.getInstance();
+        target.put("app_id", mCache.appId);
+        long timestamp = System.currentTimeMillis();
+        target.put("timestamp", timestamp);
+        target.put("app_sign", BCSecurityUtil.getMessageMD5Digest(mCache.appId +
+                timestamp + mCache.secret));
+    }
+
+    static String map2UrlQueryString(Map<String, Object> map) {
+        StringBuilder sb = new StringBuilder();
+        for(HashMap.Entry<String, Object> e : map.entrySet()){
+            try {
+                sb.append(e.getKey());
+                sb.append('=');
+                sb.append(URLEncoder.encode(String.valueOf(e.getValue()), "UTF-8"));
+            } catch (UnsupportedEncodingException e1) {
+                e1.printStackTrace();
+            }
+            sb.append('&');
+        }
+        if (sb.length() == 0)
+            return "";
+        else
+            return sb.substring(0, sb.length() - 1);
+    }
+
     public static class Response {
         public Integer code;
         public String content;
     }
-
 }

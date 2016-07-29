@@ -6,10 +6,10 @@ android {
 
     defaultConfig {
         applicationId "cn.beecloud.demo"
-        minSdkVersion 10
+        minSdkVersion 11
         targetSdkVersion 22
-        versionCode 24
-        versionName "2.5.0"
+        versionCode 23
+        versionName "2.4.0"
     }
 
     buildTypes {

@@ -232,12 +232,12 @@ public class ShoppingCartActivity extends Activity {
         payMethod = (ListView) this.findViewById(R.id.payMethod);
         Integer[] payIcons = new Integer[]{R.drawable.wechat, R.drawable.alipay,
                 R.drawable.unionpay, R.drawable.beecloud_logo, R.drawable.baidupay,
-                R.drawable.paypal, R.drawable.scan};
+                R.drawable.paypal, R.drawable.rss, R.drawable.scan};
         final String[] payNames = new String[]{"微信支付", "支付宝支付",
-                "银联在线", "BeeCloud支付", "百度钱包", "PayPal支付", "二维码支付"};
+                "银联在线", "BeeCloud支付", "百度钱包", "PayPal支付", "订阅支付", "二维码支付"};
         String[] payDescs = new String[]{"使用微信支付，以人民币CNY计费", "使用支付宝支付，以人民币CNY计费",
                 "使用银联在线支付，以人民币CNY计费", "通过BeeCloud快捷支付", "使用百度钱包支付，以人民币CNY计费",
-                "使用PayPal支付，以美元USD计费", "通过扫描二维码支付"};
+                "使用PayPal支付，以美元USD计费", "通过订阅计划，自动缴费", "通过扫描二维码支付"};
         PayMethodListItem adapter = new PayMethodListItem(this, payIcons, payNames, payDescs);
         payMethod.setAdapter(adapter);
 
@@ -407,9 +407,18 @@ public class ShoppingCartActivity extends Activity {
                                 hashMapOptional,        //optional info
                                 bcCallback);
                         break;
-                    case 6:
+                    case 6: {//订阅支付
+                        /*
+                         进入订阅支付的activity
+                         */
+                        Intent intent = new Intent(ShoppingCartActivity.this, SubscribeActivity.class);
+                        startActivity(intent);
+                        break;
+                    }
+                    case 7: {
                         Intent intent = new Intent(ShoppingCartActivity.this, QRCodeEntryActivity.class);
                         startActivity(intent);
+                    }
                 }
             }
         });

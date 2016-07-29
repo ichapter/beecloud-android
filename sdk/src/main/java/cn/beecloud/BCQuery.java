@@ -8,19 +8,27 @@ package cn.beecloud;
 
 import android.util.Log;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
+
+import java.util.HashMap;
 import java.util.Map;
 
 import cn.beecloud.async.BCCallback;
 import cn.beecloud.entity.BCBillStatus;
+import cn.beecloud.entity.BCPlanListResult;
 import cn.beecloud.entity.BCQueryBillResult;
 import cn.beecloud.entity.BCQueryBillsResult;
 import cn.beecloud.entity.BCQueryCountResult;
+import cn.beecloud.entity.BCQueryLimit;
 import cn.beecloud.entity.BCQueryRefundResult;
 import cn.beecloud.entity.BCQueryRefundsResult;
 import cn.beecloud.entity.BCQueryReqParams;
 import cn.beecloud.entity.BCRefundStatus;
 import cn.beecloud.entity.BCReqParams;
 import cn.beecloud.entity.BCRestfulCommonResult;
+import cn.beecloud.entity.BCSubscriptionBanksResult;
+import cn.beecloud.entity.BCSubscriptionListResult;
 
 /**
  * 订单查询接口
@@ -165,14 +173,32 @@ public class BCQuery {
 
                     switch (operation) {
                         case QUERY_BILLS:
-                            callback.done(BCQueryBillsResult.transJsonToResultObject(ret));
+                            try {
+                                callback.done(BCQueryBillsResult.transJsonToResultObject(ret));
+                            } catch (JsonSyntaxException ex) {
+                                callback.done(new BCQueryBillsResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
+                                        BCRestfulCommonResult.APP_INNER_FAIL,
+                                        "JsonSyntaxException or Network Error:" + response.code + " # " + response.content));
+                            }
                             break;
                         case QUERY_REFUNDS:
-                            callback.done(BCQueryRefundsResult.transJsonToResultObject(ret));
+                            try {
+                                callback.done(BCQueryRefundsResult.transJsonToResultObject(ret));
+                            } catch (JsonSyntaxException ex) {
+                                callback.done(new BCQueryRefundsResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
+                                        BCRestfulCommonResult.APP_INNER_FAIL,
+                                        "JsonSyntaxException or Network Error:" + response.code + " # " + response.content));
+                            }
                             break;
                         case QUERY_BILLS_COUNT:
                         case QUERY_REFUNDS_COUNT:
-                            callback.done(BCQueryCountResult.transJsonToObject(ret));
+                            try {
+                                callback.done(BCQueryCountResult.transJsonToObject(ret));
+                            } catch (JsonSyntaxException ex) {
+                                callback.done(new BCQueryCountResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
+                                        BCRestfulCommonResult.APP_INNER_FAIL,
+                                        "JsonSyntaxException or Network Error:" + response.code + " # " + response.content));
+                            }
                             break;
                         default:
                             doErrCallBack(operation, BCRestfulCommonResult.APP_INNER_FAIL_NUM,
@@ -422,7 +448,13 @@ public class BCQuery {
                 if (response.code == 200 || (response.code >= 400 && response.code < 500)) {
 
                     String ret = response.content;
-                    callback.done(BCRefundStatus.transJsonToObject(ret));
+                    try {
+                        callback.done(BCRefundStatus.transJsonToObject(ret));
+                    } catch (JsonSyntaxException ex) {
+                        callback.done(new BCRefundStatus(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
+                                BCRestfulCommonResult.APP_INNER_FAIL,
+                                "JsonSyntaxException or Network Error:" + response.code + " # " + response.content));
+                    }
 
                 } else {
                     callback.done(new BCRefundStatus(
@@ -474,7 +506,13 @@ public class BCQuery {
                         bcQueryReqParams.transToEncodedJsonString());
 
                 if (response.code == 200 || (response.code >= 400 && response.code < 500)) {
-                    callback.done(BCQueryBillResult.transJsonToResultObject(response.content));
+                    try {
+                        callback.done(BCQueryBillResult.transJsonToResultObject(response.content));
+                    } catch (JsonSyntaxException ex) {
+                        callback.done(new BCQueryBillResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
+                                BCRestfulCommonResult.APP_INNER_FAIL,
+                                "JsonSyntaxException or Network Error:" + response.code + " # " + response.content));
+                    }
                 } else {
                     callback.done(new BCQueryBillResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
                             BCRestfulCommonResult.APP_INNER_FAIL,
@@ -530,7 +568,13 @@ public class BCQuery {
                         bcQueryReqParams.transToEncodedJsonString());
 
                 if (response.code == 200 || (response.code >= 400 && response.code < 500)) {
-                    callback.done(BCQueryRefundResult.transJsonToResultObject(response.content));
+                    try {
+                        callback.done(BCQueryRefundResult.transJsonToResultObject(response.content));
+                    } catch (JsonSyntaxException ex) {
+                        callback.done(new BCQueryRefundResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
+                                BCRestfulCommonResult.APP_INNER_FAIL,
+                                "JsonSyntaxException or Network Error:" + response.code + " # " + response.content));
+                    }
                 } else {
                     callback.done(new BCQueryRefundResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
                             BCRestfulCommonResult.APP_INNER_FAIL,
@@ -596,7 +640,13 @@ public class BCQuery {
                 if (response.code == 200 || (response.code >= 400 && response.code < 500)) {
 
                     //返回后台结果
-                    callback.done(BCBillStatus.transJsonToObject(response.content));
+                    try {
+                        callback.done(BCBillStatus.transJsonToObject(response.content));
+                    } catch (JsonSyntaxException ex) {
+                        callback.done(new BCBillStatus(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
+                                BCRestfulCommonResult.APP_INNER_FAIL,
+                                "JsonSyntaxException or Network Error:" + response.code + " # " + response.content));
+                    }
 
                 } else {
                     callback.done(new BCBillStatus(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
@@ -604,6 +654,189 @@ public class BCQuery {
                             "Network Error:" + response.code + " # " + response.content));
                 }
 
+            }
+        });
+    }
+
+    /**
+     * 获取订阅支付支持的银行列表
+     * @param callback  回调入口
+     */
+    public void subscriptionSupportedBanks(final BCCallback callback) {
+        if (callback == null) {
+            Log.e(TAG, "请初始化callback");
+            return;
+        }
+
+        BCCache.executorService.execute(new Runnable() {
+            @Override
+            public void run() {
+                if (BCCache.getInstance().isTestMode) {
+                    callback.done(new BCSubscriptionBanksResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
+                            BCRestfulCommonResult.APP_INNER_FAIL, "该功能暂不支持测试模式"));
+                    return;
+                }
+
+                Map<String, Object> reqMap = new HashMap<String, Object>();
+                BCHttpClientUtil.attachAppSign(reqMap);
+
+                String reqURL = BCHttpClientUtil.getSubscriptionBanksUrl()
+                        + "?" + BCHttpClientUtil.map2UrlQueryString(reqMap);
+
+                BCHttpClientUtil.Response response = BCHttpClientUtil.httpGet(reqURL);
+
+                if (response.code == 200 || (response.code >= 400 && response.code < 500)) {
+                    //反序列化json
+                    Gson gson = new Gson();
+
+                    try {
+                        callback.done(gson.fromJson(response.content, BCSubscriptionBanksResult.class));
+                    } catch (JsonSyntaxException ex) {
+                        callback.done(new BCSubscriptionBanksResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
+                                BCRestfulCommonResult.APP_INNER_FAIL,
+                                "JsonSyntaxException or Network Error:" + response.code + " # " + response.content));
+                    }
+                } else {
+                    callback.done(new BCSubscriptionBanksResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
+                            BCRestfulCommonResult.APP_INNER_FAIL,
+                            "Network Error:" + response.code + " # " + response.content));
+                }
+            }
+        });
+    }
+
+    /**
+     * 查询订阅计划列表
+     * @param limit 通用限制参数
+     * @param nameWithSubstring 限制计划名中包含的字符串
+     * @param interval  查找的计划周期，可以是day, week, month or year
+     * @param intervalCount 扣款周期间隔数
+     * @param trialDays 使用天数
+     * @param callback  回调入口
+     */
+    public void queryPlans(final BCQueryLimit limit, final String nameWithSubstring, final String interval,
+                           final Integer intervalCount, final Integer trialDays, final BCCallback callback) {
+        if (callback == null) {
+            Log.e(TAG, "请初始化callback");
+            return;
+        }
+
+        BCCache.executorService.execute(new Runnable() {
+            @Override
+            public void run() {
+                if (BCCache.getInstance().isTestMode) {
+                    callback.done(new BCPlanListResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
+                            BCRestfulCommonResult.APP_INNER_FAIL, "该功能暂不支持测试模式"));
+                    return;
+                }
+
+                Map<String, Object> reqMap;
+                if (limit == null)
+                    reqMap = new HashMap<String, Object>();
+                else
+                    reqMap = BCHttpClientUtil.objectToMap(limit);
+
+                if (nameWithSubstring != null)
+                    reqMap.put("name_with_substring", nameWithSubstring);
+
+                if (interval != null)
+                    reqMap.put("interval", interval);
+
+                if (intervalCount != null)
+                    reqMap.put("interval_count", intervalCount);
+
+                if (trialDays != null)
+                    reqMap.put("trial_days", trialDays);
+
+                BCHttpClientUtil.attachAppSign(reqMap);
+
+                String reqURL = BCHttpClientUtil.getPlanUrl()
+                        + "?" + BCHttpClientUtil.map2UrlQueryString(reqMap);
+
+                BCHttpClientUtil.Response response = BCHttpClientUtil.httpGet(reqURL);
+
+                if (response.code == 200 || (response.code >= 400 && response.code < 500)) {
+                    //反序列化json
+                    Gson gson = new Gson();
+
+                    try {
+                        callback.done(gson.fromJson(response.content, BCPlanListResult.class));
+                    } catch (JsonSyntaxException ex) {
+                        callback.done(new BCPlanListResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
+                                BCRestfulCommonResult.APP_INNER_FAIL,
+                                "JsonSyntaxException or Network Error:" + response.code + " # " + response.content));
+                    }
+                } else {
+                    callback.done(new BCPlanListResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
+                            BCRestfulCommonResult.APP_INNER_FAIL,
+                            "Network Error:" + response.code + " # " + response.content));
+                }
+            }
+        });
+    }
+
+    /**
+     * 查询订阅列表
+     * @param limit 通用限制参数
+     * @param buyerId   订阅的用户标识符
+     * @param planId    订阅的计划标识符
+     * @param cardId    用户支付账户标识符
+     * @param callback  回调入口
+     */
+    public void querySubscriptions(final BCQueryLimit limit, final String buyerId, final String planId,
+                           final String cardId, final BCCallback callback) {
+        if (callback == null) {
+            Log.e(TAG, "请初始化callback");
+            return;
+        }
+
+        BCCache.executorService.execute(new Runnable() {
+            @Override
+            public void run() {
+                if (BCCache.getInstance().isTestMode) {
+                    callback.done(new BCSubscriptionListResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
+                            BCRestfulCommonResult.APP_INNER_FAIL, "该功能暂不支持测试模式"));
+                    return;
+                }
+
+                Map<String, Object> reqMap;
+                if (limit == null)
+                    reqMap = new HashMap<String, Object>();
+                else
+                    reqMap = BCHttpClientUtil.objectToMap(limit);
+
+                if (buyerId != null)
+                    reqMap.put("buyer_id", buyerId);
+
+                if (planId != null)
+                    reqMap.put("plan_id", planId);
+
+                if (cardId != null)
+                    reqMap.put("card_id", cardId);
+
+                BCHttpClientUtil.attachAppSign(reqMap);
+
+                String reqURL = BCHttpClientUtil.getSubscriptionUrl()
+                        + "?" + BCHttpClientUtil.map2UrlQueryString(reqMap);
+
+                BCHttpClientUtil.Response response = BCHttpClientUtil.httpGet(reqURL);
+
+                if (response.code == 200 || (response.code >= 400 && response.code < 500)) {
+                    //反序列化json
+                    Gson gson = new Gson();
+
+                    try {
+                        callback.done(gson.fromJson(response.content, BCSubscriptionListResult.class));
+                    } catch (JsonSyntaxException ex) {
+                        callback.done(new BCSubscriptionListResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
+                                BCRestfulCommonResult.APP_INNER_FAIL,
+                                "JsonSyntaxException or Network Error:" + response.code + " # " + response.content));
+                    }
+                } else {
+                    callback.done(new BCSubscriptionListResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
+                            BCRestfulCommonResult.APP_INNER_FAIL,
+                            "Network Error:" + response.code + " # " + response.content));
+                }
             }
         });
     }
