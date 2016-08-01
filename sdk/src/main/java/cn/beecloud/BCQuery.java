@@ -707,11 +707,11 @@ public class BCQuery {
 
     /**
      * 查询订阅计划列表
-     * @param limit 通用限制参数
-     * @param nameWithSubstring 限制计划名中包含的字符串
-     * @param interval  查找的计划周期，可以是day, week, month or year
-     * @param intervalCount 扣款周期间隔数
-     * @param trialDays 使用天数
+     * @param limit 通用限制参数，可以为null
+     * @param nameWithSubstring 限制计划名中包含的字符串，可以为null
+     * @param interval  查找的计划周期，可以是day, week, month or year，可以为null
+     * @param intervalCount 扣款周期间隔数，可以为null
+     * @param trialDays 使用天数，可以为null
      * @param callback  回调入口
      */
     public void queryPlans(final BCQueryLimit limit, final String nameWithSubstring, final String interval,
@@ -777,10 +777,10 @@ public class BCQuery {
 
     /**
      * 查询订阅列表
-     * @param limit 通用限制参数
-     * @param buyerId   订阅的用户标识符
-     * @param planId    订阅的计划标识符
-     * @param cardId    用户支付账户标识符
+     * @param limit 通用限制参数，可以为null
+     * @param buyerId   订阅的用户标识符，可以为null
+     * @param planId    订阅的计划标识符，可以为null
+     * @param cardId    用户支付账户标识符，可以为null
      * @param callback  回调入口
      */
     public void querySubscriptions(final BCQueryLimit limit, final String buyerId, final String planId,

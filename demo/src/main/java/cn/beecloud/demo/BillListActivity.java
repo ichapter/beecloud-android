@@ -175,10 +175,8 @@ public class BillListActivity extends Activity {
                                 Map<String, String> optional = new HashMap<String, String>();
                                 optional.put("扩展参数", "可以为null");
                                 params.optional = optional;
-                                //手机端need approval必须是true(RefundParams默认值)
-                                //params.needApproval = Boolean.TRUE;
 
-                                BCPay.getInstance(BillListActivity.this).reqRefund(params, new BCCallback() {
+                                BCPay.getInstance(BillListActivity.this).prefund(params, new BCCallback() {
                                     @Override
                                     public void done(BCResult result) {
                                         BCRefundResult refundResult = (BCRefundResult) result;

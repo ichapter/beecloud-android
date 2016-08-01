@@ -973,14 +973,9 @@ public class BCPay {
      * @param params 预退款参数
      * @param callback  回调入口
      */
-    public void reqRefund(final RefundParams params, final BCCallback callback) {
+    public void prefund(final RefundParams params, final BCCallback callback) {
         if (callback == null) {
             Log.e(TAG, "请初始化callback");
-            return;
-        }
-
-        if (params.needApproval == null || !params.needApproval) {
-            Log.e(TAG, "手机端只支持预退款，RefundParams中needApproval必须是true");
             return;
         }
 
@@ -1022,7 +1017,7 @@ public class BCPay {
                 reqMap.put("bill_no", params.billNum);
                 reqMap.put("refund_fee", params.refundFee);
                 reqMap.put("optional", params.optional);
-                reqMap.put("need_approval", params.needApproval);
+                reqMap.put("need_approval", Boolean.TRUE);
 
                 String reqURL = BCHttpClientUtil.getRefundUrl();
 
@@ -1258,7 +1253,7 @@ public class BCPay {
     }
 
     /**
-     * 外部支付参数实例
+     * 外部预退款参数实例
      */
     public static class RefundParams {
         /**
@@ -1293,11 +1288,5 @@ public class BCPay {
          * 对于PayPal请以HashMap实例化
          */
         public Map<String, String> optional;
-
-        /**
-         * 是否为预退款，
-         * 手机端必须是true
-         */
-        public Boolean needApproval = Boolean.TRUE;
     }
 }

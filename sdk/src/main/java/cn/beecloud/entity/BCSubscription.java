@@ -213,7 +213,7 @@ public class BCSubscription {
     }
 
     /**
-     * @param trialEnd
+     * @param trialEnd 试用截止时间戳
      */
     public void setTrialEnd(Long trialEnd) {
         this.trial_end = trialEnd;
