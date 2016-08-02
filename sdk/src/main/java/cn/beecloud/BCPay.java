@@ -1058,37 +1058,11 @@ public class BCPay {
         BCCache.executorService.execute(new Runnable() {
             @Override
             public void run() {
-                if (BCCache.getInstance().isTestMode) {
-                    callback.done(new BCSmsResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
-                            BCRestfulCommonResult.APP_INNER_FAIL, "该功能暂不支持测试模式"));
-                    return;
-                }
-
                 Map<String, Object> reqMap = new HashMap<String, Object>();
                 reqMap.put("phone", phone);
-                BCHttpClientUtil.attachAppSign(reqMap);
 
-                String reqURL = BCHttpClientUtil.getSmsCodeUrl();
-
-                BCHttpClientUtil.Response response = BCHttpClientUtil
-                        .httpPost(reqURL, reqMap);
-
-                if (response.code == 200 || (response.code >= 400 && response.code < 500)) {
-                    //反序列化json
-                    Gson gson = new Gson();
-
-                    try {
-                        callback.done(gson.fromJson(response.content, BCSmsResult.class));
-                    } catch (JsonSyntaxException ex) {
-                        callback.done(new BCSmsResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
-                                BCRestfulCommonResult.APP_INNER_FAIL,
-                                "JsonSyntaxException or Network Error:" + response.code + " # " + response.content));
-                    }
-                } else {
-                    callback.done(new BCSmsResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
-                            BCRestfulCommonResult.APP_INNER_FAIL,
-                            "Network Error:" + response.code + " # " + response.content));
-                }
+                callback.done(BCHttpClientUtil.addRestObject(BCHttpClientUtil.getSmsCodeUrl(),
+                        reqMap, BCSmsResult.class, true));
             }
         });
     }
@@ -1111,40 +1085,14 @@ public class BCPay {
         BCCache.executorService.execute(new Runnable() {
             @Override
             public void run() {
-                if (BCCache.getInstance().isTestMode) {
-                    callback.done(new BCSubscriptionResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
-                            BCRestfulCommonResult.APP_INNER_FAIL, "该功能暂不支持测试模式"));
-                    return;
-                }
-
                 Map<String, Object> reqMap = BCHttpClientUtil.objectToMap(params);
                 reqMap.put("sms_id", smsId);
                 reqMap.put("sms_code", smsCode);
                 if (couponCode != null)
                     reqMap.put("coupon_code", couponCode);
-                BCHttpClientUtil.attachAppSign(reqMap);
 
-                String reqURL = BCHttpClientUtil.getSubscriptionUrl();
-
-                BCHttpClientUtil.Response response = BCHttpClientUtil
-                        .httpPost(reqURL, reqMap);
-
-                if (response.code == 200 || (response.code >= 400 && response.code < 500)) {
-                    //反序列化json
-                    Gson gson = new Gson();
-
-                    try {
-                        callback.done(gson.fromJson(response.content, BCSubscriptionResult.class));
-                    } catch (JsonSyntaxException ex) {
-                        callback.done(new BCSubscriptionResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
-                                BCRestfulCommonResult.APP_INNER_FAIL,
-                                "JsonSyntaxException or Network Error:" + response.code + " # " + response.content));
-                    }
-                } else {
-                    callback.done(new BCSubscriptionResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
-                            BCRestfulCommonResult.APP_INNER_FAIL,
-                            "Network Error:" + response.code + " # " + response.content));
-                }
+                callback.done(BCHttpClientUtil.addRestObject(BCHttpClientUtil.getSubscriptionUrl(),
+                        reqMap, BCSubscriptionResult.class, true));
             }
         });
     }
@@ -1163,37 +1111,9 @@ public class BCPay {
         BCCache.executorService.execute(new Runnable() {
             @Override
             public void run() {
-                if (BCCache.getInstance().isTestMode) {
-                    callback.done(new BCObjectIdResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
-                            BCRestfulCommonResult.APP_INNER_FAIL, "该功能暂不支持测试模式"));
-                    return;
-                }
-
-                Map<String, Object> reqMap = new HashMap<String, Object>();
-                BCHttpClientUtil.attachAppSign(reqMap);
-
-                String reqURL = BCHttpClientUtil.getSubscriptionUrl() + "/" + sid
-                        + "?" + BCHttpClientUtil.map2UrlQueryString(reqMap);
-
-                BCHttpClientUtil.Response response = BCHttpClientUtil
-                        .httpDelete(reqURL);
-
-                if (response.code == 200 || (response.code >= 400 && response.code < 500)) {
-                    //反序列化json
-                    Gson gson = new Gson();
-
-                    try {
-                        callback.done(gson.fromJson(response.content, BCObjectIdResult.class));
-                    } catch (JsonSyntaxException ex) {
-                        callback.done(new BCObjectIdResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
-                                BCRestfulCommonResult.APP_INNER_FAIL,
-                                "JsonSyntaxException or Network Error:" + response.code + " # " + response.content));
-                    }
-                } else {
-                    callback.done(new BCObjectIdResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
-                            BCRestfulCommonResult.APP_INNER_FAIL,
-                            "Network Error:" + response.code + " # " + response.content));
-                }
+                Map<String, Object> reqMap = new HashMap<>();
+                callback.done(BCHttpClientUtil.deleteRestObject(BCHttpClientUtil.getSubscriptionUrl(),
+                        sid, reqMap, BCObjectIdResult.class, true));
             }
         });
     }

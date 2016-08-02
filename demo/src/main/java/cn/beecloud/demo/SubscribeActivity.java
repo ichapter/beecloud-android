@@ -25,6 +25,7 @@ import cn.beecloud.async.BCResult;
 import cn.beecloud.demo.util.DisplayUtils;
 import cn.beecloud.entity.BCPlan;
 import cn.beecloud.entity.BCPlanListResult;
+import cn.beecloud.entity.BCQueryLimit;
 import cn.beecloud.entity.BCSmsResult;
 import cn.beecloud.entity.BCSubscription;
 import cn.beecloud.entity.BCSubscriptionBanksResult;
@@ -125,7 +126,17 @@ public class SubscribeActivity extends Activity {
     }
 
     void reqPlans() {
-        BCQuery.getInstance().queryPlans(null, null, null, null, null,
+        // 参照API添加查询通用限制条件
+        BCQueryLimit limit = new BCQueryLimit();
+        // 比如限制最多返回10条记录
+        limit.setLimit(10);
+
+        // 参照API添加针对计划的限制条件
+        BCQuery.PlanLimit specificLimit = new BCQuery.PlanLimit();
+        // 比如只返回是按天收费的计划
+        specificLimit.interval = "day";
+
+        BCQuery.getInstance().queryPlans(limit, specificLimit,
                 new BCCallback() {
                     @Override
                     public void done(BCResult result) {
@@ -142,7 +153,8 @@ public class SubscribeActivity extends Activity {
                             planList = listResult.getPlans();
                             planSpinnerData.clear();
                             for (BCPlan plan : planList) {
-                                planSpinnerData.add(plan.getName());
+                                if (plan.getValid() != null && plan.getValid())
+                                    planSpinnerData.add(plan.getName());
                             }
                         }
 

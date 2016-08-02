@@ -9,9 +9,11 @@ package cn.beecloud;
 import android.util.Log;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.net.URLEncoder;
 import java.security.KeyManagementException;
@@ -22,6 +24,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.X509TrustManager;
 
+import cn.beecloud.entity.BCRestfulCommonResult;
 import okhttp3.FormBody;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -407,7 +410,7 @@ class BCHttpClientUtil {
 
     static String map2UrlQueryString(Map<String, Object> map) {
         StringBuilder sb = new StringBuilder();
-        for(HashMap.Entry<String, Object> e : map.entrySet()){
+        for (HashMap.Entry<String, Object> e : map.entrySet()) {
             try {
                 sb.append(e.getKey());
                 sb.append('=');
@@ -422,6 +425,90 @@ class BCHttpClientUtil {
         else
             return sb.substring(0, sb.length() - 1);
     }
+
+    static BCRestfulCommonResult setCommonResult(Class<? extends BCRestfulCommonResult> className, Integer code, String errMsg, String detail) {
+        BCRestfulCommonResult object = null;
+        try {
+            Constructor<? extends BCRestfulCommonResult> ctor = className.getConstructor(Integer.class, String.class, String.class);
+            object = ctor.newInstance(code, errMsg, detail);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return object;
+    }
+
+    //===================== BeeCloud Rest Object CURD =====================
+    private static BCRestfulCommonResult dealWithResult(Response response,
+                                                Class<? extends BCRestfulCommonResult> classType) {
+        if (response.code == 200 || (response.code >= 400 && response.code < 500)) {
+            //反序列化json
+            Gson gson = new Gson();
+
+            try {
+                return gson.fromJson(response.content, classType);
+            } catch (JsonSyntaxException ex) {
+                return setCommonResult(classType, BCRestfulCommonResult.APP_INNER_FAIL_NUM,
+                        BCRestfulCommonResult.APP_INNER_FAIL,
+                        "JsonSyntaxException or Network Error:" + response.code + " # " + response.content);
+            }
+        } else {
+            return setCommonResult(classType, BCRestfulCommonResult.APP_INNER_FAIL_NUM,
+                    BCRestfulCommonResult.APP_INNER_FAIL,
+                    "Network Error:" + response.code + " # " + response.content);
+        }
+    }
+
+    static BCRestfulCommonResult addRestObject(String url, Map<String, Object> reqParam,
+                                               Class<? extends BCRestfulCommonResult> classType,
+                                               boolean testModeNotSupport) {
+        if (testModeNotSupport && BCCache.getInstance().isTestMode) {
+            return setCommonResult(classType, BCRestfulCommonResult.APP_INNER_FAIL_NUM,
+                    BCRestfulCommonResult.APP_INNER_FAIL, "该功能暂不支持测试模式");
+        }
+
+        BCHttpClientUtil.attachAppSign(reqParam);
+        BCHttpClientUtil.Response response = BCHttpClientUtil
+                .httpPost(url, reqParam);
+
+        return dealWithResult(response, classType);
+    }
+
+    static BCRestfulCommonResult deleteRestObject(String url, String id, Map<String, Object> reqParam,
+                                                  Class<? extends BCRestfulCommonResult> classType,
+                                                  boolean testModeNotSupport) {
+        if (testModeNotSupport && BCCache.getInstance().isTestMode) {
+            return setCommonResult(classType, BCRestfulCommonResult.APP_INNER_FAIL_NUM,
+                    BCRestfulCommonResult.APP_INNER_FAIL, "该功能暂不支持测试模式");
+        }
+
+        BCHttpClientUtil.attachAppSign(reqParam);
+        String reqURL = url + "/" + id + "?" + BCHttpClientUtil.map2UrlQueryString(reqParam);
+
+        BCHttpClientUtil.Response response = BCHttpClientUtil
+                .httpDelete(reqURL);
+
+        return dealWithResult(response, classType);
+    }
+
+    static BCRestfulCommonResult queryRestObjects(String url, Map<String, Object> reqParam,
+                                                  Class<? extends BCRestfulCommonResult> classType,
+                                                  boolean testModeNotSupport) {
+        if (testModeNotSupport && BCCache.getInstance().isTestMode) {
+            return setCommonResult(classType, BCRestfulCommonResult.APP_INNER_FAIL_NUM,
+                    BCRestfulCommonResult.APP_INNER_FAIL, "该功能暂不支持测试模式");
+        }
+
+        BCHttpClientUtil.attachAppSign(reqParam);
+        String reqURL = url + "?" + BCHttpClientUtil.map2UrlQueryString(reqParam);
+
+        BCHttpClientUtil.Response response = BCHttpClientUtil
+                .httpGet(reqURL);
+
+        return dealWithResult(response, classType);
+    }
+
+    //===================== BeeCloud Rest Object CURD =====================
 
     public static class Response {
         public Integer code;

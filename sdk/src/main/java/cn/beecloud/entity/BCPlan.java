@@ -51,6 +51,11 @@ public class BCPlan {
     private Map<String, Object> optional;
 
     /**
+     * 计划是否生效
+     */
+    private Boolean valid;
+
+    /**
      * @return 订阅计划的唯一标识
      */
     public String getId() {
@@ -154,5 +159,12 @@ public class BCPlan {
      */
     public void setOptional(Map<String, Object> optional) {
         this.optional = optional;
+    }
+
+    /**
+     * @return 计划是否生效
+     */
+    public Boolean getValid() {
+        return valid;
     }
 }

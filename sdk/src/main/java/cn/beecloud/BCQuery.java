@@ -8,7 +8,6 @@ package cn.beecloud;
 
 import android.util.Log;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 
 import java.util.HashMap;
@@ -671,36 +670,10 @@ public class BCQuery {
         BCCache.executorService.execute(new Runnable() {
             @Override
             public void run() {
-                if (BCCache.getInstance().isTestMode) {
-                    callback.done(new BCSubscriptionBanksResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
-                            BCRestfulCommonResult.APP_INNER_FAIL, "该功能暂不支持测试模式"));
-                    return;
-                }
-
-                Map<String, Object> reqMap = new HashMap<String, Object>();
-                BCHttpClientUtil.attachAppSign(reqMap);
-
-                String reqURL = BCHttpClientUtil.getSubscriptionBanksUrl()
-                        + "?" + BCHttpClientUtil.map2UrlQueryString(reqMap);
-
-                BCHttpClientUtil.Response response = BCHttpClientUtil.httpGet(reqURL);
-
-                if (response.code == 200 || (response.code >= 400 && response.code < 500)) {
-                    //反序列化json
-                    Gson gson = new Gson();
-
-                    try {
-                        callback.done(gson.fromJson(response.content, BCSubscriptionBanksResult.class));
-                    } catch (JsonSyntaxException ex) {
-                        callback.done(new BCSubscriptionBanksResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
-                                BCRestfulCommonResult.APP_INNER_FAIL,
-                                "JsonSyntaxException or Network Error:" + response.code + " # " + response.content));
-                    }
-                } else {
-                    callback.done(new BCSubscriptionBanksResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
-                            BCRestfulCommonResult.APP_INNER_FAIL,
-                            "Network Error:" + response.code + " # " + response.content));
-                }
+                Map<String, Object> reqMap = new HashMap<>();
+                callback.done(BCHttpClientUtil.queryRestObjects(
+                        BCHttpClientUtil.getSubscriptionBanksUrl(), reqMap,
+                        BCSubscriptionBanksResult.class, true));
             }
         });
     }
@@ -708,14 +681,10 @@ public class BCQuery {
     /**
      * 查询订阅计划列表
      * @param limit 通用限制参数，可以为null
-     * @param nameWithSubstring 限制计划名中包含的字符串，可以为null
-     * @param interval  查找的计划周期，可以是day, week, month or year，可以为null
-     * @param intervalCount 扣款周期间隔数，可以为null
-     * @param trialDays 使用天数，可以为null
+     * @param specificLimit 针对plan的限制字段，可以为null
      * @param callback  回调入口
      */
-    public void queryPlans(final BCQueryLimit limit, final String nameWithSubstring, final String interval,
-                           final Integer intervalCount, final Integer trialDays, final BCCallback callback) {
+    public void queryPlans(final BCQueryLimit limit, final PlanLimit specificLimit, final BCCallback callback) {
         if (callback == null) {
             Log.e(TAG, "请初始化callback");
             return;
@@ -724,53 +693,28 @@ public class BCQuery {
         BCCache.executorService.execute(new Runnable() {
             @Override
             public void run() {
-                if (BCCache.getInstance().isTestMode) {
-                    callback.done(new BCPlanListResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
-                            BCRestfulCommonResult.APP_INNER_FAIL, "该功能暂不支持测试模式"));
-                    return;
-                }
-
                 Map<String, Object> reqMap;
                 if (limit == null)
-                    reqMap = new HashMap<String, Object>();
+                    reqMap = new HashMap<>();
                 else
                     reqMap = BCHttpClientUtil.objectToMap(limit);
 
-                if (nameWithSubstring != null)
-                    reqMap.put("name_with_substring", nameWithSubstring);
+                if (specificLimit != null) {
+                    if (specificLimit.nameWithSubstring != null)
+                        reqMap.put("name_with_substring", specificLimit.nameWithSubstring);
 
-                if (interval != null)
-                    reqMap.put("interval", interval);
+                    if (specificLimit.interval != null)
+                        reqMap.put("interval", specificLimit.interval);
 
-                if (intervalCount != null)
-                    reqMap.put("interval_count", intervalCount);
+                    if (specificLimit.intervalCount != null)
+                        reqMap.put("interval_count", specificLimit.intervalCount);
 
-                if (trialDays != null)
-                    reqMap.put("trial_days", trialDays);
-
-                BCHttpClientUtil.attachAppSign(reqMap);
-
-                String reqURL = BCHttpClientUtil.getPlanUrl()
-                        + "?" + BCHttpClientUtil.map2UrlQueryString(reqMap);
-
-                BCHttpClientUtil.Response response = BCHttpClientUtil.httpGet(reqURL);
-
-                if (response.code == 200 || (response.code >= 400 && response.code < 500)) {
-                    //反序列化json
-                    Gson gson = new Gson();
-
-                    try {
-                        callback.done(gson.fromJson(response.content, BCPlanListResult.class));
-                    } catch (JsonSyntaxException ex) {
-                        callback.done(new BCPlanListResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
-                                BCRestfulCommonResult.APP_INNER_FAIL,
-                                "JsonSyntaxException or Network Error:" + response.code + " # " + response.content));
-                    }
-                } else {
-                    callback.done(new BCPlanListResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
-                            BCRestfulCommonResult.APP_INNER_FAIL,
-                            "Network Error:" + response.code + " # " + response.content));
+                    if (specificLimit.trialDays != null)
+                        reqMap.put("trial_days", specificLimit.trialDays);
                 }
+
+                callback.done(BCHttpClientUtil.queryRestObjects(BCHttpClientUtil.getPlanUrl(),
+                        reqMap, BCPlanListResult.class, true));
             }
         });
     }
@@ -778,13 +722,10 @@ public class BCQuery {
     /**
      * 查询订阅列表
      * @param limit 通用限制参数，可以为null
-     * @param buyerId   订阅的用户标识符，可以为null
-     * @param planId    订阅的计划标识符，可以为null
-     * @param cardId    用户支付账户标识符，可以为null
+     * @param specificLimit 针对subscription的限制字段，可以为null
      * @param callback  回调入口
      */
-    public void querySubscriptions(final BCQueryLimit limit, final String buyerId, final String planId,
-                           final String cardId, final BCCallback callback) {
+    public void querySubscriptions(final BCQueryLimit limit, final SubscriptionLimit specificLimit, final BCCallback callback) {
         if (callback == null) {
             Log.e(TAG, "请初始化callback");
             return;
@@ -801,48 +742,29 @@ public class BCQuery {
 
                 Map<String, Object> reqMap;
                 if (limit == null)
-                    reqMap = new HashMap<String, Object>();
+                    reqMap = new HashMap<>();
                 else
                     reqMap = BCHttpClientUtil.objectToMap(limit);
 
-                if (buyerId != null)
-                    reqMap.put("buyer_id", buyerId);
+                if (specificLimit != null) {
+                    if (specificLimit.buyerId != null)
+                        reqMap.put("buyer_id", specificLimit.buyerId);
 
-                if (planId != null)
-                    reqMap.put("plan_id", planId);
+                    if (specificLimit.planId != null)
+                        reqMap.put("plan_id", specificLimit.planId);
 
-                if (cardId != null)
-                    reqMap.put("card_id", cardId);
-
-                BCHttpClientUtil.attachAppSign(reqMap);
-
-                String reqURL = BCHttpClientUtil.getSubscriptionUrl()
-                        + "?" + BCHttpClientUtil.map2UrlQueryString(reqMap);
-
-                BCHttpClientUtil.Response response = BCHttpClientUtil.httpGet(reqURL);
-
-                if (response.code == 200 || (response.code >= 400 && response.code < 500)) {
-                    //反序列化json
-                    Gson gson = new Gson();
-
-                    try {
-                        callback.done(gson.fromJson(response.content, BCSubscriptionListResult.class));
-                    } catch (JsonSyntaxException ex) {
-                        callback.done(new BCSubscriptionListResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
-                                BCRestfulCommonResult.APP_INNER_FAIL,
-                                "JsonSyntaxException or Network Error:" + response.code + " # " + response.content));
-                    }
-                } else {
-                    callback.done(new BCSubscriptionListResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
-                            BCRestfulCommonResult.APP_INNER_FAIL,
-                            "Network Error:" + response.code + " # " + response.content));
+                    if (specificLimit.cardId != null)
+                        reqMap.put("card_id", specificLimit.cardId);
                 }
+
+                callback.done(BCHttpClientUtil.queryRestObjects(BCHttpClientUtil.getSubscriptionUrl(),
+                        reqMap, BCSubscriptionListResult.class, true));
             }
         });
     }
 
     /**
-     * 查询外部参数类
+     * 查询订单和退款的参数类
      */
     public static class QueryParams {
         /**
@@ -905,5 +827,50 @@ public class BCQuery {
          * 如果是查询订单数目, 该参数会被忽略
          */
         public Boolean needDetail;
+    }
+
+    /**
+     * 查询计划的限制类，所有字段皆为选填
+     */
+    public static class PlanLimit {
+        /**
+         * 限制计划名中包含的字符串
+         */
+        public String nameWithSubstring;
+
+        /**
+         * 查找的计划周期，可以是day, week, month or year
+         */
+        public String interval;
+
+        /**
+         * 扣款周期间隔数
+         */
+        public Integer intervalCount;
+
+        /**
+         * 试用天数
+         */
+        public Integer trialDays;
+    }
+
+    /**
+     * 查询订阅的限制类，所有字段皆为选填
+     */
+    public static class SubscriptionLimit {
+        /**
+         * 订阅的用户标识符
+         */
+        public String buyerId;
+
+        /**
+         * 订阅的计划标识符
+         */
+        public String planId;
+
+        /**
+         * 用户支付账户标识符
+         */
+        public String cardId;
     }
 }

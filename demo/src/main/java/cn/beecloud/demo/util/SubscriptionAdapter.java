@@ -138,7 +138,7 @@ public class SubscriptionAdapter extends BaseAdapter {
         viewHolder.txtIdNum.setText(String.format("订阅用户身份证号: %s", subscription.getIdNum()));
         viewHolder.txtMobile.setText(String.format("订阅用户银行预留手机号: %s", subscription.getMobile()));
         viewHolder.txtStatus.setText(String.format("订阅状态: %s", subscription.getStatus()));
-        viewHolder.txtValid.setText(String.format("订阅有效: %s", subscription.isValid()));
+        viewHolder.txtValid.setText(String.format("订阅有效: %s", subscription.getValid()));
 
         return convertView;
     }

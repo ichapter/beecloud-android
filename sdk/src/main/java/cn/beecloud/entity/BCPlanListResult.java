@@ -9,6 +9,7 @@ package cn.beecloud.entity;
 import java.util.List;
 
 public class BCPlanListResult extends BCRestfulCommonResult {
+    private Integer total_count;
     private List<BCPlan> plans;
 
     public BCPlanListResult(Integer resultCode, String resultMsg, String errDetail) {
@@ -20,5 +21,17 @@ public class BCPlanListResult extends BCRestfulCommonResult {
      */
     public List<BCPlan> getPlans() {
         return plans;
+    }
+
+    /**
+     * @return 满足条件的列表个数
+     */
+    public Integer getTotalCount() {
+        if (total_count != null)
+            return total_count;
+        else if (plans != null)
+            return plans.size();
+        else
+            return 0;
     }
 }

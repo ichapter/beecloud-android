@@ -49,7 +49,7 @@ public class BCQueryLimit {
     }
 
     /**
-     * 设置是否只需要返回满足条件的记录总个数
+     * 设置是否只需要返回满足条件的记录总个数，如果为TRUE，那么查询结果只包含总个数信息
      */
     public void setCountOnly(Boolean countOnly) {
         this.count_only = countOnly;
@@ -71,7 +71,7 @@ public class BCQueryLimit {
     }
 
     /**
-     * 设置本次查询需要返回的最大记录条数
+     * 设置本次查询需要返回的最大记录条数，默认为10
      */
     public void setLimit(Integer limit) {
         this.limit = limit;
