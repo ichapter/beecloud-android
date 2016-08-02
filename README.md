@@ -547,13 +547,15 @@ BCQuery.getInstance().queryOfflineBillStatusAsync(
 ### 8.订阅支付
 先查看[订阅系统说明文档](https://github.com/beecloud/beecloud-rest-api/blob/master/subscription/%E8%AE%A2%E9%98%85%E7%B3%BB%E7%BB%9F%E8%AF%B4%E6%98%8E%E6%96%87%E6%A1%A3.md)了解基础概念，开发过程中如果对相关变量命名有疑惑，查看[API References](https://beecloud.cn/doc/api/beecloud-android/)  
   
-#### 查询计划列表
+* **查询计划列表**
+  
 **原型：**
 
 通过`BCQuery`的实例，以`queryPlans`方法查询计划列表，查询结果转化成`BCPlanListResult`后通过`getPlans`获取计划列表，请参照`demo`中`SubscribeActivity`。  
 `queryPlans`的第一个参数`BCQueryLimit`可以设置只查询总个数 `setCountOnly(Boolean.TRUE)`，结果可以通过`getTotalCount`获取。  
 
 **调用：**  
+  
 同上，首先初始化回调入口BCCallback
 ```java
 // 参照API添加查询通用限制条件
@@ -570,13 +572,15 @@ BCQuery.getInstance().queryPlans(limit, specificLimit,
         new BCCallback() {...});
 ```
   
-#### 发起订阅
+* **发起订阅**
+  
 **原型：**
 
 通过`BCPay`的实例，以`subscribe`方法发起订阅，操作结果转化成`BCSubscriptionResult`做后续处理，请参照`demo`中`SubscribeActivity`。  
 `subscribe`的验证码参数可以通过下文的`sendSmsCode`获取，返回结果包含`BCSubscription`对象，如果该对象`isValid`返回`Boolean.TRUE`表明本次订阅已经即时生效，否则你还需要等待webhook推送最终审核结果。    
 
 **调用：**  
+  
 同上，首先初始化回调入口BCCallback
 ```java
 BCSubscription subscription = new BCSubscription();
@@ -593,49 +597,57 @@ BCPay.getInstance(this).subscribe(subscription, smsId, smsCode, null,
 		new BCCallback() {...});
 ```
   
-#### 订阅支付支持的银行列表
+* **订阅支付支持的银行列表**
+  
 **原型：**
 
 通过`BCQuery`的实例，以`subscriptionSupportedBanks`方法查询，操作结果转化成`BCSubscriptionBanksResult`做后续处理，请参照`demo`中`SubscribeActivity`。  
 如果查询成功，结果中包含支持的常用银行列表和所有支持的银行列表，后者包含前者。    
 
 **调用：**  
+  
 同上，首先初始化回调入口BCCallback
 ```java
 BCQuery.getInstance().subscriptionSupportedBanks(new BCCallback() {...});
 ```
 
-#### 发送验证码
+* **发送验证码**
+  
 **原型：**
 
 通过`BCPay`的实例，以`sendSmsCode`方法发送验证码，操作结果转化成`BCSmsResult`做后续处理，请参照`demo`中`SubscribeActivity`。  
 如果发送成功，返回结果包含`smsId`，同时发送`smsCode`到用户手机。    
 
 **调用：**  
+  
 同上，首先初始化回调入口BCCallback
 ```java
 BCPay.getInstance(this).sendSmsCode("接收验证码的手机号",new BCCallback() {...});
 ```
   
-#### 取消订阅
+* **取消订阅**
+  
 **原型：**
 
 通过`BCPay`的实例，以`cancelSubscription`方法发送取消请求，操作结果转化成`BCObjectIdResult`做后续处理，请参照`demo`中`SubscriptionListActivity`。  
 如果请求成功，返回结果`getResultCode`应当为`0`，`getId`返回本次取消的订阅id。    
 
 **调用：**  
+  
 同上，首先初始化回调入口BCCallback
 ```java
 BCPay.getInstance(this).cancelSubscription("需要取消的订阅id",new BCCallback() {...});
 ```
 
-#### 查询订阅列表
+* **查询订阅列表**
+  
 **原型：**
 
 通过`BCQuery`的实例，以`querySubscriptions`方法查询计划列表，查询结果转化成`BCSubscriptionListResult`后通过`getSubscriptions`获取订阅列表，请参照`demo`中`SubscriptionListActivity`。  
 `querySubscriptions`的第一个参数`BCQueryLimit`可以设置只查询总个数 `setCountOnly(Boolean.TRUE)`，结果可以通过`getTotalCount`获取。  
 
 **调用：**  
+  
 同上，首先初始化回调入口BCCallback
 ```java
 // 参照API添加查询通用限制条件
