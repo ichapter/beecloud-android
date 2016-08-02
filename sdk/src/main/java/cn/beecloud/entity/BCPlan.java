@@ -164,7 +164,7 @@ public class BCPlan {
     /**
      * @return 计划是否生效
      */
-    public Boolean getValid() {
-        return valid;
+    public boolean isValid() {
+        return valid != null && valid;
     }
 }

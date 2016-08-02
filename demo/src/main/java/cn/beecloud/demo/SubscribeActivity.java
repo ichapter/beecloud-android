@@ -153,7 +153,7 @@ public class SubscribeActivity extends Activity {
                             planList = listResult.getPlans();
                             planSpinnerData.clear();
                             for (BCPlan plan : planList) {
-                                if (plan.getValid() != null && plan.getValid())
+                                if (plan.isValid())
                                     planSpinnerData.add(plan.getName());
                             }
                         }

@@ -250,8 +250,8 @@ public class BCSubscription {
     /**
      * @return 订阅是否已经生效，为true代表计划开始后就定期扣费
      */
-    public Boolean getValid() {
-        return valid;
+    public boolean isValid() {
+        return valid != null && valid;
     }
 
 }
