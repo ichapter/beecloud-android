@@ -363,12 +363,12 @@ BCPay.getInstance(QRCodeEntryActivity.this).reqAliInlineQRCodeAsync(
    "1": 订单码-前置模式, 对应 iframe 宽度不能小于 300px, 高度不能小于 600px  
    "3": 订单码-迷你前置模式, 对应 iframe 宽度不能小于 75px, 高度不能小于 75px  
    
-### 6.退款
-手机端目前只允许发起`预退款`，预退款结束后仍然需要在server端发起`预退款批量审核`，以达到真实退款的目的。  
+### 6.预退款
+预退款结束后仍然需要在server端发起`预退款批量审核`，以达到真实退款的目的。  
   
 **原型：**
 
-通过构造`BCPay`的实例，使用`reqRefund`方法发起预退款；在回调函数中将`BCResult`转化成`BCRefundResult`之后做后续处理；可参照`demo`中`BillListActivity`  
+通过构造`BCPay`的实例，使用`prefund`方法发起预退款；在回调函数中将`BCResult`转化成`BCRefundResult`之后做后续处理；可参照`demo`中`BillListActivity`  
   
 **调用：**
 
@@ -380,7 +380,7 @@ params.refundNum = "20160621162753241";
 params.billNum = "20160621162735489";
 //退款金额，必须为正整数，单位为分
 params.refundFee = 10;
-BCPay.getInstance(YourActivity.this).reqRefund(params, bccallback);
+BCPay.getInstance(YourActivity.this).prefund(params, bccallback);
 ```
 
    
