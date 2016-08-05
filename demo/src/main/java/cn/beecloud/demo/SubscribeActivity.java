@@ -128,8 +128,8 @@ public class SubscribeActivity extends Activity {
     void reqPlans() {
         // 参照API添加查询通用限制条件
         BCQueryLimit limit = new BCQueryLimit();
-        // 比如限制最多返回10条记录
-        limit.setLimit(10);
+        // 比如限制最多返回8条记录
+        limit.setLimit(8);
 
         // 参照API添加针对计划的限制条件
         BCQuery.PlanLimit specificLimit = new BCQuery.PlanLimit();

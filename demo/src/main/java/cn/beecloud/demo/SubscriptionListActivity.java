@@ -21,7 +21,6 @@ import cn.beecloud.BCQuery;
 import cn.beecloud.async.BCCallback;
 import cn.beecloud.async.BCResult;
 import cn.beecloud.demo.util.DisplayUtils;
-import cn.beecloud.demo.util.SubscriptionAdapter;
 import cn.beecloud.entity.BCObjectIdResult;
 import cn.beecloud.entity.BCQueryLimit;
 import cn.beecloud.entity.BCSubscription;
@@ -150,7 +149,7 @@ public class SubscriptionListActivity extends Activity {
         // 参照API添加针对计划的限制条件
         BCQuery.SubscriptionLimit specificLimit = new BCQuery.SubscriptionLimit();
         // 比如只返回订阅用户id是xz的记录
-        specificLimit.buyerId = "xz";
+        // specificLimit.buyerId = "ohmy";
 
         BCQuery.getInstance().querySubscriptions(limit, specificLimit, new BCCallback() {
             @Override

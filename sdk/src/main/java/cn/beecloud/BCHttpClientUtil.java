@@ -441,6 +441,12 @@ class BCHttpClientUtil {
     //===================== BeeCloud Rest Object CURD =====================
     private static BCRestfulCommonResult dealWithResult(Response response,
                                                 Class<? extends BCRestfulCommonResult> classType) {
+        if (response.content == null || response.content.length() == 0) {
+            return setCommonResult(classType, BCRestfulCommonResult.APP_INNER_FAIL_NUM,
+                    BCRestfulCommonResult.APP_INNER_FAIL,
+                    "JsonSyntaxException or Network Error:" + response.code + " # " + response.content);
+        }
+
         if (response.code == 200 || (response.code >= 400 && response.code < 500)) {
             //反序列化json
             Gson gson = new Gson();

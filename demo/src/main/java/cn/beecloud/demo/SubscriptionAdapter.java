@@ -4,7 +4,7 @@
  * Created by xuanzhui on 2016/7/28.
  * Copyright (c) 2016 BeeCloud. All rights reserved.
  */
-package cn.beecloud.demo.util;
+package cn.beecloud.demo;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -15,7 +15,6 @@ import android.widget.TextView;
 
 import java.util.List;
 
-import cn.beecloud.demo.R;
 import cn.beecloud.entity.BCSubscription;
 
 public class SubscriptionAdapter extends BaseAdapter {
