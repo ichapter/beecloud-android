@@ -12,6 +12,7 @@ import android.os.Looper;
 import android.util.Log;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.EncodeHintType;
@@ -160,7 +161,17 @@ public class BCOfflinePay {
                     Gson res = new Gson();
 
                     Type type = new TypeToken<Map<String,Object>>() {}.getType();
-                    Map<String, Object> responseMap = res.fromJson(ret, type);
+
+                    Map<String, Object> responseMap;
+                    try {
+                        responseMap = res.fromJson(ret, type);
+                    } catch (JsonSyntaxException ex) {
+                        callback.done(new BCQRCodeResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
+                                BCRestfulCommonResult.APP_INNER_FAIL,
+                                "JsonSyntaxException or Network Error:"
+                                        + response.code + " # " + response.content));
+                        return;
+                    }
 
                     //判断后台返回结果
                     Integer resultCode = ((Double) responseMap.get("result_code")).intValue();
@@ -319,7 +330,17 @@ public class BCOfflinePay {
                     Gson res = new Gson();
 
                     Type type = new TypeToken<Map<String, Object>>() {}.getType();
-                    Map<String, Object> responseMap = res.fromJson(ret, type);
+                    Map<String, Object> responseMap;
+                    try {
+                        responseMap = res.fromJson(ret, type);
+                    } catch (JsonSyntaxException ex) {
+                        callback.done(new BCPayResult(BCPayResult.RESULT_FAIL,
+                                BCPayResult.APP_INTERNAL_EXCEPTION_ERR_CODE,
+                                BCPayResult.FAIL_EXCEPTION,
+                                "JsonSyntaxException or Network Error:"
+                                        + response.code + " # " + response.content));
+                        return;
+                    }
 
                     //判断后台返回结果
                     Integer resultCode = ((Double) responseMap.get("result_code")).intValue();
