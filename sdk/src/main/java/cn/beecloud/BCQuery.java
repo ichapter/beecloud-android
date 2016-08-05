@@ -15,11 +15,11 @@ import java.util.Map;
 
 import cn.beecloud.async.BCCallback;
 import cn.beecloud.entity.BCBillStatus;
+import cn.beecloud.entity.BCPlanCriteria;
 import cn.beecloud.entity.BCPlanListResult;
 import cn.beecloud.entity.BCQueryBillResult;
 import cn.beecloud.entity.BCQueryBillsResult;
 import cn.beecloud.entity.BCQueryCountResult;
-import cn.beecloud.entity.BCQueryLimit;
 import cn.beecloud.entity.BCQueryRefundResult;
 import cn.beecloud.entity.BCQueryRefundsResult;
 import cn.beecloud.entity.BCQueryReqParams;
@@ -27,6 +27,7 @@ import cn.beecloud.entity.BCRefundStatus;
 import cn.beecloud.entity.BCReqParams;
 import cn.beecloud.entity.BCRestfulCommonResult;
 import cn.beecloud.entity.BCSubscriptionBanksResult;
+import cn.beecloud.entity.BCSubscriptionCriteria;
 import cn.beecloud.entity.BCSubscriptionListResult;
 
 /**
@@ -680,11 +681,10 @@ public class BCQuery {
 
     /**
      * 查询订阅计划列表
-     * @param limit 通用限制参数，可以为null
-     * @param specificLimit 针对plan的限制字段，可以为null
+     * @param criteria 订阅计划的查询条件，可以为null
      * @param callback  回调入口
      */
-    public void queryPlans(final BCQueryLimit limit, final PlanLimit specificLimit, final BCCallback callback) {
+    public void queryPlans(final BCPlanCriteria criteria, final BCCallback callback) {
         if (callback == null) {
             Log.e(TAG, "请初始化callback");
             return;
@@ -694,24 +694,10 @@ public class BCQuery {
             @Override
             public void run() {
                 Map<String, Object> reqMap;
-                if (limit == null)
+                if (criteria == null)
                     reqMap = new HashMap<>();
                 else
-                    reqMap = BCHttpClientUtil.objectToMap(limit);
-
-                if (specificLimit != null) {
-                    if (specificLimit.nameWithSubstring != null)
-                        reqMap.put("name_with_substring", specificLimit.nameWithSubstring);
-
-                    if (specificLimit.interval != null)
-                        reqMap.put("interval", specificLimit.interval);
-
-                    if (specificLimit.intervalCount != null)
-                        reqMap.put("interval_count", specificLimit.intervalCount);
-
-                    if (specificLimit.trialDays != null)
-                        reqMap.put("trial_days", specificLimit.trialDays);
-                }
+                    reqMap = BCHttpClientUtil.objectToMap(criteria);
 
                 callback.done(BCHttpClientUtil.queryRestObjects(BCHttpClientUtil.getPlanUrl(),
                         reqMap, BCPlanListResult.class, true));
@@ -721,11 +707,10 @@ public class BCQuery {
 
     /**
      * 查询订阅列表
-     * @param limit 通用限制参数，可以为null
-     * @param specificLimit 针对subscription的限制字段，可以为null
+     * @param criteria 查询订阅的条件，可以为null
      * @param callback  回调入口
      */
-    public void querySubscriptions(final BCQueryLimit limit, final SubscriptionLimit specificLimit, final BCCallback callback) {
+    public void querySubscriptions(final BCSubscriptionCriteria criteria, final BCCallback callback) {
         if (callback == null) {
             Log.e(TAG, "请初始化callback");
             return;
@@ -741,21 +726,10 @@ public class BCQuery {
                 }
 
                 Map<String, Object> reqMap;
-                if (limit == null)
+                if (criteria == null)
                     reqMap = new HashMap<>();
                 else
-                    reqMap = BCHttpClientUtil.objectToMap(limit);
-
-                if (specificLimit != null) {
-                    if (specificLimit.buyerId != null)
-                        reqMap.put("buyer_id", specificLimit.buyerId);
-
-                    if (specificLimit.planId != null)
-                        reqMap.put("plan_id", specificLimit.planId);
-
-                    if (specificLimit.cardId != null)
-                        reqMap.put("card_id", specificLimit.cardId);
-                }
+                    reqMap = BCHttpClientUtil.objectToMap(criteria);
 
                 callback.done(BCHttpClientUtil.queryRestObjects(BCHttpClientUtil.getSubscriptionUrl(),
                         reqMap, BCSubscriptionListResult.class, true));
@@ -827,50 +801,5 @@ public class BCQuery {
          * 如果是查询订单数目, 该参数会被忽略
          */
         public Boolean needDetail;
-    }
-
-    /**
-     * 查询计划的限制类，所有字段皆为选填
-     */
-    public static class PlanLimit {
-        /**
-         * 限制计划名中包含的字符串
-         */
-        public String nameWithSubstring;
-
-        /**
-         * 查找的计划周期，可以是day, week, month or year
-         */
-        public String interval;
-
-        /**
-         * 扣款周期间隔数
-         */
-        public Integer intervalCount;
-
-        /**
-         * 试用天数
-         */
-        public Integer trialDays;
-    }
-
-    /**
-     * 查询订阅的限制类，所有字段皆为选填
-     */
-    public static class SubscriptionLimit {
-        /**
-         * 订阅的用户标识符
-         */
-        public String buyerId;
-
-        /**
-         * 订阅的计划标识符
-         */
-        public String planId;
-
-        /**
-         * 用户支付账户标识符
-         */
-        public String cardId;
     }
 }

@@ -552,24 +552,49 @@ BCQuery.getInstance().queryOfflineBillStatusAsync(
 **原型：**
 
 通过`BCQuery`的实例，以`queryPlans`方法查询计划列表，查询结果转化成`BCPlanListResult`后通过`getPlans`获取计划列表，请参照`demo`中`SubscribeActivity`。  
-`queryPlans`的第一个参数`BCQueryLimit`可以设置只查询总个数 `setCountOnly(Boolean.TRUE)`，结果可以通过`getTotalCount`获取。  
+`queryPlans`的参数`BCPlanCriteria`可以设置只查询总个数 `setCountOnly(true)`，结果可以通过`getTotalCount`获取。  
 
 **调用：**  
   
 同上，首先初始化回调入口BCCallback
 ```java
-// 参照API添加查询通用限制条件
-BCQueryLimit limit = new BCQueryLimit();
+// 参照API添加查询计划限制条件
+BCPlanCriteria criteria = new BCPlanCriteria();
 // 比如限制最多返回8条记录
-limit.setLimit(8);
+criteria.setLimit(8);
+// 比如只返回计划名包含"plan"的
+criteria.setNameWithSubstring("plan");
 
-// 参照API添加针对计划的限制条件
-BCQuery.PlanLimit specificLimit = new BCQuery.PlanLimit();
-// 比如只返回是按天收费的计划
-specificLimit.interval = "day";
-
-BCQuery.getInstance().queryPlans(limit, specificLimit,
+BCQuery.getInstance().queryPlans(criteria,
         new BCCallback() {...});
+```
+  
+* **订阅支付支持的银行列表**
+  
+**原型：**
+
+通过`BCQuery`的实例，以`subscriptionSupportedBanks`方法查询，操作结果转化成`BCSubscriptionBanksResult`做后续处理，请参照`demo`中`SubscribeActivity`。  
+如果查询成功，结果中包含支持的常用银行列表和所有支持的银行列表，后者包含前者。    
+
+**调用：**  
+  
+同上，首先初始化回调入口BCCallback
+```java
+BCQuery.getInstance().subscriptionSupportedBanks(new BCCallback() {...});
+```
+  
+* **发送验证码**
+  
+**原型：**
+
+通过`BCPay`的实例，以`sendSmsCode`方法发送验证码，操作结果转化成`BCSmsResult`做后续处理，请参照`demo`中`SubscribeActivity`。  
+如果发送成功，返回结果包含`smsId`，同时发送`smsCode`到用户手机。    
+
+**调用：**  
+  
+同上，首先初始化回调入口BCCallback
+```java
+BCPay.getInstance(this).sendSmsCode("接收验证码的手机号",new BCCallback() {...});
 ```
   
 * **发起订阅**
@@ -577,7 +602,7 @@ BCQuery.getInstance().queryPlans(limit, specificLimit,
 **原型：**
 
 通过`BCPay`的实例，以`subscribe`方法发起订阅，操作结果转化成`BCSubscriptionResult`做后续处理，请参照`demo`中`SubscribeActivity`。  
-`subscribe`的验证码参数可以通过下文的`sendSmsCode`获取，返回结果包含`BCSubscription`对象，如果该对象`isValid`返回`Boolean.TRUE`表明本次订阅已经即时生效，否则你还需要等待webhook推送最终审核结果。    
+`subscribe`的验证码参数可以通过上文的`sendSmsCode`获取，返回结果包含`BCSubscription`对象，如果该对象`isValid`返回`true`表明本次订阅已经即时生效，否则你还需要等待webhook推送最终审核结果。    
 
 **调用：**  
   
@@ -595,34 +620,6 @@ subscription.setMobile("和银行卡绑定的手机号");
 // 第四个参数用于后期优惠码，目前请填null
 BCPay.getInstance(this).subscribe(subscription, smsId, smsCode, null,
 		new BCCallback() {...});
-```
-  
-* **订阅支付支持的银行列表**
-  
-**原型：**
-
-通过`BCQuery`的实例，以`subscriptionSupportedBanks`方法查询，操作结果转化成`BCSubscriptionBanksResult`做后续处理，请参照`demo`中`SubscribeActivity`。  
-如果查询成功，结果中包含支持的常用银行列表和所有支持的银行列表，后者包含前者。    
-
-**调用：**  
-  
-同上，首先初始化回调入口BCCallback
-```java
-BCQuery.getInstance().subscriptionSupportedBanks(new BCCallback() {...});
-```
-
-* **发送验证码**
-  
-**原型：**
-
-通过`BCPay`的实例，以`sendSmsCode`方法发送验证码，操作结果转化成`BCSmsResult`做后续处理，请参照`demo`中`SubscribeActivity`。  
-如果发送成功，返回结果包含`smsId`，同时发送`smsCode`到用户手机。    
-
-**调用：**  
-  
-同上，首先初始化回调入口BCCallback
-```java
-BCPay.getInstance(this).sendSmsCode("接收验证码的手机号",new BCCallback() {...});
 ```
   
 * **取消订阅**
@@ -644,23 +641,20 @@ BCPay.getInstance(this).cancelSubscription("需要取消的订阅id",new BCCallb
 **原型：**
 
 通过`BCQuery`的实例，以`querySubscriptions`方法查询计划列表，查询结果转化成`BCSubscriptionListResult`后通过`getSubscriptions`获取订阅列表，请参照`demo`中`SubscriptionListActivity`。  
-`querySubscriptions`的第一个参数`BCQueryLimit`可以设置只查询总个数 `setCountOnly(Boolean.TRUE)`，结果可以通过`getTotalCount`获取。  
+`querySubscriptions`的参数`BCSubscriptionCriteria`可以设置只查询总个数 `setCountOnly(true)`，结果可以通过`getTotalCount`获取。  
 
 **调用：**  
   
 同上，首先初始化回调入口BCCallback
 ```java
-// 参照API添加查询通用限制条件
-BCQueryLimit limit = new BCQueryLimit();
-// 比如限制最多返回8条记录
-limit.setLimit(8);
+// 参照API添加查询订阅限制条件
+BCSubscriptionCriteria criteria = new BCSubscriptionCriteria();
+// 比如限制最多返回10条记录
+criteria.setLimit(10);
+// 比如只返回订阅用户id是ohmy的记录
+criteria.setBuyerId("ohmy");
 
-// 参照API添加针对计划的限制条件
-BCQuery.SubscriptionLimit specificLimit = new BCQuery.SubscriptionLimit();
-// 比如只返回订阅用户id是xz的记录
-specificLimit.buyerId = "xz";
-
-BCQuery.getInstance().querySubscriptions(limit, specificLimit,
+BCQuery.getInstance().querySubscriptions(criteria,
         new BCCallback() {...});
 ```
   

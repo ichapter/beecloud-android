@@ -24,8 +24,8 @@ import cn.beecloud.async.BCCallback;
 import cn.beecloud.async.BCResult;
 import cn.beecloud.demo.util.DisplayUtils;
 import cn.beecloud.entity.BCPlan;
+import cn.beecloud.entity.BCPlanCriteria;
 import cn.beecloud.entity.BCPlanListResult;
-import cn.beecloud.entity.BCQueryLimit;
 import cn.beecloud.entity.BCSmsResult;
 import cn.beecloud.entity.BCSubscription;
 import cn.beecloud.entity.BCSubscriptionBanksResult;
@@ -127,16 +127,13 @@ public class SubscribeActivity extends Activity {
 
     void reqPlans() {
         // 参照API添加查询通用限制条件
-        BCQueryLimit limit = new BCQueryLimit();
+        BCPlanCriteria criteria = new BCPlanCriteria();
         // 比如限制最多返回8条记录
-        limit.setLimit(8);
+        criteria.setLimit(8);
+        // 比如只返回计划名包含"plan"的
+        criteria.setNameWithSubstring("plan");
 
-        // 参照API添加针对计划的限制条件
-        BCQuery.PlanLimit specificLimit = new BCQuery.PlanLimit();
-        // 比如只返回是按天收费的计划
-        specificLimit.interval = "day";
-
-        BCQuery.getInstance().queryPlans(limit, specificLimit,
+        BCQuery.getInstance().queryPlans(criteria,
                 new BCCallback() {
                     @Override
                     public void done(BCResult result) {

@@ -378,22 +378,27 @@ class BCHttpClientUtil {
         return response;
     }
 
+    // 所有super class包含的非空字段
     static Map<String, Object> objectToMap(Object object) {
         Map<String, Object> map = new HashMap<>();
 
         Class cls = object.getClass();
+        while (cls != null) {
+            for (Field field : cls.getDeclaredFields()) {
+                field.setAccessible(true);
 
-        for (Field field : cls.getDeclaredFields()) {
-            field.setAccessible(true);
+                Object value = null;
+                try {
+                    value = field.get(object);
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                }
 
-            Object value = null;
-            try {
-                value = field.get(object);
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
+                if (value != null)
+                    map.put(field.getName(), value);
             }
-            if (value != null)
-                map.put(field.getName(), value);
+
+            cls = cls.getSuperclass();
         }
 
         return map;
@@ -507,7 +512,6 @@ class BCHttpClientUtil {
 
         BCHttpClientUtil.attachAppSign(reqParam);
         String reqURL = url + "?" + BCHttpClientUtil.map2UrlQueryString(reqParam);
-
         BCHttpClientUtil.Response response = BCHttpClientUtil
                 .httpGet(reqURL);
 
