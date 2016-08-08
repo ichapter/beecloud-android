@@ -17,6 +17,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
@@ -245,13 +246,24 @@ public class BCMockPayActivity extends Activity {
                         BCHttpClientUtil.Response response = BCHttpClientUtil.httpGet(notifyUrl);
 
                         loadingDialog.dismiss();
-                        if (response.code == 200) {
+                        if (response.code == 200 || (response.code >= 400 && response.code < 500)) {
                             String ret = response.content;
 
                             //反序列化json
-                            Gson res = new Gson();
+                            Gson gson = new Gson();
                             Type type = new TypeToken<Map<String, Object>>(){}.getType();
-                            Map<String, Object> responseMap = res.fromJson(ret, type);
+                            Map<String, Object> responseMap;
+
+                            try {
+                                responseMap = gson.fromJson(ret, type);
+                            } catch (JsonSyntaxException ex) {
+                                BCPay.payCallback.done(new BCPayResult(BCPayResult.RESULT_FAIL,
+                                        BCPayResult.APP_INTERNAL_EXCEPTION_ERR_CODE,
+                                        BCPayResult.FAIL_EXCEPTION,
+                                        "JsonSyntaxException or Network Error:"
+                                                + response.code + " # " + response.content));
+                                return;
+                            }
 
                             //判断后台返回结果
                             Integer resultCode = ((Double) responseMap.get("result_code")).intValue();

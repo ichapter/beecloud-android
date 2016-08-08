@@ -31,6 +31,10 @@ public class BillListAdapter extends BaseAdapter {
         mInflater = LayoutInflater.from(context);
     }
 
+    public void setBills(List<BCBillOrder> bills) {
+        this.bills = bills;
+    }
+
     /**
      * How many items are in the data set represented by this Adapter.
      *

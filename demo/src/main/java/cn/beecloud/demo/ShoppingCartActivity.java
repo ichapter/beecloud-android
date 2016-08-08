@@ -225,19 +225,19 @@ public class ShoppingCartActivity extends Activity {
         // 如果使用PayPal需要在支付之前设置client id和应用secret
         // BCPay.PAYPAL_PAY_TYPE.SANDBOX用于测试，BCPay.PAYPAL_PAY_TYPE.LIVE用于生产环境
         //最后一个参数表示是否在paypal支付页面显示收货地址，如果地址不合法有可能造成无法支付
-        BCPay.initPayPal("AVT1Ch18aTIlUJIeeCxvC7ZKQYHczGwiWm8jOwhrREc4a5FnbdwlqEB4evlHPXXUA67RAAZqZM0H8TCR",
-                "EL-fkjkEUyxrwZAmrfn46awFXlX-h2nRkyCVhhpeVdlSRuhPJKXx3ZvUTTJqPQuAeomXA8PZ2MkX24vF",
+        BCPay.initPayPal("AdvoLpBgtfNrLx9NCzLtIOR4ShGxwzStnAw8Ja-fytk5iy_-Wfy7hARHcRIr6eWksLoutuXfksy7ge9U",
+                "EJP-yD2lHnf4SSIpZr2xGYTjRbzqBe2jBWnex3rL17Nz7yN1pjMeVYP1bi8HvzQaWbmmVo3oKPlzgivW",
                 BCPay.PAYPAL_PAY_TYPE.SANDBOX, Boolean.FALSE);
 
         payMethod = (ListView) this.findViewById(R.id.payMethod);
         Integer[] payIcons = new Integer[]{R.drawable.wechat, R.drawable.alipay,
                 R.drawable.unionpay, R.drawable.beecloud_logo, R.drawable.baidupay,
-                R.drawable.paypal, R.drawable.scan};
+                R.drawable.paypal, R.drawable.rss, R.drawable.scan};
         final String[] payNames = new String[]{"微信支付", "支付宝支付",
-                "银联在线", "BeeCloud支付", "百度钱包", "PayPal支付", "二维码支付"};
+                "银联在线", "BeeCloud支付", "百度钱包", "PayPal支付", "订阅支付", "二维码支付"};
         String[] payDescs = new String[]{"使用微信支付，以人民币CNY计费", "使用支付宝支付，以人民币CNY计费",
                 "使用银联在线支付，以人民币CNY计费", "通过BeeCloud快捷支付", "使用百度钱包支付，以人民币CNY计费",
-                "使用PayPal支付，以美元USD计费", "通过扫描二维码支付"};
+                "使用PayPal支付，以美元USD计费", "通过订阅计划，自动缴费", "通过扫描二维码支付"};
         PayMethodListItem adapter = new PayMethodListItem(this, payIcons, payNames, payDescs);
         payMethod.setAdapter(adapter);
 
@@ -407,9 +407,18 @@ public class ShoppingCartActivity extends Activity {
                                 hashMapOptional,        //optional info
                                 bcCallback);
                         break;
-                    case 6:
+                    case 6: {//订阅支付
+                        /*
+                         进入订阅支付的activity
+                         */
+                        Intent intent = new Intent(ShoppingCartActivity.this, SubscribeActivity.class);
+                        startActivity(intent);
+                        break;
+                    }
+                    case 7: {
                         Intent intent = new Intent(ShoppingCartActivity.this, QRCodeEntryActivity.class);
                         startActivity(intent);
+                    }
                 }
             }
         });

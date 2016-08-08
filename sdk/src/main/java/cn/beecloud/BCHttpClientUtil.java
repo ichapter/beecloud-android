@@ -1,6 +1,6 @@
 /**
  * BCHttpClientUtil.java
- *
+ * <p/>
  * Created by xuanzhui on 2015/7/27.
  * Copyright (c) 2015 BeeCloud. All rights reserved.
  */
@@ -9,19 +9,29 @@ package cn.beecloud;
 import android.util.Log;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.net.URLEncoder;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import javax.net.ssl.X509TrustManager;
+
+import cn.beecloud.entity.BCRestfulCommonResult;
 import okhttp3.FormBody;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
+import okhttp3.internal.platform.Platform;
 
 /**
  * 网络请求工具类
@@ -74,100 +84,103 @@ class BCHttpClientUtil {
     //线下订单查询
     private static final String OFFLINE_BILL_STATUS_URL = "rest/offline/bill/status";
 
+    private static final String PLAN_URL = "plan";
+    private static final String SUBSCRIPTION_URL = "subscription";
+
     private final static String PAYPAL_LIVE_BASE_URL = "https://api.paypal.com/v1/";
     private final static String PAYPAL_SANDBOX_BASE_URL = "https://api.sandbox.paypal.com/v1/";
 
-    private final static String PAYPAL_ACCESS_TOKEN_URL= "oauth2/token";
+    private final static String PAYPAL_ACCESS_TOKEN_URL = "oauth2/token";
 
     /**
      * 随机获取主机, 并加入API版本号
      */
-    private static String getRandomHost() {
+    private static String getRootHost() {
         return BEECLOUD_HOST + HOST_API_VERSION;
     }
 
     /**
-     * @return  支付请求URL
+     * @return 支付请求URL
      */
     public static String getBillPayURL() {
         if (BCCache.getInstance().isTestMode) {
-            return getRandomHost() + BILL_PAY_SANDBOX_URL;
+            return getRootHost() + BILL_PAY_SANDBOX_URL;
         } else {
-            return getRandomHost() + BILL_PAY_URL;
+            return getRootHost() + BILL_PAY_URL;
         }
     }
 
     public static String getNotifyPayResultSandboxUrl() {
-        return getRandomHost() + NOTIFY_PAY_RESULT_SANDBOX_URL
+        return getRootHost() + NOTIFY_PAY_RESULT_SANDBOX_URL
                 + "/" + BCCache.getInstance().appId;
     }
 
     /**
-     * @return  获取扫码信息URL
+     * @return 获取扫码信息URL
      */
     public static String getQRCodeReqURL() {
-        return getRandomHost() + BILL_PAY_URL;
+        return getRootHost() + BILL_PAY_URL;
     }
 
     /**
-     * @return  查询支付订单部分URL
+     * @return 查询支付订单部分URL
      */
     public static String getBillQueryURL() {
         if (BCCache.getInstance().isTestMode) {
-            return getRandomHost() + BILL_PAY_SANDBOX_URL;
+            return getRootHost() + BILL_PAY_SANDBOX_URL;
         } else {
-            return getRandomHost() + BILL_PAY_URL;
+            return getRootHost() + BILL_PAY_URL;
         }
     }
 
     /**
-     * @return  查询支付订单列表URL
+     * @return 查询支付订单列表URL
      */
     public static String getBillsQueryURL() {
         if (BCCache.getInstance().isTestMode) {
-            return getRandomHost() + BILLS_QUERY_SANDBOX_URL;
+            return getRootHost() + BILLS_QUERY_SANDBOX_URL;
         } else {
-            return getRandomHost() + BILLS_QUERY_URL;
+            return getRootHost() + BILLS_QUERY_URL;
         }
     }
 
     /**
-     * @return  查询支付订单数目URL
+     * @return 查询支付订单数目URL
      */
     public static String getBillsCountQueryURL() {
         if (BCCache.getInstance().isTestMode) {
-            return getRandomHost() + BILLS_COUNT_QUERY_SANDBOX_URL;
+            return getRootHost() + BILLS_COUNT_QUERY_SANDBOX_URL;
         } else {
-            return getRandomHost() + BILLS_COUNT_QUERY_URL;
+            return getRootHost() + BILLS_COUNT_QUERY_URL;
         }
     }
 
     /**
-     * @return  查询退款订单部分URL
+     * @return 查询退款订单部分URL
      */
     public static String getRefundQueryURL() {
-        return getRandomHost() + REFUND_QUERY_URL;
+        return getRootHost() + REFUND_QUERY_URL;
     }
 
     /**
-     * @return  查询退款订单列表URL
+     * @return 查询退款订单列表URL
      */
     public static String getRefundsQueryURL() {
-        return getRandomHost() + REFUNDS_QUERY_URL;
+        return getRootHost() + REFUNDS_QUERY_URL;
     }
 
     /**
-     * @return  查询退款订单数目URL
+     * @return 查询退款订单数目URL
      */
     public static String getRefundsCountQueryURL() {
-        return getRandomHost() + REFUNDS_COUNT_QUERY_URL;
+        return getRootHost() + REFUNDS_COUNT_QUERY_URL;
     }
 
     /**
-     * @return  查询退款订单状态URL
+     * @return 查询退款订单状态URL
      */
     public static String getRefundStatusURL() {
-        return getRandomHost() + REFUND_STATUS_QUERY_URL;
+        return getRootHost() + REFUND_STATUS_QUERY_URL;
     }
 
     public static String getPayPalAccessTokenUrl() {
@@ -178,23 +191,47 @@ class BCHttpClientUtil {
     }
 
     /**
-     * @return  线下支付
+     * @return 线下支付
      */
     public static String getBillOfflinePayURL() {
-        return getRandomHost() + BILL_OFFLINE_PAY_URL;
+        return getRootHost() + BILL_OFFLINE_PAY_URL;
     }
 
     /**
-     * @return  线下订单查询
+     * @return 线下订单查询
      */
     public static String getOfflineBillStatusURL() {
-        return getRandomHost() + OFFLINE_BILL_STATUS_URL;
+        return getRootHost() + OFFLINE_BILL_STATUS_URL;
+    }
+
+    /**
+     * @return 退款
+     */
+    public static String getRefundUrl() {
+        return getRootHost() + "rest/refund";
+    }
+
+    public static String getPlanUrl() {
+        return getRootHost() + PLAN_URL;
+    }
+
+    public static String getSubscriptionUrl() {
+        return getRootHost() + SUBSCRIPTION_URL;
+    }
+
+    public static String getSubscriptionBanksUrl() {
+        return getRootHost() + "subscription_banks";
+    }
+
+    public static String getSmsCodeUrl() {
+        return getRootHost() + "sms";
     }
 
     /**
      * http get 请求
-     * @param url   请求uri
-     * @return      HttpResponse请求结果实例
+     *
+     * @param url 请求uri，如有参数在原始url后面通过 ?k1=v1&k2=v2 连接
+     * @return BCHttpClientUtil.Response请求结果实例
      */
     public static Response httpGet(String url) {
 
@@ -218,13 +255,7 @@ class BCHttpClientUtil {
             okhttp3.Response temp = client.newCall(request).execute();
             response.code = temp.code();
             ResponseBody body = temp.body();
-            if (temp.isSuccessful()) {
-                //call string auto close body
-                response.content = body.string();
-            } else {
-                response.content = "网络请求失败";
-                temp.body().close();
-            }
+            response.content = body.string();
         } catch (IOException e) {
             e.printStackTrace();
             Log.w(TAG, e.getMessage() == null ? " " : e.getMessage());
@@ -235,9 +266,10 @@ class BCHttpClientUtil {
 
     /**
      * http post 请求
-     * @param url       请求url
-     * @param jsonStr    post参数
-     * @return          HttpResponse请求结果实例
+     *
+     * @param url     请求url
+     * @param jsonStr post参数
+     * @return BCHttpClientUtil.Response请求结果实例
      */
     public static Response httpPost(String url, String jsonStr) {
         Response response = new Response();
@@ -259,10 +291,35 @@ class BCHttpClientUtil {
     }
 
     /**
+     * http delete 请求
+     *
+     * @param url 请求uri，如有参数在原始url后面通过 ?k1=v1&k2=v2 连接
+     * @return BCHttpClientUtil.Response请求结果实例
+     */
+    public static Response httpDelete(String url) {
+
+        Response response = new Response();
+
+        OkHttpClient client = new OkHttpClient.Builder()
+                .connectTimeout(BCCache.getInstance().connectTimeout, TimeUnit.MILLISECONDS)
+                .build();
+
+        Request request = new Request.Builder()
+                .url(url)
+                .delete()
+                .build();
+
+        proceedRequest(client, request, response);
+
+        return response;
+    }
+
+    /**
      * http post 请求
-     * @param url       请求url
-     * @param para      post参数
-     * @return          HttpResponse请求结果实例
+     *
+     * @param url  请求url
+     * @param para post参数
+     * @return BCHttpClientUtil.Response请求结果实例
      */
     public static Response httpPost(String url, Map<String, Object> para) {
         Gson gson = new Gson();
@@ -271,48 +328,200 @@ class BCHttpClientUtil {
         return httpPost(url, param);
     }
 
+    /**
+     * @return paypal token
+     */
     public static Response getPayPalAccessToken() {
         Response response = new Response();
 
+        BCTLSSocketFactory socketFactory = null;
         try {
-            //PayPal needs TLS v1.2
-            OkHttpClient client =
-                    new OkHttpClient.Builder()
-                            .connectTimeout(BCCache.getInstance().connectTimeout, TimeUnit.MILLISECONDS)
-                            .sslSocketFactory(new BCTLSSocketFactory()).build();
-
-            FormBody.Builder form = new FormBody.Builder();
-            form.add("grant_type", "client_credentials");
-            RequestBody body = form.build();
-
-            Request request = new Request.Builder()
-                    .url(getPayPalAccessTokenUrl())
-                    .header("Accept", "application/json")
-                    .header("Content-Type", "application/x-www-form-urlencoded")
-                    .header("Authorization", BCSecurityUtil.getB64Auth(
-                            BCCache.getInstance().paypalClientID, BCCache.getInstance().paypalSecret))
-                    .post(body)
-                    .build();
-
-            proceedRequest(client, request, response);
-        } catch (KeyManagementException e) {
-            e.printStackTrace();
-            Log.w(TAG, e.getMessage() == null ? " " : e.getMessage());
-            response.code = -1;
-            response.content = e.getMessage();
-        } catch (NoSuchAlgorithmException e) {
+            socketFactory = new BCTLSSocketFactory();
+        } catch (KeyManagementException | NoSuchAlgorithmException e) {
             e.printStackTrace();
             Log.w(TAG, e.getMessage() == null ? " " : e.getMessage());
             response.code = -1;
             response.content = e.getMessage();
         }
 
+        if (socketFactory == null)
+            return response;
+
+        X509TrustManager trustManager = Platform.get().trustManager(socketFactory);
+
+        if (trustManager == null) {
+            response.code = -1;
+            return response;
+        }
+
+        //PayPal needs TLS v1.2
+        OkHttpClient client =
+                new OkHttpClient.Builder()
+                        .connectTimeout(BCCache.getInstance().connectTimeout, TimeUnit.MILLISECONDS)
+                        .sslSocketFactory(socketFactory, trustManager).build();
+
+        FormBody.Builder form = new FormBody.Builder();
+        form.add("grant_type", "client_credentials");
+        RequestBody body = form.build();
+
+        Request request = new Request.Builder()
+                .url(getPayPalAccessTokenUrl())
+                .header("Accept", "application/json")
+                .header("Content-Type", "application/x-www-form-urlencoded")
+                .header("Authorization", BCSecurityUtil.getB64Auth(
+                        BCCache.getInstance().paypalClientID, BCCache.getInstance().paypalSecret))
+                .post(body)
+                .build();
+
+        proceedRequest(client, request, response);
+
         return response;
     }
+
+    // 所有super class包含的非空字段
+    static Map<String, Object> objectToMap(Object object) {
+        Map<String, Object> map = new HashMap<>();
+
+        Class cls = object.getClass();
+        while (cls != null) {
+            for (Field field : cls.getDeclaredFields()) {
+                field.setAccessible(true);
+
+                Object value = null;
+                try {
+                    value = field.get(object);
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                }
+
+                if (value != null)
+                    map.put(field.getName(), value);
+            }
+
+            cls = cls.getSuperclass();
+        }
+
+        return map;
+    }
+
+    static void attachAppSign(Map<String, Object> target) {
+        BCCache mCache = BCCache.getInstance();
+        target.put("app_id", mCache.appId);
+        long timestamp = System.currentTimeMillis();
+        target.put("timestamp", timestamp);
+        target.put("app_sign", BCSecurityUtil.getMessageMD5Digest(mCache.appId +
+                timestamp + mCache.secret));
+    }
+
+    static String map2UrlQueryString(Map<String, Object> map) {
+        StringBuilder sb = new StringBuilder();
+        for (HashMap.Entry<String, Object> e : map.entrySet()) {
+            try {
+                sb.append(e.getKey());
+                sb.append('=');
+                sb.append(URLEncoder.encode(String.valueOf(e.getValue()), "UTF-8"));
+            } catch (UnsupportedEncodingException e1) {
+                e1.printStackTrace();
+            }
+            sb.append('&');
+        }
+        if (sb.length() == 0)
+            return "";
+        else
+            return sb.substring(0, sb.length() - 1);
+    }
+
+    static BCRestfulCommonResult setCommonResult(Class<? extends BCRestfulCommonResult> className, Integer code, String errMsg, String detail) {
+        BCRestfulCommonResult object = null;
+        try {
+            Constructor<? extends BCRestfulCommonResult> ctor = className.getConstructor(Integer.class, String.class, String.class);
+            object = ctor.newInstance(code, errMsg, detail);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return object;
+    }
+
+    //===================== BeeCloud Rest Object CURD =====================
+    private static BCRestfulCommonResult dealWithResult(Response response,
+                                                Class<? extends BCRestfulCommonResult> classType) {
+        if (response.content == null || response.content.length() == 0) {
+            return setCommonResult(classType, BCRestfulCommonResult.APP_INNER_FAIL_NUM,
+                    BCRestfulCommonResult.APP_INNER_FAIL,
+                    "JsonSyntaxException or Network Error:" + response.code + " # " + response.content);
+        }
+
+        if (response.code == 200 || (response.code >= 400 && response.code < 500)) {
+            //反序列化json
+            Gson gson = new Gson();
+
+            try {
+                return gson.fromJson(response.content, classType);
+            } catch (JsonSyntaxException ex) {
+                return setCommonResult(classType, BCRestfulCommonResult.APP_INNER_FAIL_NUM,
+                        BCRestfulCommonResult.APP_INNER_FAIL,
+                        "JsonSyntaxException or Network Error:" + response.code + " # " + response.content);
+            }
+        } else {
+            return setCommonResult(classType, BCRestfulCommonResult.APP_INNER_FAIL_NUM,
+                    BCRestfulCommonResult.APP_INNER_FAIL,
+                    "Network Error:" + response.code + " # " + response.content);
+        }
+    }
+
+    static BCRestfulCommonResult addRestObject(String url, Map<String, Object> reqParam,
+                                               Class<? extends BCRestfulCommonResult> classType,
+                                               boolean testModeNotSupport) {
+        if (testModeNotSupport && BCCache.getInstance().isTestMode) {
+            return setCommonResult(classType, BCRestfulCommonResult.APP_INNER_FAIL_NUM,
+                    BCRestfulCommonResult.APP_INNER_FAIL, "该功能暂不支持测试模式");
+        }
+
+        BCHttpClientUtil.attachAppSign(reqParam);
+        BCHttpClientUtil.Response response = BCHttpClientUtil
+                .httpPost(url, reqParam);
+
+        return dealWithResult(response, classType);
+    }
+
+    static BCRestfulCommonResult deleteRestObject(String url, String id, Map<String, Object> reqParam,
+                                                  Class<? extends BCRestfulCommonResult> classType,
+                                                  boolean testModeNotSupport) {
+        if (testModeNotSupport && BCCache.getInstance().isTestMode) {
+            return setCommonResult(classType, BCRestfulCommonResult.APP_INNER_FAIL_NUM,
+                    BCRestfulCommonResult.APP_INNER_FAIL, "该功能暂不支持测试模式");
+        }
+
+        BCHttpClientUtil.attachAppSign(reqParam);
+        String reqURL = url + "/" + id + "?" + BCHttpClientUtil.map2UrlQueryString(reqParam);
+
+        BCHttpClientUtil.Response response = BCHttpClientUtil
+                .httpDelete(reqURL);
+
+        return dealWithResult(response, classType);
+    }
+
+    static BCRestfulCommonResult queryRestObjects(String url, Map<String, Object> reqParam,
+                                                  Class<? extends BCRestfulCommonResult> classType,
+                                                  boolean testModeNotSupport) {
+        if (testModeNotSupport && BCCache.getInstance().isTestMode) {
+            return setCommonResult(classType, BCRestfulCommonResult.APP_INNER_FAIL_NUM,
+                    BCRestfulCommonResult.APP_INNER_FAIL, "该功能暂不支持测试模式");
+        }
+
+        BCHttpClientUtil.attachAppSign(reqParam);
+        String reqURL = url + "?" + BCHttpClientUtil.map2UrlQueryString(reqParam);
+        BCHttpClientUtil.Response response = BCHttpClientUtil
+                .httpGet(reqURL);
+
+        return dealWithResult(response, classType);
+    }
+
+    //===================== BeeCloud Rest Object CURD =====================
 
     public static class Response {
         public Integer code;
         public String content;
     }
-
 }

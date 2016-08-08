@@ -11,6 +11,7 @@ import cn.beecloud.demo.util.DisplayUtils;
 public class OrdersEntryActivity extends Activity {
     Button btnQueryBills;
     Button btnQueryRefunds;
+    Button btnQuerySubscriptions;
     Button btnRefundStatus;
 
     @Override
@@ -34,6 +35,15 @@ public class OrdersEntryActivity extends Activity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(OrdersEntryActivity.this, RefundOrdersActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        btnQuerySubscriptions = (Button) findViewById(R.id.btnQuerySubscriptions);
+        btnQuerySubscriptions.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(OrdersEntryActivity.this, SubscriptionListActivity.class);
                 startActivity(intent);
             }
         });

@@ -16,6 +16,7 @@ import com.baidu.android.pay.PayCallBack;
 import com.baidu.paysdk.PayCallBackManager;
 import com.baidu.paysdk.api.BaiduPay;
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.tencent.mm.sdk.constants.Build;
 import com.tencent.mm.sdk.modelpay.PayReq;
@@ -23,6 +24,7 @@ import com.tencent.mm.sdk.openapi.IWXAPI;
 import com.tencent.mm.sdk.openapi.WXAPIFactory;
 
 import java.lang.reflect.Type;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -30,11 +32,16 @@ import java.util.regex.Pattern;
 
 import cn.beecloud.async.BCCallback;
 import cn.beecloud.async.BCPayPalSyncObserver;
+import cn.beecloud.entity.BCObjectIdResult;
 import cn.beecloud.entity.BCPayReqParams;
 import cn.beecloud.entity.BCPayResult;
 import cn.beecloud.entity.BCQRCodeResult;
+import cn.beecloud.entity.BCRefundResult;
 import cn.beecloud.entity.BCReqParams;
 import cn.beecloud.entity.BCRestfulCommonResult;
+import cn.beecloud.entity.BCSmsResult;
+import cn.beecloud.entity.BCSubscription;
+import cn.beecloud.entity.BCSubscriptionResult;
 
 /**
  * 支付类
@@ -256,15 +263,23 @@ public class BCPay {
                 BCHttpClientUtil.Response response = BCHttpClientUtil
                         .httpPost(payURL, parameters.transToBillReqMapParams());
 
-                if (response.code == 200) {
+                if (response.code == 200 || (response.code >= 400 && response.code < 500)) {
                     String ret = response.content;
 
                     //反序列化json串
                     Gson res = new Gson();
 
-                    Type type = new TypeToken<Map<String, Object>>() {
-                    }.getType();
-                    Map<String, Object> responseMap = res.fromJson(ret, type);
+                    Type type = new TypeToken<Map<String, Object>>() {}.getType();
+                    Map<String, Object> responseMap;
+                    try {
+                        responseMap = res.fromJson(ret, type);
+                    } catch (JsonSyntaxException ex) {
+                        callback.done(new BCPayResult(BCPayResult.RESULT_FAIL,
+                                        BCPayResult.APP_INTERNAL_EXCEPTION_ERR_CODE,
+                                        BCPayResult.FAIL_EXCEPTION,
+                                        "JsonSyntaxException or Network Error:" + response.code + " # " + response.content));
+                        return;
+                    }
 
                     //判断后台返回结果
                     Integer resultCode = ((Double) responseMap.get("result_code")).intValue();
@@ -752,13 +767,21 @@ public class BCPay {
         BCHttpClientUtil.Response response = BCHttpClientUtil
                 .httpPost(payURL, parameters.transToBillReqMapParams());
 
-        if (response.code == 200) {
+        if (response.code == 200 || (response.code >= 400 && response.code < 500)) {
             String ret = response.content;
 
             Gson res = new Gson();
 
             Type type = new TypeToken<Map<String,Object>>() {}.getType();
-            Map<String, Object> responseMap = res.fromJson(ret, type);
+            Map<String, Object> responseMap;
+            try {
+                responseMap = res.fromJson(ret, type);
+            } catch (JsonSyntaxException ex) {
+                return new BCPayResult(BCPayResult.RESULT_FAIL,
+                        BCPayResult.APP_INTERNAL_EXCEPTION_ERR_CODE,
+                        BCPayResult.FAIL_EXCEPTION,
+                        "JsonSyntaxException or Network Error:" + response.code + " # " + response.content);
+            }
 
             //check result
             Double resultCode = (Double) responseMap.get("result_code");
@@ -892,15 +915,22 @@ public class BCPay {
                 BCHttpClientUtil.Response response = BCHttpClientUtil
                         .httpPost(qrCodeReqURL, parameters.transToBillReqMapParams());
 
-                if (response.code == 200) {
+                if (response.code == 200 || (response.code >= 400 && response.code < 500)) {
                     String ret = response.content;
 
                     //反序列化json
                     Gson res = new Gson();
 
-                    Type type = new TypeToken<Map<String, Object>>() {
-                    }.getType();
-                    Map<String, Object> responseMap = res.fromJson(ret, type);
+                    Type type = new TypeToken<Map<String, Object>>() {}.getType();
+                    Map<String, Object> responseMap;
+                    try {
+                        responseMap = res.fromJson(ret, type);
+                    } catch (JsonSyntaxException ex) {
+                        callback.done(new BCQRCodeResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
+                                BCRestfulCommonResult.APP_INNER_FAIL,
+                                "JsonSyntaxException or Network Error:" + response.code + " # " + response.content));
+                        return;
+                    }
 
                     //判断后台返回结果
                     Integer resultCode = ((Double) responseMap.get("result_code")).intValue();
@@ -934,6 +964,156 @@ public class BCPay {
                             "Network Error:" + response.code + " # " + response.content));
                 }
 
+            }
+        });
+    }
+
+    /**
+     * 发起预退款
+     * @param params 预退款参数
+     * @param callback  回调入口
+     */
+    public void prefund(final RefundParams params, final BCCallback callback) {
+        if (callback == null) {
+            Log.e(TAG, "请初始化callback");
+            return;
+        }
+
+        BCCache.executorService.execute(new Runnable() {
+            @Override
+            public void run() {
+                if (BCCache.getInstance().isTestMode) {
+                    callback.done(new BCRefundResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
+                            BCRestfulCommonResult.APP_INNER_FAIL, "该功能暂不支持测试模式"));
+                    return;
+                }
+
+                if (params.channelType != null &&
+                        params.channelType != BCReqParams.BCChannelTypes.WX &&
+                        params.channelType != BCReqParams.BCChannelTypes.ALI &&
+                        params.channelType != BCReqParams.BCChannelTypes.UN &&
+                        params.channelType != BCReqParams.BCChannelTypes.BD &&
+                        params.channelType != BCReqParams.BCChannelTypes.KUAIQIAN &&
+                        params.channelType != BCReqParams.BCChannelTypes.JD &&
+                        params.channelType != BCReqParams.BCChannelTypes.YEE) {
+                    callback.done(new BCRefundResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
+                            BCRestfulCommonResult.APP_INNER_FAIL, "选择的渠道类型不正确"));
+                    return;
+                }
+
+                Map<String, Object> reqMap = new HashMap<String, Object>();
+
+                BCCache mCache = BCCache.getInstance();
+                String appId = mCache.appId;
+                Long timestamp = (new Date()).getTime();
+                String appSign = BCSecurityUtil.getMessageMD5Digest(appId +
+                        timestamp + mCache.secret);
+                reqMap.put("app_id", appId);
+                reqMap.put("timestamp", timestamp);
+                reqMap.put("app_sign", appSign);
+                if (params.channelType != null)
+                    reqMap.put("channel", params.channelType.name());
+                reqMap.put("refund_no", params.refundNum);
+                reqMap.put("bill_no", params.billNum);
+                reqMap.put("refund_fee", params.refundFee);
+                reqMap.put("optional", params.optional);
+                reqMap.put("need_approval", Boolean.TRUE);
+
+                String reqURL = BCHttpClientUtil.getRefundUrl();
+
+                BCHttpClientUtil.Response response = BCHttpClientUtil
+                        .httpPost(reqURL, reqMap);
+
+                if (response.code == 200 || (response.code >= 400 && response.code < 500)) {
+                    //反序列化json
+                    Gson gson = new Gson();
+
+                    try {
+                        callback.done(gson.fromJson(response.content, BCRefundResult.class));
+                    } catch (JsonSyntaxException ex) {
+                        callback.done(new BCRefundResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
+                                BCRestfulCommonResult.APP_INNER_FAIL,
+                                "JsonSyntaxException or Network Error:" + response.code + " # " + response.content));
+                    }
+                } else {
+                    callback.done(new BCRefundResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
+                            BCRestfulCommonResult.APP_INNER_FAIL,
+                            "Network Error:" + response.code + " # " + response.content));
+                }
+            }
+        });
+    }
+
+    /**
+     * 发送验证码
+     * @param phone 结束验证码的手机号
+     * @param callback  回调入口
+     */
+    public void sendSmsCode(final String phone, final BCCallback callback) {
+        if (callback == null) {
+            Log.e(TAG, "请初始化callback");
+            return;
+        }
+
+        BCCache.executorService.execute(new Runnable() {
+            @Override
+            public void run() {
+                Map<String, Object> reqMap = new HashMap<String, Object>();
+                reqMap.put("phone", phone);
+
+                callback.done(BCHttpClientUtil.addRestObject(BCHttpClientUtil.getSmsCodeUrl(),
+                        reqMap, BCSmsResult.class, true));
+            }
+        });
+    }
+
+    /**
+     * 发起订阅
+     * @param params 订阅参数
+     * @param smsId 通过sendSmsCode获取的验证码标识符
+     * @param smsCode   用户手机收到的验证码
+     * @param couponCode    优惠码，可以为null
+     * @param callback  回调入口
+     */
+    public void subscribe(final BCSubscription params, final String smsId, final String smsCode,
+                          final String couponCode, final BCCallback callback) {
+        if (callback == null) {
+            Log.e(TAG, "请初始化callback");
+            return;
+        }
+
+        BCCache.executorService.execute(new Runnable() {
+            @Override
+            public void run() {
+                Map<String, Object> reqMap = BCHttpClientUtil.objectToMap(params);
+                reqMap.put("sms_id", smsId);
+                reqMap.put("sms_code", smsCode);
+                if (couponCode != null)
+                    reqMap.put("coupon_code", couponCode);
+
+                callback.done(BCHttpClientUtil.addRestObject(BCHttpClientUtil.getSubscriptionUrl(),
+                        reqMap, BCSubscriptionResult.class, true));
+            }
+        });
+    }
+
+    /**
+     * 取消订阅
+     * @param sid   订阅记录的标识符id
+     * @param callback  回调入口
+     */
+    public void cancelSubscription(final String sid, final BCCallback callback) {
+        if (callback == null) {
+            Log.e(TAG, "请初始化callback");
+            return;
+        }
+
+        BCCache.executorService.execute(new Runnable() {
+            @Override
+            public void run() {
+                Map<String, Object> reqMap = new HashMap<>();
+                callback.done(BCHttpClientUtil.deleteRestObject(BCHttpClientUtil.getSubscriptionUrl(),
+                        sid, reqMap, BCObjectIdResult.class, true));
             }
         });
     }
@@ -990,5 +1170,43 @@ public class BCPay {
          * 目前key只有是"category"时才会进行分析
          */
         public Map<String, String> analysis;
+    }
+
+    /**
+     * 外部预退款参数实例
+     */
+    public static class RefundParams {
+        /**
+         *  选填参数
+         *  BCReqParams.BCChannelTypes.WX，
+         *  BCReqParams.BCChannelTypes.ALI，
+         *  BCReqParams.BCChannelTypes.UN，
+         *  BCReqParams.BCChannelTypes.BD，
+         *  BCReqParams.BCChannelTypes.KUAIQIAN，
+         *  BCReqParams.BCChannelTypes.JD，
+         *  BCReqParams.BCChannelTypes.YEE
+         */
+        public BCReqParams.BCChannelTypes channelType;
+
+        /**
+         * 商户退款单号
+         */
+        public String refundNum;
+
+        /**
+         * 发起支付时填写的订单号
+         */
+        public String billNum;
+
+        /**
+         * 退款金额，必须为正整数，单位为分
+         */
+        public Integer refundFee;
+
+        /**
+         * 扩展参数，可以传入任意数量的key/value对来补充对业务逻辑的需求，可以为null，
+         * 对于PayPal请以HashMap实例化
+         */
+        public Map<String, String> optional;
     }
 }

@@ -35,6 +35,15 @@ public class BCRefundStatus extends BCRestfulCommonResult {
      * @param resultCode    返回码
      * @param resultMsg     返回信息
      * @param errDetail     具体错误信息
+     */
+    public BCRefundStatus(Integer resultCode, String resultMsg, String errDetail) {
+        super(resultCode, resultMsg, errDetail);
+    }
+
+    /**
+     * @param resultCode    返回码
+     * @param resultMsg     返回信息
+     * @param errDetail     具体错误信息
      * @param refundStatus  退款状态
      */
     public BCRefundStatus(Integer resultCode, String resultMsg, String errDetail, String refundStatus) {
