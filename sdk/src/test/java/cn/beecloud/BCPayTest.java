@@ -301,7 +301,7 @@ public class BCPayTest {
 
         //mock ali result
         PowerMockito.stub(PowerMockito.method(PayTask.class, "pay",
-                String.class)).toReturn("resultStatus={9000};memo={支付成功};result=mocked");
+                String.class, boolean.class)).toReturn("resultStatus={9000};memo={支付成功};result=mocked");
 
         pay.reqAliPaymentAsync("正常title",
                 22,

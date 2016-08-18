@@ -1,6 +1,6 @@
 ## BeeCloud Android SDK (Open Source)
 
-[![Build Status](https://travis-ci.org/beecloud/beecloud-android.svg)](https://travis-ci.org/beecloud/beecloud-android) ![license](https://img.shields.io/badge/license-MIT-brightgreen.svg) ![version](https://img.shields.io/badge/version-v2.4.0-blue.svg)
+[![Build Status](https://travis-ci.org/beecloud/beecloud-android.svg)](https://travis-ci.org/beecloud/beecloud-android) ![license](https://img.shields.io/badge/license-MIT-brightgreen.svg) ![version](https://img.shields.io/badge/version-v2.4.1-blue.svg)
 
 ## 简介
 
@@ -47,7 +47,7 @@ SDK支持以下支付渠道:
 `gson-2.4.jar`为必须引入的jar，  
 `zxing-3.2.0.jar`为生成二维码必须引入的jar，  
 微信支付需要引入`libammsdk.jar`，  
-支付宝需要引入`alipaysdk.jar`、`alipayutdid.jar`、`alipaysecsdk.jar`，  
+支付宝需要引入`alipaySdk-xxx.jar`，  
 银联需要引入`UPPayAssistEx.jar`，  
 百度钱包支付需要引入`Cashier_SDK-v4.2.0.jar`，  
 最后添加`beecloud android sdk`：`beecloud-x.x.x.jar`（如果你添加的是sdk目录下最新的jar，请手动添加其同级目录下依赖的`okhttp-x.x.x.jar`和`okio-x.x.x.jar`）
@@ -673,9 +673,7 @@ BCQuery.getInstance().querySubscriptions(criteria,
 -libraryjars libs/gson-2.4.jar
 -libraryjars libs/zxing-3.2.0.jar
 #支付宝
--libraryjars libs/alipaysdk.jar
--libraryjars libs/alipaysecsdk.jar
--libraryjars libs/alipayutdid.jar
+-libraryjars libs/alipaySdk-xxx.jar
 #微信
 -libraryjars libs/libammsdk.jar
 #银联
@@ -686,6 +684,10 @@ BCQuery.getInstance().querySubscriptions(criteria,
 #以下是Android Studio和Eclipse都必须的
 #BeeCloud
 -dontwarn cn.beecloud.**
+
+-dontwarn com.alipay.**
+-dontwarn com.baidu.**
+-dontwarn com.tencent.**
 
 #保留类签名声明
 -keepattributes Signature

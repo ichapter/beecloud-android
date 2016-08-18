@@ -10,8 +10,8 @@ android {
     defaultConfig {
         minSdkVersion 10 //PayPal要求min至小10
         targetSdkVersion 22
-        versionCode 23
-        versionName "2.4.0"
+        versionCode 24
+        versionName "2.4.1"
     }
 
     //对于import module方式，compileOptions可以直接删掉
@@ -44,9 +44,7 @@ dependencies {
     libs/libammsdk.jar
 
     //ali
-    libs/alipaysdk.jar
-    libs/alipayutdid.jar
-    libs/alipaysecsdk.jar
+    libs/alipaySdk-xxx.jar.jar
 
     //union pay
     libs/UPPayAssistEx.jar
@@ -89,7 +87,7 @@ task clearJar(type: Delete) {
 
 task makeJar(type:org.gradle.api.tasks.bundling.Jar) {
     //指定生成的jar名
-    baseName 'beecloud-2.4.0'
+    baseName 'beecloud-2.4.1'
     //从哪里打包class文件
     from('build/intermediates/classes/release/cn/beecloud')
     //打包到jar后的目录结构
