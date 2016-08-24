@@ -411,7 +411,7 @@ public class BCPay {
         String orderString = (String) responseMap.get("order_string");
 
         PayTask aliPay = new PayTask(mContextActivity);
-        String aliResult = aliPay.pay(orderString);
+        String aliResult = aliPay.pay(orderString, false);
 
         //解析ali返回结果
         Pattern pattern = Pattern.compile("resultStatus=\\{(\\d+?)\\}");

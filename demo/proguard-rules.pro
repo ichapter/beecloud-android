@@ -16,14 +16,22 @@
 #   public *;
 #}
 
+-dontwarn com.alipay.**
+-dontwarn com.baidu.**
+-dontwarn com.tencent.**
+
 #for paypal
 -dontwarn com.paypal.**
 -dontwarn io.card.payment.**
+-dontwarn okhttp3.**
+-dontwarn okio.**
 
 -keepattributes Signature
 
 #beecloud
--keep class cn.beecloud.** { *; }
+-keep class cn.beecloud.* { *; }
+-keep class cn.beecloud.async.* { *; }
+-keep class cn.beecloud.entity.* { *; }
 
 -keep class com.google.** { *; }
 #支付宝
@@ -37,3 +45,9 @@
 -keep class com.dianxinos.** { *; }
 #PayPal
 -keep class com.paypal.** { *; }
+
+-keep interface okhttp3.** { *; }
+-keep interface okio.** { *; }
+
+-keep class okhttp3.** { *; }
+-keep class okio.** { *; }
