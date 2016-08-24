@@ -310,6 +310,9 @@ public class BCPay {
                                 case BD_APP:
                                     reqBaiduPaymentViaAPP(responseMap);
                                     break;
+                                case BC_WX_WAP:
+                                    reqWXWapPaymentViaWebView(responseMap);
+                                    break;
                                 default:
                                     callback.done(new BCPayResult(BCPayResult.RESULT_FAIL,
                                             BCPayResult.APP_INTERNAL_PARAMS_ERR_CODE,
@@ -399,6 +402,19 @@ public class BCPay {
                     BCPayResult.FAIL_EXCEPTION,
                     "Error: 微信API为空, 请确认已经在需要调起微信支付的Activity中[成功]调用了BCPay.initWechatPay"));
         }
+    }
+
+    /**
+     * 与服务器交互后下一步进入微信wap支付
+     *
+     * @param responseMap     服务端返回参数
+     */
+    private void reqWXWapPaymentViaWebView(final Map<String, Object> responseMap) {
+        String payInfo = String.valueOf(responseMap.get("pay_info"));
+        Intent intent = new Intent();
+        intent.setClass(mContextActivity, BCWXWapPaymentActivity.class);
+        intent.putExtra("pay_info", payInfo);
+        mContextActivity.startActivity(intent);
     }
 
     /**

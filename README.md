@@ -1,20 +1,20 @@
 ## BeeCloud Android SDK (Open Source)
 
-[![Build Status](https://travis-ci.org/beecloud/beecloud-android.svg)](https://travis-ci.org/beecloud/beecloud-android) ![license](https://img.shields.io/badge/license-MIT-brightgreen.svg) ![version](https://img.shields.io/badge/version-v2.4.1-blue.svg)
+[![Build Status](https://travis-ci.org/beecloud/beecloud-android.svg)](https://travis-ci.org/beecloud/beecloud-android) ![license](https://img.shields.io/badge/license-MIT-brightgreen.svg) ![version](https://img.shields.io/badge/version-v2.5.0-blue.svg)
 
 ## 简介
 
-本项目的官方GitHub地址是 [https://github.com/beecloud/beecloud-android](https://github.com/beecloud/beecloud-android)  
+本项目的官方GitHub地址是 [https://github.com/beecloud/beecloud-android](https://github.com/beecloud/beecloud-android)
 
-SDK支持以下支付渠道: 
- 
+SDK支持以下支付渠道:
+
  * 微信APP
  * 支付宝APP
  * 银联在线APP
  * PayPal
- * 百度钱包   
+ * 百度钱包
 
-包含预退款、订阅支付和相关的查询功能。  
+包含预退款、订阅支付和相关的查询功能。
 还提供了线下收款功能(包括微信扫码、微信刷卡、支付宝扫码、支付宝条形码)，订单状态的查询以及订单撤销。 
 
 ## 流程
@@ -162,6 +162,13 @@ BCPay.initPayPal(
     android:windowSoftInputMode="adjustResize" />
 ```
 > 对于百度钱包，由于需要添加的activity数量众多，请参考demo中的AndroidManifest.xml
+> 对于微信wap，需要添加
+```java
+<activity
+        android:name="cn.beecloud.BCWXWapPaymentActivity"
+        android:screenOrientation="portrait"
+        android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+```
 
 ### 4.支付
 

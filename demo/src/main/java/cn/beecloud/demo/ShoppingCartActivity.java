@@ -232,12 +232,13 @@ public class ShoppingCartActivity extends Activity {
         payMethod = (ListView) this.findViewById(R.id.payMethod);
         Integer[] payIcons = new Integer[]{R.drawable.wechat, R.drawable.alipay,
                 R.drawable.unionpay, R.drawable.beecloud_logo, R.drawable.baidupay,
-                R.drawable.paypal, R.drawable.rss, R.drawable.scan};
+                R.drawable.paypal, R.drawable.rss, R.drawable.wechat, R.drawable.scan};
         final String[] payNames = new String[]{"微信支付", "支付宝支付",
-                "银联在线", "BeeCloud支付", "百度钱包", "PayPal支付", "订阅支付", "二维码支付"};
+                "银联在线", "BeeCloud支付", "百度钱包", "PayPal支付", "订阅支付", "微信WAP支付", "二维码支付"};
         String[] payDescs = new String[]{"使用微信支付，以人民币CNY计费", "使用支付宝支付，以人民币CNY计费",
                 "使用银联在线支付，以人民币CNY计费", "通过BeeCloud快捷支付", "使用百度钱包支付，以人民币CNY计费",
-                "使用PayPal支付，以美元USD计费", "通过订阅计划，自动缴费", "通过扫描二维码支付"};
+                "使用PayPal支付，以美元USD计费", "通过订阅计划，自动缴费", "使用微信WAP支付，以人民币CNY计费",
+                "通过扫描二维码支付"};
         PayMethodListItem adapter = new PayMethodListItem(this, payIcons, payNames, payDescs);
         payMethod.setAdapter(adapter);
 
@@ -416,6 +417,26 @@ public class ShoppingCartActivity extends Activity {
                         break;
                     }
                     case 7: {
+                        payParam = new BCPay.PayParams();
+
+                        // 微信Wap
+                        payParam.channelType = BCReqParams.BCChannelTypes.BC_WX_WAP;
+
+                        //商品描述, 32个字节内, 汉字以2个字节计
+                        payParam.billTitle = "安卓WX_WAP支付测试";
+
+                        //支付金额，以分为单位，必须是正整数
+                        payParam.billTotalFee = 1;
+
+                        //商户自定义订单号
+                        payParam.billNum = BillUtils.genBillNum();
+
+                        BCPay.getInstance(ShoppingCartActivity.this).reqPaymentAsync(payParam,
+                                bcCallback);
+
+                        break;
+                    }
+                    case 8: {
                         Intent intent = new Intent(ShoppingCartActivity.this, QRCodeEntryActivity.class);
                         startActivity(intent);
                     }

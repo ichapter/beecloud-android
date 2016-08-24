@@ -159,6 +159,11 @@ public class BCReqParams {
         BC_APP,
 
         /**
+         * BeeCloud 微信Wap
+         */
+        BC_WX_WAP,
+
+        /**
          * BeeCloud网关支付
          */
         BC_GATEWAY,
@@ -274,6 +279,7 @@ public class BCReqParams {
          */
         public static boolean isValidAPPPaymentChannelType(BCChannelTypes channel) {
             return channel == WX_APP ||
+                    channel == BC_WX_WAP ||
                     channel == ALI_APP ||
                     channel == UN_APP ||
                     channel == PAYPAL_SANDBOX ||
@@ -331,6 +337,8 @@ public class BCReqParams {
                 return "微信公众号支付";
             else if (channel.equals(WX_APP.name()))
                 return "微信手机原生APP支付";
+            else if (channel.equals(BC_WX_WAP.name()))
+                return "微信WAP支付";
             else if (channel.equals(ALI.name()))
                 return "支付宝支付";
             else if (channel.equals(ALI_APP.name()))
