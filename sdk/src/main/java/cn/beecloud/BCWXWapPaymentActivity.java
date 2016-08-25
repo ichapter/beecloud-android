@@ -82,7 +82,7 @@ public class BCWXWapPaymentActivity extends Activity {
             }
         });
 
-        url = getIntent().getStringExtra("pay_info");
+        url = getIntent().getStringExtra("url");
 
         webView.loadUrl(url);
     }

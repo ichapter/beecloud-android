@@ -410,10 +410,10 @@ public class BCPay {
      * @param responseMap     服务端返回参数
      */
     private void reqWXWapPaymentViaWebView(final Map<String, Object> responseMap) {
-        String payInfo = String.valueOf(responseMap.get("pay_info"));
+        String payInfo = String.valueOf(responseMap.get("url"));
         Intent intent = new Intent();
         intent.setClass(mContextActivity, BCWXWapPaymentActivity.class);
-        intent.putExtra("pay_info", payInfo);
+        intent.putExtra("url", payInfo);
         mContextActivity.startActivity(intent);
     }
 
