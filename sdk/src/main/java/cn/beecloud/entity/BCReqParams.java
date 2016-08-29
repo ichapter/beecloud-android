@@ -174,6 +174,11 @@ public class BCReqParams {
         BC_EXPRESS,
 
         /**
+         * BeeCloud微信扫码支付
+         */
+        BC_NATIVE,
+
+        /**
          * for PayPal query
          */
         PAYPAL,
@@ -320,6 +325,7 @@ public class BCReqParams {
          */
         public static boolean isValidQRCodeReqChannelType(BCChannelTypes channel) {
             return channel == WX_NATIVE ||
+                    channel == BC_NATIVE ||
                     channel == ALI_QRCODE ||
                     channel == ALI_OFFLINE_QRCODE;
         }
@@ -399,6 +405,8 @@ public class BCReqParams {
                 return "BeeCloud网关支付";
             else if (channel.equals(BC_EXPRESS.name()))
                 return "BeeCloud快捷支付";
+            else if (channel.equals(BC_NATIVE.name()))
+                return "BeeCloud微信扫码支付";
             else
                 return "其他支付类型";
         }
