@@ -144,6 +144,16 @@ public class QRCodeEntryActivity extends Activity {
             }
         });
 
+        Button btnReqBCQRCode = (Button)findViewById(R.id.btnReqBCQRCode);
+        btnReqBCQRCode.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(QRCodeEntryActivity.this, GenQRCodeActivity.class);
+                intent.putExtra("type", "BC");
+                startActivity(intent);
+            }
+        });
+
         initOfflineReqBtn();
     }
 

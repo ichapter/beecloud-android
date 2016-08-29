@@ -25,6 +25,17 @@
             android:textSize="20sp"
             android:layout_width="fill_parent" />
 
+        <Button
+            android:id="@+id/btnReqBCQRCode"
+            android:padding="5dp"
+            android:layout_height="wrap_content"
+            android:background="@drawable/orange_radius"
+            android:layout_marginTop="10dp"
+            android:text="生成BeeCloud微信支付二维码"
+            android:textColor="#ffffff"
+            android:textSize="20sp"
+            android:layout_width="fill_parent" />
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

@@ -40,6 +40,7 @@ class BCHttpClientUtil {
 
     //主机地址
     private static final String BEECLOUD_HOST = "https://apidynamic.beecloud.cn";
+
     private static final String TAG = "BCHttpClientUtil";
 
     //Rest API版本号

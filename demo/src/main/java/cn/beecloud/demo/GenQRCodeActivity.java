@@ -10,6 +10,7 @@ import android.os.Message;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.HashMap;
@@ -17,6 +18,7 @@ import java.util.Map;
 
 import cn.beecloud.BCCache;
 import cn.beecloud.BCOfflinePay;
+import cn.beecloud.BCPay;
 import cn.beecloud.BCQuery;
 import cn.beecloud.async.BCCallback;
 import cn.beecloud.async.BCResult;
@@ -24,6 +26,7 @@ import cn.beecloud.demo.util.BillUtils;
 import cn.beecloud.demo.util.DisplayUtils;
 import cn.beecloud.entity.BCBillStatus;
 import cn.beecloud.entity.BCQRCodeResult;
+import cn.beecloud.entity.BCQueryBillResult;
 import cn.beecloud.entity.BCReqParams;
 import cn.beecloud.entity.BCRevertStatus;
 
@@ -36,6 +39,7 @@ public class GenQRCodeActivity extends Activity {
     ProgressDialog loadingDialog;
 
     String billNum;
+    String billId;
 
     String type;
     BCReqParams.BCChannelTypes channelType;
@@ -80,6 +84,8 @@ public class GenQRCodeActivity extends Activity {
         Intent intent = getIntent();
         type = intent.getStringExtra("type");
 
+        btnRevert = (Button) findViewById(R.id.btnRevert);
+
         //对于二维码，微信使用 WX_NATIVE 作为channel参数
         //支付宝使用ALI_OFFLINE_QRCODE
         if (type.equals("WX")) {
@@ -89,8 +95,11 @@ public class GenQRCodeActivity extends Activity {
             channelType = BCReqParams.BCChannelTypes.ALI_OFFLINE_QRCODE;
             billTitle = "安卓支付宝线下二维码测试";
         } else {
-            Toast.makeText(this, "invalid!", Toast.LENGTH_SHORT).show();
-            finish();
+            channelType = BCReqParams.BCChannelTypes.BC_NATIVE;
+            billTitle = "安卓BC_NATIVE二维码测试";
+            btnRevert.setVisibility(View.GONE);
+            TextView revertTip = (TextView) findViewById(R.id.revertTip);
+            revertTip.setVisibility(View.GONE);
         }
 
         DisplayUtils.initBack(this);
@@ -104,8 +113,6 @@ public class GenQRCodeActivity extends Activity {
         btnQueryResult = (Button) findViewById(R.id.btnQueryResult);
 
         initQueryButton();
-
-        btnRevert = (Button) findViewById(R.id.btnRevert);
 
         initRevertBtn();
 
@@ -134,6 +141,8 @@ public class GenQRCodeActivity extends Activity {
 
                 //resultCode为0表示请求成功
                 if (bcqrCodeResult.getResultCode() == 0) {
+                    billId = bcqrCodeResult.getId();
+
                     //如果你设置了生成二维码参数为true那么此处可以获取二维码
                     qrCodeBitMap = bcqrCodeResult.getQrCodeBitmap();
 
@@ -164,11 +173,9 @@ public class GenQRCodeActivity extends Activity {
 
         billNum = BillUtils.genBillNum();
 
-        //你可以任选一种方法请求微信和支付宝二维码
-        //此处的判断只是示例和测试需要，并没有实际的逻辑意义
-        if (channelType == BCReqParams.BCChannelTypes.WX_NATIVE) {
-            BCOfflinePay.getInstance().reqQRCodeAsync(
-                    channelType,
+        if (channelType == BCReqParams.BCChannelTypes.BC_NATIVE) {
+            // BeeCloud微信二维码支付并不是严格意义上的线下支付
+            BCPay.getInstance(GenQRCodeActivity.this).reqBCNativeAsync(
                     billTitle,  //商品描述
                     1,          //总金额, 以分为单位, 必须是正整数
                     billNum,          //流水号
@@ -201,35 +208,64 @@ public class GenQRCodeActivity extends Activity {
                 loadingDialog.setMessage("订单查询中，请稍候...");
                 loadingDialog.show();
 
-                BCQuery.getInstance().queryOfflineBillStatusAsync(
-                        channelType,
-                        billNum,
-                        new BCCallback() {
-                            @Override
-                            public void done(BCResult result) {
-                                loadingDialog.dismiss();
+                if (channelType == BCReqParams.BCChannelTypes.BC_NATIVE) {
+                    // BC_NATIVE通过id查询结果
+                    BCQuery.getInstance().queryBillByIDAsync(billId, new BCCallback() {
+                        @Override
+                        public void done(BCResult result) {
+                            loadingDialog.dismiss();
 
-                                BCBillStatus billStatus = (BCBillStatus) result;
+                            BCQueryBillResult billStatus = (BCQueryBillResult) result;
 
-                                Message msg = mHandler.obtainMessage();
+                            Message msg = mHandler.obtainMessage();
 
-                                //表示支付成功
-                                if (billStatus.getResultCode() == 0 &&
-                                        billStatus.getPayResult()) {
-                                    msg.what = NOTIFY_RESULT;
-                                    notify = "支付成功";
-                                } else {
+                            //表示支付成功
+                            if (billStatus.getResultCode() == 0 &&
+                                    billStatus.getBill().getPayResult()) {
+                                msg.what = NOTIFY_RESULT;
+                                notify = "支付成功";
+                            } else {
 
-                                    msg.what = ERR_CODE;
-                                    errMsg = "支付失败：" + billStatus.getResultCode() + " # " +
-                                                    billStatus.getResultMsg() + " # " +
-                                                    billStatus.getErrDetail();
-                                }
-
-                                mHandler.sendMessage(msg);
+                                msg.what = ERR_CODE;
+                                errMsg = "支付失败：" + billStatus.getResultCode() + " # " +
+                                        billStatus.getResultMsg() + " # " +
+                                        billStatus.getErrDetail();
                             }
+
+                            mHandler.sendMessage(msg);
                         }
-                );
+                    });
+                } else {
+                    BCQuery.getInstance().queryOfflineBillStatusAsync(
+                            channelType,
+                            billNum,
+                            new BCCallback() {
+                                @Override
+                                public void done(BCResult result) {
+                                    loadingDialog.dismiss();
+
+                                    BCBillStatus billStatus = (BCBillStatus) result;
+
+                                    Message msg = mHandler.obtainMessage();
+
+                                    //表示支付成功
+                                    if (billStatus.getResultCode() == 0 &&
+                                            billStatus.getPayResult()) {
+                                        msg.what = NOTIFY_RESULT;
+                                        notify = "支付成功";
+                                    } else {
+
+                                        msg.what = ERR_CODE;
+                                        errMsg = "支付失败：" + billStatus.getResultCode() + " # " +
+                                                billStatus.getResultMsg() + " # " +
+                                                billStatus.getErrDetail();
+                                    }
+
+                                    mHandler.sendMessage(msg);
+                                }
+                            }
+                    );
+                }
             }
         });
     }

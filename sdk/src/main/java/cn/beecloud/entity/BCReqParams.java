@@ -159,6 +159,11 @@ public class BCReqParams {
         BC_APP,
 
         /**
+         * BeeCloud 微信Wap
+         */
+        BC_WX_WAP,
+
+        /**
          * BeeCloud网关支付
          */
         BC_GATEWAY,
@@ -167,6 +172,11 @@ public class BCReqParams {
          * BeeCloud快捷支付
          */
         BC_EXPRESS,
+
+        /**
+         * BeeCloud微信扫码支付
+         */
+        BC_NATIVE,
 
         /**
          * for PayPal query
@@ -274,6 +284,7 @@ public class BCReqParams {
          */
         public static boolean isValidAPPPaymentChannelType(BCChannelTypes channel) {
             return channel == WX_APP ||
+                    channel == BC_WX_WAP ||
                     channel == ALI_APP ||
                     channel == UN_APP ||
                     channel == PAYPAL_SANDBOX ||
@@ -314,6 +325,7 @@ public class BCReqParams {
          */
         public static boolean isValidQRCodeReqChannelType(BCChannelTypes channel) {
             return channel == WX_NATIVE ||
+                    channel == BC_NATIVE ||
                     channel == ALI_QRCODE ||
                     channel == ALI_OFFLINE_QRCODE;
         }
@@ -331,6 +343,8 @@ public class BCReqParams {
                 return "微信公众号支付";
             else if (channel.equals(WX_APP.name()))
                 return "微信手机原生APP支付";
+            else if (channel.equals(BC_WX_WAP.name()))
+                return "微信WAP支付";
             else if (channel.equals(ALI.name()))
                 return "支付宝支付";
             else if (channel.equals(ALI_APP.name()))
@@ -391,6 +405,8 @@ public class BCReqParams {
                 return "BeeCloud网关支付";
             else if (channel.equals(BC_EXPRESS.name()))
                 return "BeeCloud快捷支付";
+            else if (channel.equals(BC_NATIVE.name()))
+                return "BeeCloud微信扫码支付";
             else
                 return "其他支付类型";
         }

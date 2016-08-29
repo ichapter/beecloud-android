@@ -1,6 +1,6 @@
 /**
  * BCPay.java
- *
+ * <p>
  * Created by xuanzhui on 2015/7/27.
  * Copyright (c) 2015 BeeCloud. All rights reserved.
  */
@@ -65,12 +65,13 @@ public class BCPay {
 
     private static BCPay instance;
 
-    private BCPay() {}
+    private BCPay() {
+    }
 
     /**
      * 唯一获取BCPay实例的入口
      * @param context   留存context
-     * @return          BCPay实例
+     * @return BCPay实例
      */
     public synchronized static BCPay getInstance(Context context) {
 
@@ -80,7 +81,7 @@ public class BCPay {
         }
 
         if (context != null)
-            mContextActivity = (Activity)context;
+            mContextActivity = (Activity) context;
 
         return instance;
     }
@@ -91,7 +92,7 @@ public class BCPay {
      * 微信支付只有经过初始化才能成功调起，其他支付渠道无此要求。
      *
      * @param context      需要在某Activity里初始化微信支付，此参数需要传递该Activity.this，不能为null
-     * @return             返回出错信息，如果成功则为null
+     * @return 返回出错信息，如果成功则为null
      */
     public static String initWechatPay(Context context, String wechatAppID) {
         String errMsg = null;
@@ -169,7 +170,7 @@ public class BCPay {
      * @param type      paypay pay type, SANDBOX for test before online, LIVE is for online
      * @param retrieveShippingAddresses set true then it will enable PayPal Shipping Addresses Retrieval, but it sometimes may cause 'shipping address invalid' error during payment
      */
-    public static void initPayPal(String clientId, String secret, PAYPAL_PAY_TYPE type, Boolean retrieveShippingAddresses){
+    public static void initPayPal(String clientId, String secret, PAYPAL_PAY_TYPE type, Boolean retrieveShippingAddresses) {
         BCCache instance = BCCache.getInstance();
         instance.paypalClientID = clientId;
         instance.paypalSecret = secret;
@@ -269,15 +270,16 @@ public class BCPay {
                     //反序列化json串
                     Gson res = new Gson();
 
-                    Type type = new TypeToken<Map<String, Object>>() {}.getType();
+                    Type type = new TypeToken<Map<String, Object>>() {
+                    }.getType();
                     Map<String, Object> responseMap;
                     try {
                         responseMap = res.fromJson(ret, type);
                     } catch (JsonSyntaxException ex) {
                         callback.done(new BCPayResult(BCPayResult.RESULT_FAIL,
-                                        BCPayResult.APP_INTERNAL_EXCEPTION_ERR_CODE,
-                                        BCPayResult.FAIL_EXCEPTION,
-                                        "JsonSyntaxException or Network Error:" + response.code + " # " + response.content));
+                                BCPayResult.APP_INTERNAL_EXCEPTION_ERR_CODE,
+                                BCPayResult.FAIL_EXCEPTION,
+                                "JsonSyntaxException or Network Error:" + response.code + " # " + response.content));
                         return;
                     }
 
@@ -287,7 +289,7 @@ public class BCPay {
 
                         if (mContextActivity != null) {
 
-                            BCCache.getInstance().billID = (String)responseMap.get("id");
+                            BCCache.getInstance().billID = (String) responseMap.get("id");
 
                             //如果是测试模式
                             if (BCCache.getInstance().isTestMode) {
@@ -309,6 +311,9 @@ public class BCPay {
                                     break;
                                 case BD_APP:
                                     reqBaiduPaymentViaAPP(responseMap);
+                                    break;
+                                case BC_WX_WAP:
+                                    reqWXWapPaymentViaWebView(responseMap);
                                     break;
                                 default:
                                     callback.done(new BCPayResult(BCPayResult.RESULT_FAIL,
@@ -356,7 +361,7 @@ public class BCPay {
             return;
 
         if (payParam.channelType == BCReqParams.BCChannelTypes.PAYPAL_SANDBOX ||
-                    payParam.channelType == BCReqParams.BCChannelTypes.PAYPAL_LIVE) {
+                payParam.channelType == BCReqParams.BCChannelTypes.PAYPAL_LIVE) {
             reqPayPalPaymentAsync(payParam.billTitle,
                     payParam.billTotalFee,
                     payParam.currency,
@@ -399,6 +404,19 @@ public class BCPay {
                     BCPayResult.FAIL_EXCEPTION,
                     "Error: 微信API为空, 请确认已经在需要调起微信支付的Activity中[成功]调用了BCPay.initWechatPay"));
         }
+    }
+
+    /**
+     * 与服务器交互后下一步进入微信wap支付
+     *
+     * @param responseMap     服务端返回参数
+     */
+    private void reqWXWapPaymentViaWebView(final Map<String, Object> responseMap) {
+        String payInfo = String.valueOf(responseMap.get("url"));
+        Intent intent = new Intent();
+        intent.setClass(mContextActivity, BCWXWapPaymentActivity.class);
+        intent.putExtra("url", payInfo);
+        mContextActivity.startActivity(intent);
     }
 
     /**
@@ -631,9 +649,9 @@ public class BCPay {
      * @param callback        支付完成后的回调函数
      */
     public void reqBaiduPaymentAsync(final String billTitle, final Integer billTotalFee,
-                                   final String billNum,
+                                     final String billNum,
                                      final Map<String, String> optional,
-                                   final BCCallback callback) {
+                                     final BCCallback callback) {
         this.reqPaymentAsync(BCReqParams.BCChannelTypes.BD_APP, billTitle, billTotalFee,
                 billNum, null, optional, null, callback);
     }
@@ -648,8 +666,8 @@ public class BCPay {
      * @param callback        支付完成后的回调函数
      */
     public void reqPayPalPaymentAsync(final String billTitle, final Integer billTotalFee,
-                                          final String currency, final HashMap<String, String> optional,
-                                          final BCCallback callback) {
+                                      final String currency, final HashMap<String, String> optional,
+                                      final BCCallback callback) {
         if (BCCache.getInstance().isTestMode) {
             callback.done(new BCPayResult(BCPayResult.RESULT_FAIL,
                     BCPayResult.APP_INTERNAL_PARAMS_ERR_CODE,
@@ -693,7 +711,8 @@ public class BCPay {
             //反序列化json
             Gson res = new Gson();
 
-            Type type = new TypeToken<Map<String, Object>>() {}.getType();
+            Type type = new TypeToken<Map<String, Object>>() {
+            }.getType();
             Map<String, Object> responseMap = res.fromJson(ret, type);
 
             //判断后台返回结果
@@ -710,7 +729,7 @@ public class BCPay {
      * @return if result equals BCPayResult.RESULT_SUCCESS then it means sync successfully and payment is valid
      */
     public BCPayResult syncPayPalPayment(final String billTitle, final Integer billTotalFee, final String billNum,
-                               final String currency, final String optional) {
+                                         final String currency, final String optional) {
         if (BCCache.getInstance().isTestMode) {
             return new BCPayResult(BCPayResult.RESULT_FAIL,
                     BCPayResult.APP_INTERNAL_PARAMS_ERR_CODE,
@@ -734,7 +753,8 @@ public class BCPay {
 
         if (optional != null) {
             Gson gson = new Gson();
-            optionalMap = gson.fromJson(optional, new TypeToken<Map<String,String>>() {}.getType());
+            optionalMap = gson.fromJson(optional, new TypeToken<Map<String, String>>() {
+            }.getType());
         }
 
         String paramValidRes = BCValidationUtil.prepareParametersForPay(billTitle, billTotalFee,
@@ -759,7 +779,7 @@ public class BCPay {
                     "Can't get access Token");
         }
 
-        parameters.currency=currency;
+        parameters.currency = currency;
         parameters.accessToken = "Bearer " + accessToken;
 
         String payURL = BCHttpClientUtil.getBillPayURL();
@@ -772,7 +792,8 @@ public class BCPay {
 
             Gson res = new Gson();
 
-            Type type = new TypeToken<Map<String,Object>>() {}.getType();
+            Type type = new TypeToken<Map<String, Object>>() {
+            }.getType();
             Map<String, Object> responseMap;
             try {
                 responseMap = res.fromJson(ret, type);
@@ -789,7 +810,7 @@ public class BCPay {
 
             if (resultCode == 0) {
 
-                BCCache.getInstance().billID=String.valueOf(responseMap.get("id"));
+                BCCache.getInstance().billID = String.valueOf(responseMap.get("id"));
 
                 return new BCPayResult(BCPayResult.RESULT_SUCCESS,
                         BCPayResult.APP_PAY_SUCC_CODE,
@@ -833,12 +854,13 @@ public class BCPay {
      */
     public BCPayResult syncPayPalPayment(final String syncJson) {
         Gson gson = new Gson();
-        Map<String, String> syncItem = gson.fromJson(syncJson, new TypeToken<Map<String,String>>() {}.getType());
+        Map<String, String> syncItem = gson.fromJson(syncJson, new TypeToken<Map<String, String>>() {
+        }.getType());
 
         Integer billTotalFee;
-        try{
+        try {
             billTotalFee = Integer.valueOf(syncItem.get("billTotalFee"));
-        } catch (Exception e){
+        } catch (Exception e) {
             Log.e(TAG, e.getMessage() == null ? "Exception" : e.getMessage());
             billTotalFee = -1;
         }
@@ -860,10 +882,10 @@ public class BCPay {
      * @param callback        支付完成后的回调函数
      */
     public void reqAliInlineQRCodeAsync(final String billTitle, final Integer billTotalFee,
-                                  final String billNum, final Map<String, String> optional,
-                                  final String returnUrl,
-                                  final String qrPayMode,
-                                  final BCCallback callback) {
+                                        final String billNum, final Map<String, String> optional,
+                                        final String returnUrl,
+                                        final String qrPayMode,
+                                        final BCCallback callback) {
         if (callback == null) {
             Log.w(TAG, "请初始化callback");
             return;
@@ -921,7 +943,8 @@ public class BCPay {
                     //反序列化json
                     Gson res = new Gson();
 
-                    Type type = new TypeToken<Map<String, Object>>() {}.getType();
+                    Type type = new TypeToken<Map<String, Object>>() {
+                    }.getType();
                     Map<String, Object> responseMap;
                     try {
                         responseMap = res.fromJson(ret, type);
@@ -949,7 +972,7 @@ public class BCPay {
                                 String.valueOf(responseMap.get("err_detail")),
                                 null, null,
                                 content, null,
-                                aliQRCodeHtml));
+                                aliQRCodeHtml, null));
 
                     } else {
                         //返回服务端传回的错误信息
@@ -966,6 +989,25 @@ public class BCPay {
 
             }
         });
+    }
+
+    /**
+     * 生成BeeCloud微信二维码
+     *
+     * @param billTitle       商品描述, 32个字节内, 汉字以2个字节计
+     * @param billTotalFee    支付金额，以分为单位，必须是正整数
+     * @param billNum         商户自定义订单号
+     * @param optional        为扩展参数，可以传入任意数量的key/value对来补充对业务逻辑的需求
+     * @param genQRCode       是否生成QRCode Bitmap
+     * @param qrCodeWidth     如果生成, QRCode的宽度, null则使用默认参数
+     * @param callback        支付完成后的回调函数
+     */
+    public void reqBCNativeAsync(final String billTitle, final Integer billTotalFee,
+                                 final String billNum, final Map<String, String> optional,
+                                 final Boolean genQRCode, final Integer qrCodeWidth,
+                                 final BCCallback callback) {
+        BCOfflinePay.getInstance().reqQRCodeAsync(BCReqParams.BCChannelTypes.BC_NATIVE,
+                billTitle, billTotalFee, billNum, optional, genQRCode, qrCodeWidth, callback);
     }
 
     /**

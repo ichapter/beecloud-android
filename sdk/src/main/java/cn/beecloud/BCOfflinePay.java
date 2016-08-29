@@ -151,6 +151,8 @@ public class BCOfflinePay {
                 }
 
                 String qrCodeReqURL = BCHttpClientUtil.getBillOfflinePayURL();
+                if (channelType == BCReqParams.BCChannelTypes.BC_NATIVE)
+                    qrCodeReqURL = BCHttpClientUtil.getBillPayURL();
 
                 BCHttpClientUtil.Response response = BCHttpClientUtil
                         .httpPost(qrCodeReqURL, parameters.transToBillReqMapParams());
@@ -201,12 +203,16 @@ public class BCOfflinePay {
                             }
                         }
 
+                        String id = null;
+                        if (responseMap.get("id") != null)
+                            id = String.valueOf(responseMap.get("id"));
+
                         callback.done(new BCQRCodeResult(resultCode,
                                 String.valueOf(responseMap.get("result_msg")),
                                 String.valueOf(responseMap.get("err_detail")),
                                 imgSize, imgSize,
                                 content, qrBitmap,
-                                null));
+                                null, id));
 
                     } else {
                         //返回服务端传回的错误信息

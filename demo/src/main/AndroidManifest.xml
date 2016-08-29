@@ -272,6 +272,13 @@
             android:theme="@android:style/Theme.Translucent.NoTitleBar" />
         <!-- for test mode end -->
 
+        <!-- for wx wap start -->
+        <activity
+            android:name="cn.beecloud.BCWXWapPaymentActivity"
+            android:screenOrientation="portrait"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+        <!-- for wx wap end -->
+
         <activity
             android:name=".BillListActivity"
             android:screenOrientation="portrait" />

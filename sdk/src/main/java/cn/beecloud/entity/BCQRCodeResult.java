@@ -23,6 +23,8 @@ public class BCQRCodeResult extends BCRestfulCommonResult {
 
     private String aliQRCodeHtml;
 
+    private String id;
+
     /**
      * 无参构造
      */
@@ -71,13 +73,14 @@ public class BCQRCodeResult extends BCRestfulCommonResult {
     public BCQRCodeResult(Integer resultCode, String resultMsg, String errDetail,
                           Integer qrCodeHeight, Integer qrCodeWidth,
                           String qrCodeRawContent, Bitmap qrCodeBitmap,
-                          String aliQRCodeHtml) {
+                          String aliQRCodeHtml, String id) {
         super(resultCode, resultMsg, errDetail);
         this.qrCodeHeight = qrCodeHeight;
         this.qrCodeWidth = qrCodeWidth;
         this.qrCodeRawContent = qrCodeRawContent;
         this.qrCodeBitmap = qrCodeBitmap;
         this.aliQRCodeHtml = aliQRCodeHtml;
+        this.id = id;
     }
 
     /**
@@ -115,4 +118,7 @@ public class BCQRCodeResult extends BCRestfulCommonResult {
         return aliQRCodeHtml;
     }
 
+    public String getId() {
+        return id;
+    }
 }
