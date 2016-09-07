@@ -69,6 +69,11 @@ public class BCPayReqParams extends BCReqParams {
     public Integer billTimeout;
 
     /**
+     * 异步回调地址
+     */
+    public String notifyUrl;
+
+    /**
      * 附加数据
      * 用户自定义的参数, 将会在webhook通知中原样返回, 该字段主要用于商户携带订单的自定义数据
      */
@@ -135,6 +140,9 @@ public class BCPayReqParams extends BCReqParams {
 
         if (currency != null)
             params.put("currency", currency);
+
+        if (notifyUrl != null)
+            params.put("notify_url", notifyUrl);
 
         if (optional !=null && optional.size() != 0)
             params.put("optional", optional);

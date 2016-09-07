@@ -212,6 +212,10 @@ class BCHttpClientUtil {
         return getRootHost() + "rest/refund";
     }
 
+    public static String getAuthUrl() {
+        return getRootHost() + "auth";
+    }
+
     public static String getPlanUrl() {
         return getRootHost() + PLAN_URL;
     }

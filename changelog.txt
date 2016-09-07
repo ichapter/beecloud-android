@@ -1,5 +1,9 @@
 BeeCloud Android SDK Changelog
 ==========================
+v2.6.0 2016年9月7日
+增加鉴权
+增加notify url
+
 v2.5.0 2016年8月24日
 增加微信WAP支付
 

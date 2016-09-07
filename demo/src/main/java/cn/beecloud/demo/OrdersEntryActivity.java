@@ -58,4 +58,9 @@ public class OrdersEntryActivity extends Activity {
         });
     }
 
+    public void forwardAuth(View view) {
+        Intent intent = new Intent(OrdersEntryActivity.this, VerifyCardActivity.class);
+        startActivity(intent);
+    }
+
 }

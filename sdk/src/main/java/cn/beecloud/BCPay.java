@@ -218,6 +218,7 @@ public class BCPay {
     private void reqPaymentAsync(final BCReqParams.BCChannelTypes channelType,
                                  final String billTitle, final Integer billTotalFee,
                                  final String billNum, final Integer billTimeout,
+                                 final String notifyUrl,
                                  final Map<String, String> optional,
                                  final Map<String, String> analysis,
                                  final BCCallback callback) {
@@ -258,6 +259,7 @@ public class BCPay {
 
                 parameters.billTimeout = billTimeout;
                 parameters.analysis = analysis;
+                parameters.notifyUrl = notifyUrl;
 
                 String payURL = BCHttpClientUtil.getBillPayURL();
 
@@ -373,6 +375,7 @@ public class BCPay {
                     payParam.billTotalFee,
                     payParam.billNum,
                     payParam.billTimeout,
+                    payParam.notifyUrl,
                     payParam.optional,
                     payParam.analysis,
                     callback);
@@ -602,7 +605,7 @@ public class BCPay {
                                   final String billNum,
                                   final Map<String, String> optional, final BCCallback callback) {
         this.reqPaymentAsync(BCReqParams.BCChannelTypes.WX_APP, billTitle, billTotalFee,
-                billNum, null, optional, null, callback);
+                billNum, null, null, optional, null, callback);
     }
 
     /**
@@ -619,7 +622,7 @@ public class BCPay {
                                    final Map<String, String> optional,
                                    final BCCallback callback) {
         this.reqPaymentAsync(BCReqParams.BCChannelTypes.ALI_APP, billTitle, billTotalFee,
-                billNum, null, optional, null, callback);
+                billNum, null, null, optional, null, callback);
     }
 
     /**
@@ -636,7 +639,7 @@ public class BCPay {
                                      final Map<String, String> optional,
                                      final BCCallback callback) {
         this.reqPaymentAsync(BCReqParams.BCChannelTypes.UN_APP, billTitle, billTotalFee,
-                billNum, null, optional, null, callback);
+                billNum, null, null, optional, null, callback);
     }
 
     /**
@@ -653,7 +656,7 @@ public class BCPay {
                                      final Map<String, String> optional,
                                      final BCCallback callback) {
         this.reqPaymentAsync(BCReqParams.BCChannelTypes.BD_APP, billTitle, billTotalFee,
-                billNum, null, optional, null, callback);
+                billNum, null, null, optional, null, callback);
     }
 
     /**
@@ -1200,6 +1203,11 @@ public class BCPay {
          * 订单超时时间，以秒为单位，建议不小于360, 可以为null
          */
         public Integer billTimeout;
+
+        /**
+         * 异步回调地址
+         */
+        public String notifyUrl;
 
         /**
          * 扩展参数，可以传入任意数量的key/value对来补充对业务逻辑的需求，可以为null，

@@ -1,6 +1,6 @@
 ## BeeCloud Android SDK (Open Source)
 
-[![Build Status](https://travis-ci.org/beecloud/beecloud-android.svg)](https://travis-ci.org/beecloud/beecloud-android) ![license](https://img.shields.io/badge/license-MIT-brightgreen.svg) ![version](https://img.shields.io/badge/version-v2.5.0-blue.svg)
+[![Build Status](https://travis-ci.org/beecloud/beecloud-android.svg)](https://travis-ci.org/beecloud/beecloud-android) ![license](https://img.shields.io/badge/license-MIT-brightgreen.svg) ![version](https://img.shields.io/badge/version-v2.6.0-blue.svg)
 
 ## 简介
 
@@ -14,7 +14,7 @@ SDK支持以下支付渠道:
  * PayPal
  * 百度钱包
 
-包含预退款、订阅支付和相关的查询功能。
+包含预退款、订阅支付、鉴权和相关的查询功能。
 还提供了线下收款功能(包括微信扫码、微信刷卡、支付宝扫码、支付宝条形码)，订单状态的查询以及订单撤销。 
 
 ## 流程
@@ -666,6 +666,22 @@ BCQuery.getInstance().querySubscriptions(criteria,
 ```
   
 
+###  9. 鉴权
+**原型：**
+
+通过`BCValidationUtil.verifyCardFactors`方法鉴权，结果转化成`BCCardVerifyResult`做后续处理，请参照`demo`中`VerifyCardActivity`。  
+
+**调用：**  
+  
+同上，首先初始化回调入口BCCallback
+```java
+// 二要素鉴权
+BCValidationUtil.verifyCardFactors(
+    "姓名",
+    "身份证号码",
+    new BCCallback() { ... });
+```
+  
 ## Demo
 考虑到个人的开发习惯，本项目提供了`Android Studio`和`Eclipse ADT`两种工程的`demo`，为了使demo顺利运行，请注意以下细节
 >1. 对于使用`Android Studio`的开发人员，下载源码后可以将`demo_eclipse`移除，`Import Project`的时候选择`beecloud-android`，`sdk`为`demo`的依赖`model`，`gradle`会自动关联。
