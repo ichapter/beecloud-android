@@ -442,7 +442,7 @@ public class ShoppingCartActivity extends Activity {
                     case 8: {
                         payParam = new BCPay.PayParams();
 
-                        // 微信Wap
+                        // 微信APP
                         payParam.channelType = BCReqParams.BCChannelTypes.BC_WX_APP;
 
                         //商品描述, 32个字节内, 汉字以2个字节计
