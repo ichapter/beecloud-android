@@ -11,7 +11,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="20dp"
-        android:text="本示例依赖ZXing扫码工具，你可以根据需求自己决定用什么方式扫描用户的付款码，注意扫码方式发起的订单也可以撤销，撤销方法参考GenQRCodeActivity"
+        android:text="本示例依赖ZXing扫码工具，你可以根据需求自己决定用什么方式扫描用户的付款码，注意WX_SCAN和ALI_SCAN扫码方式发起的订单也可以撤销，撤销方法参考GenQRCodeActivity"
         android:textSize="16sp"
         android:textColor="@color/main_orange"/>
 

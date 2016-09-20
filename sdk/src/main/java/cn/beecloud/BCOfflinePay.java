@@ -351,11 +351,15 @@ public class BCOfflinePay {
                     //判断后台返回结果
                     Integer resultCode = ((Double) responseMap.get("result_code")).intValue();
                     if (resultCode == 0) {
+                        String id = null;
+                        if (responseMap.get("id") != null)
+                            id = String.valueOf(responseMap.get("id"));
 
                         callback.done(new BCPayResult(BCPayResult.RESULT_SUCCESS,
                                 BCPayResult.APP_PAY_SUCC_CODE,
                                 BCPayResult.RESULT_SUCCESS,
-                                BCPayResult.RESULT_SUCCESS));
+                                BCPayResult.RESULT_SUCCESS,
+                                id));
 
                     } else {
                         //返回服务端传回的错误信息

@@ -149,7 +149,7 @@ public class QRCodeEntryActivity extends Activity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(QRCodeEntryActivity.this, GenQRCodeActivity.class);
-                intent.putExtra("type", "BC");
+                intent.putExtra("type", "BC_NATIVE");
                 startActivity(intent);
             }
         });
@@ -204,5 +204,23 @@ public class QRCodeEntryActivity extends Activity {
         super.onDestroy();
         //用到BCPay的activity在结束前，清理context引用
         BCPay.clear();
+    }
+
+    public void reqBCAliOffCode(View view) {
+        Intent intent = new Intent(QRCodeEntryActivity.this, GenQRCodeActivity.class);
+        intent.putExtra("type", "BC_ALI_QRCODE");
+        startActivity(intent);
+    }
+
+    public void reqBCWXScan(View view) {
+        Intent intent = new Intent(QRCodeEntryActivity.this, PayViaAuthCodeActivity.class);
+        intent.putExtra("type", "BC_WX_SCAN");
+        startActivity(intent);
+    }
+
+    public void reqBCAliScan(View view) {
+        Intent intent = new Intent(QRCodeEntryActivity.this, PayViaAuthCodeActivity.class);
+        intent.putExtra("type", "BC_ALI_SCAN");
+        startActivity(intent);
     }
 }

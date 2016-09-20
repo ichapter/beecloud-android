@@ -9,6 +9,8 @@ package cn.beecloud;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 
 import com.alipay.sdk.app.PayTask;
@@ -18,6 +20,9 @@ import com.baidu.paysdk.api.BaiduPay;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
+import com.switfpass.pay.MainApplication;
+import com.switfpass.pay.activity.PayPlugin;
+import com.switfpass.pay.bean.RequestMsg;
 import com.tencent.mm.sdk.constants.Build;
 import com.tencent.mm.sdk.modelpay.PayReq;
 import com.tencent.mm.sdk.openapi.IWXAPI;
@@ -304,6 +309,9 @@ public class BCPay {
                                 case WX_APP:
                                     reqWXPaymentViaAPP(responseMap);
                                     break;
+                                case BC_WX_APP:
+                                    reqBCWXPaymentViaAPP(responseMap);
+                                    break;
                                 case ALI_APP:
                                     reqAliPaymentViaAPP(responseMap);
                                     break;
@@ -388,7 +396,6 @@ public class BCPay {
      * @param responseMap     服务端返回参数
      */
     private void reqWXPaymentViaAPP(final Map<String, Object> responseMap) {
-
         //获取到服务器的订单参数后，以下主要代码即可调起微信支付。
         PayReq request = new PayReq();
         request.appId = String.valueOf(responseMap.get("app_id"));
@@ -407,6 +414,27 @@ public class BCPay {
                     BCPayResult.FAIL_EXCEPTION,
                     "Error: 微信API为空, 请确认已经在需要调起微信支付的Activity中[成功]调用了BCPay.initWechatPay"));
         }
+    }
+
+    /**
+     * 与服务器交互后下一步进入BC微信app支付
+     *
+     * @param responseMap     服务端返回参数
+     */
+    private void reqBCWXPaymentViaAPP(final Map<String, Object> responseMap) {
+        final RequestMsg msg = new RequestMsg();
+        msg.setTokenId(String.valueOf(responseMap.get("token_id")));
+        msg.setTradeType(MainApplication.WX_APP_TYPE);
+        msg.setAppId(BCCache.getInstance().wxAppId);
+
+        Handler mainHandler = new Handler(Looper.getMainLooper());
+        mainHandler.post(
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        PayPlugin.unifiedAppPay(mContextActivity, msg);
+                    }
+                });
     }
 
     /**

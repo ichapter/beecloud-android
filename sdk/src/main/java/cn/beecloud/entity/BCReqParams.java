@@ -154,9 +154,11 @@ public class BCReqParams {
         BC,
 
         /**
-         * BeeCloud APP快捷支付
+         * BeeCloud 银联快捷支付
          */
         BC_APP,
+
+        BC_WX_APP,
 
         /**
          * BeeCloud 微信Wap
@@ -172,7 +174,9 @@ public class BCReqParams {
          * BeeCloud快捷支付
          */
         BC_EXPRESS,
-
+        BC_ALI_SCAN,
+        BC_WX_SCAN,
+        BC_ALI_QRCODE,
         /**
          * BeeCloud微信扫码支付
          */
@@ -285,6 +289,7 @@ public class BCReqParams {
         public static boolean isValidAPPPaymentChannelType(BCChannelTypes channel) {
             return channel == WX_APP ||
                     channel == BC_WX_WAP ||
+                    channel == BC_WX_APP ||
                     channel == ALI_APP ||
                     channel == UN_APP ||
                     channel == PAYPAL_SANDBOX ||
@@ -301,7 +306,9 @@ public class BCReqParams {
          */
         public static boolean isValidOfflinePayChannelType(BCChannelTypes channel) {
             return channel == WX_SCAN ||
-                    channel == ALI_SCAN;
+                    channel == ALI_SCAN ||
+                    channel == BC_WX_SCAN ||
+                    channel == BC_ALI_SCAN;
         }
 
         /**
@@ -312,9 +319,13 @@ public class BCReqParams {
          */
         public static boolean isValidOfflineChannelType(BCChannelTypes channel) {
             return channel == WX_NATIVE ||
-                    channel == WX_SCAN ||
+                    channel == BC_NATIVE ||
                     channel == ALI_OFFLINE_QRCODE ||
-                    channel == ALI_SCAN;
+                    channel == BC_ALI_QRCODE ||
+                    channel == WX_SCAN ||
+                    channel == ALI_SCAN ||
+                    channel == BC_WX_SCAN ||
+                    channel == BC_ALI_SCAN;
         }
 
         /**
@@ -327,7 +338,8 @@ public class BCReqParams {
             return channel == WX_NATIVE ||
                     channel == BC_NATIVE ||
                     channel == ALI_QRCODE ||
-                    channel == ALI_OFFLINE_QRCODE;
+                    channel == ALI_OFFLINE_QRCODE ||
+                    channel == BC_ALI_QRCODE;
         }
 
         /**
@@ -343,8 +355,12 @@ public class BCReqParams {
                 return "微信公众号支付";
             else if (channel.equals(WX_APP.name()))
                 return "微信手机原生APP支付";
+            else if (channel.equals(WX_SCAN.name()))
+                return "微信被扫";
             else if (channel.equals(BC_WX_WAP.name()))
                 return "微信WAP支付";
+            else if (channel.equals(BC_WX_APP.name()))
+                return "BeeCloud微信APP支付";
             else if (channel.equals(ALI.name()))
                 return "支付宝支付";
             else if (channel.equals(ALI_APP.name()))
@@ -355,6 +371,8 @@ public class BCReqParams {
                 return "支付宝内嵌二维码支付";
             else if (channel.equals(ALI_OFFLINE_QRCODE.name()))
                 return "支付宝线下二维码支付";
+            else if (channel.equals(ALI_SCAN.name()))
+                return "支付宝被扫";
             else if (channel.equals(ALI_WAP.name()))
                 return "支付宝移动网页支付";
             else if (channel.equals(UN.name()))
@@ -407,6 +425,12 @@ public class BCReqParams {
                 return "BeeCloud快捷支付";
             else if (channel.equals(BC_NATIVE.name()))
                 return "BeeCloud微信扫码支付";
+            else if (channel.equals(BC_ALI_SCAN.name()))
+                return "BeeCloud支付宝被扫";
+            else if (channel.equals(BC_WX_SCAN.name()))
+                return "BeeCloud微信被扫";
+            else if (channel.equals(BC_ALI_QRCODE.name()))
+                return "BeeCloud支付宝线下二维码支付";
             else
                 return "其他支付类型";
         }

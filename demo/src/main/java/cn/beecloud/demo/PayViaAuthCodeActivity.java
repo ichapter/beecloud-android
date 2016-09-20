@@ -37,12 +37,13 @@ import cn.beecloud.demo.util.BillUtils;
 import cn.beecloud.demo.util.DisplayUtils;
 import cn.beecloud.entity.BCBillStatus;
 import cn.beecloud.entity.BCPayResult;
+import cn.beecloud.entity.BCQueryBillResult;
 import cn.beecloud.entity.BCReqParams;
 
 public class PayViaAuthCodeActivity extends Activity {
     private static final String TAG = "PayViaAuthCodeActivity";
 
-    private static final int REQ_OFF_PAY_SUCC=1;
+    private static final int REQ_OFF_PAY_SUCC = 1;
     private static final int NOTIFY_RESULT = 10;
     private static final int ERR_CODE = 99;
 
@@ -57,11 +58,12 @@ public class PayViaAuthCodeActivity extends Activity {
     String type;
     String billTitle;
     String billNum;
+    String billId;
     String authCode;
     String errMsg;
     String notify;
 
-    private Handler mHandler= new Handler(new Handler.Callback() {
+    private Handler mHandler = new Handler(new Handler.Callback() {
 
         @Override
         public boolean handleMessage(Message msg) {
@@ -108,8 +110,8 @@ public class PayViaAuthCodeActivity extends Activity {
             channelType = BCReqParams.BCChannelTypes.ALI_SCAN;
             billTitle = "安卓通过扫描支付宝付款码支付测试";
         } else {
-            Toast.makeText(this, "invalid!", Toast.LENGTH_SHORT).show();
-            finish();
+            channelType = BCReqParams.BCChannelTypes.valueOf(type);
+            billTitle = "安卓" + type + "支付测试";
         }
 
         DisplayUtils.initBack(this);
@@ -126,7 +128,7 @@ public class PayViaAuthCodeActivity extends Activity {
         initQueryBtn();
     }
 
-    void initScanBtn () {
+    void initScanBtn() {
         scanBtn = (Button) findViewById(R.id.scanBtn);
         scanBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -151,7 +153,7 @@ public class PayViaAuthCodeActivity extends Activity {
 
                 billNum = BillUtils.genBillNum();
 
-                Map<String, String> optional=new HashMap<String, String>();
+                Map<String, String> optional = new HashMap<String, String>();
                 optional.put("用途", "测试扫码支付");
                 optional.put("testEN", "value恩恩");
 
@@ -169,6 +171,7 @@ public class PayViaAuthCodeActivity extends Activity {
                         //RESULT_SUCCESS表示请求成功
                         if (payResult.getResult().equals(BCPayResult.RESULT_SUCCESS)) {
                             msg.what = REQ_OFF_PAY_SUCC;
+                            billId = payResult.getId();
                         } else {
 
                             errMsg = "支付失败，请重试；错误信息：" +
@@ -192,34 +195,19 @@ public class PayViaAuthCodeActivity extends Activity {
                     }
                 };
 
-                //你可以任选一种方法请求微信和支付宝二维码
-                //此处的判断只是示例和测试需要，并没有实际的逻辑意义
-                if (channelType == BCReqParams.BCChannelTypes.WX_SCAN) {
-                    BCOfflinePay.getInstance().reqOfflinePayAsync(
-                            channelType,
-                            "安卓微信扫码方法支付测试", //商品描述
-                            1,                 //总金额, 以分为单位, 必须是正整数
-                            billNum,          //流水号
-                            optional,            //扩展参数
-                            authCode,           //付款码
-                            "fake-terminalId",  //若机具商接入terminalId(机具终端编号)必填
-                            null,               //若系统商接入，storeId(商户门店编号)必填
-                            callback);
-                } else {
-                    BCOfflinePay.PayParams payParam = new BCOfflinePay.PayParams();
-                    payParam.channelType = channelType;
-                    payParam.billTitle = "安卓支付宝扫码方法支付测试";  //商品描述
-                    payParam.billTotalFee = 1;  //总金额, 以分为单位, 必须是正整数
-                    payParam.billNum = billNum; //流水号
-                    payParam.optional = optional;   //扩展参数
-                    payParam.authCode = authCode;   //付款码
-                    payParam.terminalId = "fake-terminalId";    //若机具商接入terminalId(机具终端编号)必填
+                BCOfflinePay.PayParams payParam = new BCOfflinePay.PayParams();
+                payParam.channelType = channelType;
+                payParam.billTitle = billTitle;  //商品描述
+                payParam.billTotalFee = 1;  //总金额, 以分为单位, 必须是正整数
+                payParam.billNum = billNum; //流水号
+                payParam.optional = optional;   //扩展参数
+                payParam.authCode = authCode;   //付款码
+                payParam.terminalId = "fake-terminalId";    //若机具商接入terminalId(机具终端编号)必填
 
-                    BCOfflinePay.getInstance().reqOfflinePayAsync(
-                            payParam,
-                            callback);
+                BCOfflinePay.getInstance().reqOfflinePayAsync(
+                        payParam,
+                        callback);
 
-                }
             }
         });
     }
@@ -233,54 +221,79 @@ public class PayViaAuthCodeActivity extends Activity {
                 loadingDialog.setMessage("订单查询中，请稍候...");
                 loadingDialog.show();
 
-                BCQuery.getInstance().queryOfflineBillStatusAsync(
-                        channelType,
-                        billNum,
-                        new BCCallback() {
-                            @Override
-                            public void done(BCResult result) {
-                                loadingDialog.dismiss();
+                if (type.startsWith("BC")) {
+                    // BC的渠道通过id查询结果
+                    BCQuery.getInstance().queryBillByIDAsync(billId, new BCCallback() {
+                        @Override
+                        public void done(BCResult result) {
+                            loadingDialog.dismiss();
 
-                                BCBillStatus billStatus = (BCBillStatus) result;
+                            BCQueryBillResult billStatus = (BCQueryBillResult) result;
 
-                                Message msg = mHandler.obtainMessage();
+                            Message msg = mHandler.obtainMessage();
 
-                                //表示支付成功
-                                if (billStatus.getResultCode() == 0 &&
-                                        billStatus.getPayResult()) {
-                                    msg.what = NOTIFY_RESULT;
-                                    notify = "支付成功";
-                                } else {
+                            //表示支付成功
+                            if (billStatus.getResultCode() == 0 &&
+                                    billStatus.getBill().getPayResult()) {
+                                msg.what = NOTIFY_RESULT;
+                                notify = "支付成功";
+                            } else {
 
-                                    msg.what = ERR_CODE;
-                                    errMsg = "支付失败：" + billStatus.getResultCode() + " # " +
-                                            billStatus.getResultMsg() + " # " +
-                                            billStatus.getErrDetail();
-                                }
-
-                                mHandler.sendMessage(msg);
+                                msg.what = ERR_CODE;
+                                errMsg = "支付失败：" + billStatus.getResultCode() + " # " +
+                                        billStatus.getResultMsg() + " # " +
+                                        billStatus.getErrDetail();
                             }
+
+                            mHandler.sendMessage(msg);
                         }
-                );
+                    });
+                } else {
+                    BCQuery.getInstance().queryOfflineBillStatusAsync(
+                            channelType,
+                            billNum,
+                            new BCCallback() {
+                                @Override
+                                public void done(BCResult result) {
+                                    loadingDialog.dismiss();
+
+                                    BCBillStatus billStatus = (BCBillStatus) result;
+
+                                    Message msg = mHandler.obtainMessage();
+
+                                    //表示支付成功
+                                    if (billStatus.getResultCode() == 0 &&
+                                            billStatus.getPayResult()) {
+                                        msg.what = NOTIFY_RESULT;
+                                        notify = "支付成功";
+                                    } else {
+
+                                        msg.what = ERR_CODE;
+                                        errMsg = "支付失败：" + billStatus.getResultCode() + " # " +
+                                                billStatus.getResultMsg() + " # " +
+                                                billStatus.getErrDetail();
+                                    }
+
+                                    mHandler.sendMessage(msg);
+                                }
+                            }
+                    );
+                }
             }
         });
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode==IntentIntegrator.REQUEST_CODE)
-        {
+        if (requestCode == IntentIntegrator.REQUEST_CODE) {
             IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
-            if (scanResult != null)
-            {
+            if (scanResult != null) {
                 // handle scan result
                 Log.d(TAG, scanResult.toString());
 
                 authCode = scanResult.getContents();
                 authCodeView.setText("收款码：" + authCode);
-            }
-            else
-            {
+            } else {
                 // else continue with any other code you need in the method
                 Toast.makeText(PayViaAuthCodeActivity.this, "无法获取收款码，请重试", Toast.LENGTH_LONG).show();
             }
@@ -290,7 +303,7 @@ public class PayViaAuthCodeActivity extends Activity {
     public boolean preCheck() {
         boolean res = appInstalledOrNot("com.google.zxing.client.android");
 
-        if (!res){
+        if (!res) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle("提示");
             builder.setMessage("本示例依赖ZXing扫码APP，是否安装？");
@@ -332,7 +345,7 @@ public class PayViaAuthCodeActivity extends Activity {
             byte[] buffer = new byte[1024];
 
             int len;
-            while((len = in.read(buffer)) != -1) {
+            while ((len = in.read(buffer)) != -1) {
                 out.write(buffer, 0, len);
             }
 
@@ -349,7 +362,7 @@ public class PayViaAuthCodeActivity extends Activity {
 
             startActivity(intent);
 
-        } catch(Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -360,8 +373,7 @@ public class PayViaAuthCodeActivity extends Activity {
         try {
             pm.getPackageInfo(uri, 0);
             appInstalled = true;
-        }
-        catch (PackageManager.NameNotFoundException e) {
+        } catch (PackageManager.NameNotFoundException e) {
             appInstalled = false;
         }
         return appInstalled;

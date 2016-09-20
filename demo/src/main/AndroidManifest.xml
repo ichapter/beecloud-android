@@ -308,7 +308,8 @@
         <activity
             android:name=".SubscriptionListActivity"
             android:screenOrientation="portrait" />
-        <activity android:name=".VerifyCardActivity"
+        <activity
+            android:name=".VerifyCardActivity"
             android:screenOrientation="portrait" />
     </application>
 
