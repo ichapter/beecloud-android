@@ -701,7 +701,7 @@ BCValidationUtil.verifyCardFactors(
 -libraryjars libs/UPPayAssistEx.jar
 #百度
 -libraryjars libs/Cashier_SDK-v4.2.0.jar
-#BC\_WX\_APP额外需要的
+#BC_WX_APP额外需要的
 -libraryjars libs/ecitic_banksdk.jar
 
 #以下是Android Studio和Eclipse都必须的
@@ -726,7 +726,7 @@ BCValidationUtil.verifyCardFactors(
 #百度
 -keep class com.baidu.** { *; }
 -keep class com.dianxinos.** { *; }
-#BC\_WX\_APP
+#BC_WX_APP
 -keep class com.switfpass.pay.** { *; }
 -keep class com.switfpass.pay.** { *; }
 -dontwarn com.switfpass.pay.**
