@@ -216,7 +216,7 @@ BCPay.PayParams payParam = new BCPay.PayParams();
 payParam.channelType = BCReqParams.BCChannelTypes.WX_APP;
 
 //商品描述, 32个字节内, 汉字以2个字节计
-payParam.billTitle = "安卓银联支付测试";
+payParam.billTitle = "安卓微信支付测试";
 
 //支付金额，以分为单位，必须是正整数
 payParam.billTotalFee = 10;
