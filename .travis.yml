@@ -38,4 +38,4 @@ before_install:
 install:
   - true
 
-script: gradle test
+script: gradle test --stacktrace

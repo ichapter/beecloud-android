@@ -95,8 +95,8 @@ public class GenQRCodeActivity extends Activity {
             channelType = BCReqParams.BCChannelTypes.ALI_OFFLINE_QRCODE;
             billTitle = "安卓支付宝线下二维码测试";
         } else {
-            channelType = BCReqParams.BCChannelTypes.BC_NATIVE;
-            billTitle = "安卓BC_NATIVE二维码测试";
+            channelType = BCReqParams.BCChannelTypes.valueOf(type);
+            billTitle = "安卓" + type + "二维码测试";
             btnRevert.setVisibility(View.GONE);
             TextView revertTip = (TextView) findViewById(R.id.revertTip);
             revertTip.setVisibility(View.GONE);
@@ -208,8 +208,8 @@ public class GenQRCodeActivity extends Activity {
                 loadingDialog.setMessage("订单查询中，请稍候...");
                 loadingDialog.show();
 
-                if (channelType == BCReqParams.BCChannelTypes.BC_NATIVE) {
-                    // BC_NATIVE通过id查询结果
+                if (type.startsWith("BC")) {
+                    // BC的渠道通过id查询结果
                     BCQuery.getInstance().queryBillByIDAsync(billId, new BCCallback() {
                         @Override
                         public void done(BCResult result) {

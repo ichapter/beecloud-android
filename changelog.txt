@@ -1,5 +1,13 @@
 BeeCloud Android SDK Changelog
 ==========================
+v2.6.0 2016年9月7日
+增加鉴权
+增加notify url
+增加BC_WX_APP
+增加BC_WX_SCAN
+增加BC_ALI_SCAN
+增加BC_ALI_QRCODE
+
 v2.5.0 2016年8月24日
 增加微信WAP支付
 

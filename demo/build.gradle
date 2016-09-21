@@ -8,8 +8,8 @@ android {
         applicationId "cn.beecloud.demo"
         minSdkVersion 11
         targetSdkVersion 22
-        versionCode 25
-        versionName "2.5.0"
+        versionCode 26
+        versionName "2.6.0"
     }
 
     buildTypes {
@@ -47,6 +47,6 @@ android {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:appcompat-v7:22.0.0'
     compile project(':sdk')
+    compile 'com.android.support:appcompat-v7:22.0.0'
 }

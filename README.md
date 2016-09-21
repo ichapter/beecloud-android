@@ -1,6 +1,6 @@
 ## BeeCloud Android SDK (Open Source)
 
-[![Build Status](https://travis-ci.org/beecloud/beecloud-android.svg)](https://travis-ci.org/beecloud/beecloud-android) ![license](https://img.shields.io/badge/license-MIT-brightgreen.svg) ![version](https://img.shields.io/badge/version-v2.5.0-blue.svg)
+[![Build Status](https://travis-ci.org/beecloud/beecloud-android.svg)](https://travis-ci.org/beecloud/beecloud-android) ![license](https://img.shields.io/badge/license-MIT-brightgreen.svg) ![version](https://img.shields.io/badge/version-v2.6.0-blue.svg)
 
 ## 简介
 
@@ -14,7 +14,7 @@ SDK支持以下支付渠道:
  * PayPal
  * 百度钱包
 
-包含预退款、订阅支付和相关的查询功能。
+包含预退款、订阅支付、鉴权和相关的查询功能。
 还提供了线下收款功能(包括微信扫码、微信刷卡、支付宝扫码、支付宝条形码)，订单状态的查询以及订单撤销。 
 
 ## 流程
@@ -50,6 +50,7 @@ SDK支持以下支付渠道:
 支付宝需要引入`alipaySdk-xxx.jar`，  
 银联需要引入`UPPayAssistEx.jar`，  
 百度钱包支付需要引入`Cashier_SDK-v4.2.0.jar`，  
+`BC_WX_APP`需要引入`libammsdk.jar`和`ecitic_banksdk.jar`，  
 最后添加`beecloud android sdk`：`beecloud-x.x.x.jar`（如果你添加的是sdk目录下最新的jar，请手动添加其同级目录下依赖的`okhttp-x.x.x.jar`和`okio-x.x.x.jar`）
 
 2.对于微信支付，需要注意你的`AndroidManifest.xml`中`package`需要和微信平台创建的移动应用`应用包名`保持一致，否则会遭遇[`一般错误`](http://help.beecloud.cn/hc/kb/article/157111/)  
@@ -175,21 +176,11 @@ BCPay.initPayPal(
 请查看`doc`中的`API`，支付类`BCPay`，参照`demo`中`ShoppingCartActivity`
 
 **原型：** 
- 
-通过`BCPay`的实例，以`reqWXPaymentAsync`方法发起微信支付请求。  
-通过`BCPay`的实例，以`reqAliPaymentAsync`方法发起支付宝支付请求。  
-通过`BCPay`的实例，以`reqUnionPaymentAsync`方法发起银联支付请求。  
-通过`BCPay`的实例，以`reqBaiduPaymentAsync`方法发起百度钱包支付请求。  
-通过`BCPay`的实例，以`reqPayPalPaymentAsync`方法发起PayPal支付请求。  
 
-参数依次为
-> billTitle       商品描述, 32个字节内, 汉字以2个字节计  
-> billTotalFee    支付金额，以分为单位，必须是正整数  
-> billNum         商户自定义订单号，PayPal不需要该参数  
-> optional        为扩展参数，可以传入任意数量的key/value对来补充对业务逻辑  
-> callback        支付完成后的回调入口
+通过`BCPay`的实例，以`reqPaymentAsync`方法发起所有支持的支付请求，该方法的调用请参考demo支付示例，BCPay.PayParams参数请参阅[API](https://beecloud.cn/doc/api/beecloud-android/cn/beecloud/BCPay.PayParams.html)。  
 
-或者，通过`BCPay`的实例，以`reqPaymentAsync`方法发起所有支持的支付请求，该方法的调用请参考demo中百度钱包的支付调用，BCPay.PayParams参数请参阅[API](https://beecloud.cn/doc/api/beecloud-android/cn/beecloud/BCPay.PayParams.html)。  
+参数中channelType可以是`WX_APP`(微信手机原生APP支付)，`ALI_APP`(支付宝手机原生APP支付)，`UN_APP`(银联手机原生APP支付)，`BD_APP`(百度钱包APP支付)，`PAYPAL_SANDBOX`，`PAYPAL_LIVE`，`BC_APP`(BeeCloud 银联快捷支付)，`BC_WX_APP`(BeeCloud 微信APP支付)  
+
 参数依次为
 > payParam        BCPay.PayParams类型  
 > callback        支付完成后的回调入口
@@ -218,17 +209,24 @@ BCCallback bcCallback = new BCCallback() {
     }
 };
 
-//调用支付接口
-Map<String, String> mapOptional = new HashMap<>();
-mapOptional.put("testkey1", "测试value值1");
+//创建支付参数类
+BCPay.PayParams payParam = new BCPay.PayParams();
+
+// 发起的渠道类型
+payParam.channelType = BCReqParams.BCChannelTypes.WX_APP;
+
+//商品描述, 32个字节内, 汉字以2个字节计
+payParam.billTitle = "安卓微信支付测试";
+
+//支付金额，以分为单位，必须是正整数
+payParam.billTotalFee = 10;
+
+//商户自定义订单号
+payParam.billNum = "unique bill number";
 
 //发起支付
-BCPay.getInstance(ShoppingCartActivity.this).reqWXPaymentAsync(
-    "微信支付测试",               //订单标题
-    1,                           //订单金额(分)
-    billNum,  //订单流水号
-    mapOptional,            //扩展参数(可以null)
-    bcCallback);            //支付完成后回调入口
+BCPay.getInstance(context).reqPaymentAsync(payParam,
+        bcCallback);
 ```
 ##### 对于PayPal支付的补充说明
 PayPal回调返回的成功表示手机支付已经完成，但是订单还没有同步到BeeCloud服务器，由于同步过程中sdk需要先向PayPal服务器请求token，该请求过程失败几率相对比较大，所以可能需要多次请求同步，如果依然失败，请保留订单数据用于下次同步，同步接口为`syncPayPalPayment`，例如：
@@ -666,6 +664,22 @@ BCQuery.getInstance().querySubscriptions(criteria,
 ```
   
 
+###  9. 鉴权
+**原型：**
+
+通过`BCValidationUtil.verifyCardFactors`方法鉴权，结果转化成`BCCardVerifyResult`做后续处理，请参照`demo`中`VerifyCardActivity`。  
+
+**调用：**  
+  
+同上，首先初始化回调入口BCCallback
+```java
+// 二要素鉴权
+BCValidationUtil.verifyCardFactors(
+    "姓名",
+    "身份证号码",
+    new BCCallback() { ... });
+```
+  
 ## Demo
 考虑到个人的开发习惯，本项目提供了`Android Studio`和`Eclipse ADT`两种工程的`demo`，为了使demo顺利运行，请注意以下细节
 >1. 对于使用`Android Studio`的开发人员，下载源码后可以将`demo_eclipse`移除，`Import Project`的时候选择`beecloud-android`，`sdk`为`demo`的依赖`model`，`gradle`会自动关联。
@@ -687,6 +701,8 @@ BCQuery.getInstance().querySubscriptions(criteria,
 -libraryjars libs/UPPayAssistEx.jar
 #百度
 -libraryjars libs/Cashier_SDK-v4.2.0.jar
+#BC_WX_APP额外需要的
+-libraryjars libs/ecitic_banksdk.jar
 
 #以下是Android Studio和Eclipse都必须的
 #BeeCloud
@@ -710,6 +726,10 @@ BCQuery.getInstance().querySubscriptions(criteria,
 #百度
 -keep class com.baidu.** { *; }
 -keep class com.dianxinos.** { *; }
+#BC_WX_APP
+-keep class com.switfpass.pay.** { *; }
+-keep class com.switfpass.pay.** { *; }
+-dontwarn com.switfpass.pay.**
 
 #Android Studio中包含PayPal依赖，需要添加
 -dontwarn com.paypal.**

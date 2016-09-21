@@ -272,6 +272,7 @@
             android:theme="@android:style/Theme.Translucent.NoTitleBar" />
         <!-- for test mode end -->
 
+
         <!-- for wx wap start -->
         <activity
             android:name="cn.beecloud.BCWXWapPaymentActivity"
@@ -304,7 +305,11 @@
         <activity
             android:name=".SubscribeActivity"
             android:screenOrientation="portrait" />
-        <activity android:name=".SubscriptionListActivity"
+        <activity
+            android:name=".SubscriptionListActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".VerifyCardActivity"
             android:screenOrientation="portrait" />
     </application>
 
