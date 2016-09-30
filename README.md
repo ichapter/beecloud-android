@@ -179,7 +179,7 @@ BCPay.initPayPal(
 
 通过`BCPay`的实例，以`reqPaymentAsync`方法发起所有支持的支付请求，该方法的调用请参考demo支付示例，BCPay.PayParams参数请参阅[API](https://beecloud.cn/doc/api/beecloud-android/cn/beecloud/BCPay.PayParams.html)。  
 
-参数中channelType可以是`WX_APP`(微信APP)、`ALI_APP`(支付宝APP)、`UN_APP`(银联APP)、`BD_APP`(百度钱包APP)、`PAYPAL_SANDBOX`、`PAYPAL_LIVE`、`BC_APP`(BeePay快捷APP)、`BC_WX_APP`(BeePay微信APP)、BC_WX_WAP(BeePay微信WAP)  
+参数中channelType可以是`WX_APP`(微信APP)、`ALI_APP`(支付宝APP)、`UN_APP`(银联APP)、`BD_APP`(百度钱包APP)、`PAYPAL_SANDBOX`、`PAYPAL_LIVE`、`BC_APP`(BeePay快捷APP)、`BC_WX_APP`(BeePay微信APP)、`BC_WX_WAP`(BeePay微信WAP)  
 
 参数依次为
 > payParam        BCPay.PayParams类型  
