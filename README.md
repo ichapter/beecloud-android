@@ -179,7 +179,7 @@ BCPay.initPayPal(
 
 通过`BCPay`的实例，以`reqPaymentAsync`方法发起所有支持的支付请求，该方法的调用请参考demo支付示例，BCPay.PayParams参数请参阅[API](https://beecloud.cn/doc/api/beecloud-android/cn/beecloud/BCPay.PayParams.html)。  
 
-参数中channelType可以是`WX_APP`(微信手机原生APP支付)，`ALI_APP`(支付宝手机原生APP支付)，`UN_APP`(银联手机原生APP支付)，`BD_APP`(百度钱包APP支付)，`PAYPAL_SANDBOX`，`PAYPAL_LIVE`，`BC_APP`(BeeCloud 银联快捷支付)，`BC_WX_APP`(BeeCloud 微信APP支付)，`BC_WX_WAP`(BeeCloud 微信WAP支付)  
+参数中channelType可以是`WX_APP`(微信APP)、`ALI_APP`(支付宝APP)、`UN_APP`(银联APP)、`BD_APP`(百度钱包APP)、`PAYPAL_SANDBOX`、`PAYPAL_LIVE`、`BC_APP`(BeePay快捷APP)、`BC_WX_APP`(BeePay微信APP)、`BC_WX_WAP`(BeePay微信WAP)  
 
 参数依次为
 > payParam        BCPay.PayParams类型  
@@ -195,7 +195,7 @@ BCCallback bcCallback = new BCCallback() {
     public void done(final BCResult bcResult) {
         //此处根据业务需要处理支付结果
         final BCPayResult bcPayResult = (BCPayResult)bcResult;
-        
+
         switch (bcPayResult.getResult()) {
             case BCPayResult.RESULT_SUCCESS:
                 //用户支付成功
@@ -263,44 +263,33 @@ BCCache.executorService.execute(new Runnable() {
 请查看`doc`中的`API`，线下支付类`BCOfflinePay`，参照`demo`中`QRCodeEntryActivity`和其关联的activity；一般用于线下门店通过出示二维码由用户扫描付款，或者通过用户出示的付款码收款。  
 线下支付基本流程：
 > 1 通过二维码或者付款码发起支付；  
-> 2 支付结束后调用查询接口确认`BCQuery.getInstance().queryOfflineBillStatusAsync`,请参考查询部分说明。  
-第二步必不可少。
+> 2 支付结束后调用查询接口确认支付结果。  
 
 **原型：** 
- 
-通过`BCOfflinePay`的实例，以`reqQRCodeAsync`方法请求生成支付二维码。   
-通过`BCOfflinePay`的实例，以`reqOfflinePayAsync`方法通过获取到的付款码发起收款。  
 
-公用参数依次为
-> channelType     BCChannelTypes类型，二维码支持WX_NATIVE，ALI_OFFLINE_QRCODE，扫码支付支持WX_SCAN, ALI_SCAN  
-> billTitle       商品描述, 32个字节内, 汉字以2个字节计  
-> billTotalFee    支付金额，以分为单位，必须是正整数  
-> billNum         商户自定义订单号  
-> optional        为扩展参数，可以传入任意数量的key/value对来补充对业务逻辑  
+通过`BCOfflinePay`的实例，以`reqQRCodeAsync`方法请求生成支付二维码。   
+通过`BCOfflinePay`的实例，以`reqOfflinePayAsync`方法通过获取到的付款码发起收款  
+
+参数依次为
+> payParam        [BCOfflinePay.PayParams类型](https://beecloud.cn/doc/api/beecloud-android/cn/beecloud/BCOfflinePay.PayParams.html)  
 > callback        支付完成后的回调入口
 
-请求生成支付二维码的额外参数
-> genQRCode       是否生成QRCode Bitmap
-> 如果为false，请自行根据getQrCodeRawContent返回的URL，使用BCPay.generateBitmap方法生成支付二维码，你也可以使用自己熟悉的二维码生成工具
 
+- 请求生成支付二维码
+
+二维码包含`WX_NATIVE`(微信扫码)、`ALI_OFFLINE_QRCODE`(支付宝扫码)、`BC_NATIVE`(BeePay微信扫码)、`BC_ALI_QRCODE`(BeePay支付宝扫码)  
+
+专有参数
+> genQRCode       是否生成QRCode Bitmap
+> 如果为false，请自行根据getQrCodeRawContent返回的URL，使用BCPay.generateBitmap方法生成支付二维码，你也可以使用自己熟悉的二维码生成工具  
 > qrCodeWidth     如果生成二维码(genQRCode为true), QRCode的宽度(以px为单位), null则使用默认参数360px
 
-请求通过获取到的付款码发起收款的额外参数
-> authCode        用户出示的收款码  
-> terminalId      机具终端编号，支付宝扫码(ALI_SCAN)的选填参数  
-> storeId         商户门店编号，支付宝扫码(ALI_SCAN)的选填参数
+在回调函数中将`BCResult`转化成`BCQRCodeResult`之后做后续处理  
 
-对于生成二维码的请求，在回调函数中将`BCResult`转化成`BCQRCodeResult`之后做后续处理  
 **调用：**
 ```java
 BCOfflinePay.getInstance().reqQRCodeAsync(
-        channelType,		//渠道类型
-        billTitle,  		//商品描述
-        1,          		//总金额, 以分为单位, 必须是正整数
-        billNum,          	//流水号
-        optional,           //扩展参数
-        true,               //是否生成二维码的bitmap
-        380,                //二维码的尺寸, 以px为单位, 如果为null则默认为360
+        payParam,
         new BCCallback() {
             @Override
             public void done(BCResult bcResult) {
@@ -321,23 +310,27 @@ BCOfflinePay.getInstance().reqQRCodeAsync(
         });
 ```
 
-对于通过用户出示的付款码收款，在回调函数中将`BCResult`转化成`BCPayResult`之后做后续处理  
+
+- 通过付款码发起收款
+
+支持`WX_SCAN`(微信刷卡), `ALI_SCAN`(支付宝刷卡)、`BC_WX_SCAN`(BeePay微信刷卡)、`BC_ALI_SCAN`(BeePay支付宝刷卡)  
+
+专有参数
+> authCode        用户出示的收款码  
+> terminalId      机具终端编号，支付宝扫码(ALI_SCAN)的选填参数  
+> storeId         商户门店编号，支付宝扫码(ALI_SCAN)的选填参数
+
+在回调函数中将`BCResult`转化成`BCPayResult`之后做后续处理  
+
 **调用：**
 ```java
 BCOfflinePay.getInstance().reqOfflinePayAsync(
-        channelType,
-        billTitle, //商品描述
-        1,                 			//总金额, 以分为单位, 必须是正整数
-        billNum,          			//流水号
-        optional,            		//扩展参数
-        authCode,           		//付款码
-        "fake-terminalId",  		//若机具商接入terminalId(机具终端编号)必填
-        null,               		//若系统商接入，storeId(商户门店编号)必填
+        payParam,
         new BCCallback(){...});
 ```
 
 * **关于订单的撤销**
-  
+
 支持WX_SCAN, ALI_OFFLINE_QRCODE, ALI_SCAN   
 订单撤销后，用户将不能继续支付，这和退款是不同的操作，具体请参考`GenQRCodeActivity`
 ```java
@@ -363,7 +356,7 @@ BCPay.getInstance(QRCodeEntryActivity.this).reqAliInlineQRCodeAsync(
 请求生成支付宝内嵌支付二维码的特有参数说明
 > returnUrl       支付成功后的同步跳转页面, 必填  
 > qrPayMode       支付宝内嵌二维码类型
->>>可选项  
+>> 可选项  
    "0": 订单码-简约前置模式, 对应 iframe 宽度不能小于 600px, 高度不能小于 300px  
    "1": 订单码-前置模式, 对应 iframe 宽度不能小于 300px, 高度不能小于 600px  
    "3": 订单码-迷你前置模式, 对应 iframe 宽度不能小于 75px, 高度不能小于 75px  
