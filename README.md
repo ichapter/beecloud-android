@@ -77,7 +77,7 @@ BeeCloud.setSandbox(true);
 BeeCloud.setAppIdAndSecret("c5d1cba1-5e3f-4ba0-941d-9b0a371fe719",
         "4bfdd244-574d-4bf3-b034-0c751ed34fee");
 ```    
->2 如果用到微信支付，在用到微信支付的Activity的onCreate函数里调用以下函数，第二个参数需要换成你自己的微信AppID，例如
+>2 如果用到微信APP支付，在用到微信支付的Activity的onCreate函数里调用以下函数，第二个参数需要换成你自己的微信AppID，例如
 ```java
 BCPay.initWechatPay(ShoppingCartActivity.this, "wxf1aa465362b4c8f1");
 ```    
@@ -118,7 +118,7 @@ BCPay.initPayPal(
     android:screenOrientation="portrait"
     android:theme="@android:style/Theme.Translucent.NoTitleBar" />
 ```
-> 对于微信支付，需要添加
+> 对于微信APP支付，需要添加
 ```java
 <activity
     android:name="cn.beecloud.BCWechatPaymentActivity"
@@ -162,7 +162,8 @@ BCPay.initPayPal(
     android:theme="@android:style/Theme.Translucent.NoTitleBar"
     android:windowSoftInputMode="adjustResize" />
 ```
-> 对于百度钱包，由于需要添加的activity数量众多，请参考demo中的AndroidManifest.xml
+> 对于百度钱包，由于需要添加的activity数量众多，请参考demo中的AndroidManifest.xml  
+
 > 对于微信wap，需要添加
 ```java
 <activity
