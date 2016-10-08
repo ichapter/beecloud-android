@@ -46,14 +46,14 @@ SDK支持以下支付渠道:
 添加第三方的支付类，在`beecloud-android\demo_eclipse\libs`目录下  
 `gson-2.4.jar`为必须引入的jar，  
 `zxing-3.2.0.jar`为生成二维码必须引入的jar，  
-微信支付需要引入`libammsdk.jar`，  
+微信APP支付需要引入`libammsdk.jar`，  
 支付宝需要引入`alipaySdk-xxx.jar`，  
 银联需要引入`UPPayAssistEx.jar`，  
 百度钱包支付需要引入`Cashier_SDK-v4.2.0.jar`，  
 `BC_WX_APP`需要引入`libammsdk.jar`和`ecitic_banksdk.jar`，  
 最后添加`beecloud android sdk`：`beecloud-x.x.x.jar`（如果你添加的是sdk目录下最新的jar，请手动添加其同级目录下依赖的`okhttp-x.x.x.jar`和`okio-x.x.x.jar`）
 
-2.对于微信支付，需要注意你的`AndroidManifest.xml`中`package`需要和微信平台创建的移动应用`应用包名`保持一致，否则会遭遇[`一般错误`](http://help.beecloud.cn/hc/kb/article/157111/)  
+2.对于微信APP支付，需要注意你的`AndroidManifest.xml`中`package`需要和微信平台创建的移动应用`应用包名`保持一致，否则会遭遇[`一般错误`](http://help.beecloud.cn/hc/kb/article/157111/)  
 
 3.对于银联支付需要将银联插件`beecloud-android\demo\src\main\assets\UPPayPluginEx.apk`引入你的工程`assets`目录下
 
