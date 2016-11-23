@@ -1,5 +1,8 @@
 language: android
 
+jdk:
+  - oraclejdk8
+
 android:
   components:
     # Uncomment the lines below if you want to
@@ -38,4 +41,5 @@ before_install:
 install:
   - true
 
+script: gradle --version
 script: gradle test --stacktrace
