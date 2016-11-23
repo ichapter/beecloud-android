@@ -133,7 +133,7 @@ public class BCOfflinePay {
                 //校验并准备公用参数
                 BCPayReqParams parameters;
                 try {
-                    parameters = new BCPayReqParams(channelType, BCReqParams.ReqType.QRCODE);
+                    parameters = new BCPayReqParams(channelType);
                 } catch (BCException e) {
                     callback.done(new BCQRCodeResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
                             BCRestfulCommonResult.APP_INNER_FAIL, e.getMessage()));
@@ -288,7 +288,7 @@ public class BCOfflinePay {
                 //校验并准备公用参数
                 BCPayReqParams parameters;
                 try {
-                    parameters = new BCPayReqParams(channelType, BCReqParams.ReqType.OFFLINE_PAY);
+                    parameters = new BCPayReqParams(channelType);
                 } catch (BCException e) {
                     callback.done(new BCPayResult(BCPayResult.RESULT_FAIL,
                             BCPayResult.APP_INTERNAL_PARAMS_ERR_CODE,
@@ -467,7 +467,7 @@ public class BCOfflinePay {
                 //校验并准备公用参数
                 BCReqParams parameters;
                 try {
-                    parameters = new BCReqParams(channelType, BCReqParams.ReqType.OFFLINE);
+                    parameters = new BCReqParams(channelType);
                 } catch (BCException e) {
                     callback.done(new BCRevertStatus(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
                             BCRestfulCommonResult.APP_INNER_FAIL,

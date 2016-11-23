@@ -30,10 +30,9 @@ import cn.beecloud.entity.BCRestfulCommonResult;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({BCHttpClientUtil.class, PayTask.class, BCCache.class})
 public class BCPayTest {
-
+    Activity activity;
     BCPay pay;
     CountDownLatch latch;
-    Activity activity;
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
@@ -175,9 +174,9 @@ public class BCPayTest {
                         BCPayResult payResult = (BCPayResult) result;
 
                         Assert.assertEquals(BCPayResult.RESULT_FAIL, payResult.getResult());
-                        Assert.assertEquals((Integer)BCPayResult.APP_INTERNAL_NETWORK_ERR_CODE,
+                        Assert.assertEquals((Integer)BCPayResult.APP_INTERNAL_EXCEPTION_ERR_CODE,
                                 payResult.getErrCode());
-                        Assert.assertEquals(BCPayResult.FAIL_NETWORK_ISSUE,
+                        Assert.assertEquals(BCPayResult.FAIL_EXCEPTION,
                                 payResult.getErrMsg());
                         //System.out.println(payResult.getDetailInfo());
 
@@ -277,52 +276,6 @@ public class BCPayTest {
 
                         Assert.assertEquals("ff5fef0c-93bd-46d2-8500-5ed53502d344",
                                 BCCache.getInstance().billID);
-
-                        latch.countDown();
-                    }
-                });
-
-        latch.await(2000, TimeUnit.MILLISECONDS);
-    }
-
-    /**
-     * 模拟支付宝正常发起支付
-     * @throws Exception
-     */
-    @Test
-    public void testReqAliPaymentAsync() throws Exception {
-        final BCHttpClientUtil.Response response = new BCHttpClientUtil.Response();
-        response.code = 200;
-        response.content = "{\"result_msg\":\"OK\",\"err_detail\":\"\",\"result_code\":0,\"order_string\":\"mocked string\",\"id\":\"3474c7a1-a655-448a-a643-f0b3b9b60ec2\"}";
-
-        //mock network
-        PowerMockito.stub(PowerMockito.method(BCHttpClientUtil.class, "httpPost",
-                String.class, Map.class)).toReturn(response);
-
-        //mock ali result
-        PowerMockito.stub(PowerMockito.method(PayTask.class, "pay",
-                String.class, boolean.class)).toReturn("resultStatus={9000};memo={支付成功};result=mocked");
-
-        pay.reqAliPaymentAsync("正常title",
-                22,
-                "123456789ABCDE",
-                null,
-                new BCCallback() {
-                    @Override
-                    public void done(BCResult result) {
-                        Assert.assertTrue(result instanceof BCPayResult);
-
-                        BCPayResult payResult = (BCPayResult) result;
-
-                        Assert.assertEquals(BCPayResult.RESULT_SUCCESS, payResult.getResult());
-
-                        Assert.assertEquals((Integer) BCPayResult.APP_PAY_SUCC_CODE,
-                                payResult.getErrCode());
-                        Assert.assertEquals(BCPayResult.RESULT_SUCCESS,
-                                payResult.getErrMsg());
-
-                        Assert.assertEquals("3474c7a1-a655-448a-a643-f0b3b9b60ec2",
-                                payResult.getId());
 
                         latch.countDown();
                     }
@@ -527,8 +480,6 @@ public class BCPayTest {
 
                         Assert.assertEquals(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
                                 bcqrCodeResult.getResultCode());
-                        Assert.assertTrue(bcqrCodeResult.getErrDetail()
-                                .startsWith("Network Error"));
 
                         latch.countDown();
                     }

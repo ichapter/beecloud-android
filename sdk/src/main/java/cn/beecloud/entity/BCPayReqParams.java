@@ -74,6 +74,11 @@ public class BCPayReqParams extends BCReqParams {
     public String notifyUrl;
 
     /**
+     * BC_EXPRESS支付卡号
+     */
+    public String cardNum;
+
+    /**
      * 附加数据
      * 用户自定义的参数, 将会在webhook通知中原样返回, 该字段主要用于商户携带订单的自定义数据
      */
@@ -95,7 +100,7 @@ public class BCPayReqParams extends BCReqParams {
     public String qrPayMode;
 
     /**
-     * 支付宝内嵌二维码支付(ALI_QRCODE)的必填参数
+     * 部分网页支付类型的必填参数
      * 同步返回页面
      * 支付渠道处理完请求后,当前页面自动跳转到商户网站里指定页面的http路径
      */
@@ -107,17 +112,7 @@ public class BCPayReqParams extends BCReqParams {
      * @throws BCException  父类构造有可能抛出异常
      */
     public BCPayReqParams(BCChannelTypes channel) throws BCException {
-        super(channel, ReqType.PAY);
-    }
-
-    /**
-     * 构造函数
-     * @param channel       支付渠道类型
-     * @param reqType       请求类型
-     * @throws BCException  父类构造有可能抛出异常
-     */
-    public BCPayReqParams(BCChannelTypes channel, ReqType reqType) throws BCException {
-        super(channel, reqType);
+        super(channel);
     }
 
     /**
@@ -155,6 +150,9 @@ public class BCPayReqParams extends BCReqParams {
 
         if (returnUrl != null)
             params.put("return_url", returnUrl);
+
+        if (cardNum != null)
+            params.put("card_no", cardNum);
 
         if (billTimeout != null)
             params.put("bill_timeout", billTimeout);

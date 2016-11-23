@@ -19,6 +19,7 @@
 -dontwarn com.alipay.**
 -dontwarn com.baidu.**
 -dontwarn com.tencent.**
+-dontwarn com.switfpass.**
 
 #for paypal
 -dontwarn com.paypal.**
@@ -51,3 +52,5 @@
 
 -keep class okhttp3.** { *; }
 -keep class okio.** { *; }
+
+-keep class com.switfpass.** { *; }

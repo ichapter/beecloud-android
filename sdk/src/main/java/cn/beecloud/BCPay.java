@@ -223,7 +223,8 @@ public class BCPay {
     private void reqPaymentAsync(final BCReqParams.BCChannelTypes channelType,
                                  final String billTitle, final Integer billTotalFee,
                                  final String billNum, final Integer billTimeout,
-                                 final String notifyUrl,
+                                 final String notifyUrl, final String returnUrl,
+                                 final String cardNum,
                                  final Map<String, String> optional,
                                  final Map<String, String> analysis,
                                  final BCCallback callback) {
@@ -265,6 +266,8 @@ public class BCPay {
                 parameters.billTimeout = billTimeout;
                 parameters.analysis = analysis;
                 parameters.notifyUrl = notifyUrl;
+                parameters.returnUrl = returnUrl;
+                parameters.cardNum = cardNum;
 
                 String payURL = BCHttpClientUtil.getBillPayURL();
 
@@ -326,10 +329,16 @@ public class BCPay {
                                     reqWXWapPaymentViaWebView(responseMap);
                                     break;
                                 default:
-                                    callback.done(new BCPayResult(BCPayResult.RESULT_FAIL,
-                                            BCPayResult.APP_INTERNAL_PARAMS_ERR_CODE,
-                                            BCPayResult.FAIL_INVALID_PARAMS,
-                                            "channelType参数不合法"));
+                                    callback.done(new BCPayResult(
+                                            BCPayResult.RESULT_UNKNOWN,
+                                            resultCode,
+                                            String.valueOf(responseMap.get("result_msg")),
+                                            String.valueOf(responseMap.get("err_detail")),
+                                            String.valueOf(responseMap.get("id")),
+                                            responseMap.get("url") == null ? null :
+                                                    String.valueOf(responseMap.get("url")),
+                                            responseMap.get("html") == null ? null :
+                                                    String.valueOf(responseMap.get("html"))));
                             }
 
                         } else {
@@ -384,6 +393,8 @@ public class BCPay {
                     payParam.billNum,
                     payParam.billTimeout,
                     payParam.notifyUrl,
+                    payParam.returnUrl,
+                    payParam.cardNum,
                     payParam.optional,
                     payParam.analysis,
                     callback);
@@ -458,7 +469,6 @@ public class BCPay {
     private void reqAliPaymentViaAPP(final Map<String, Object> responseMap) {
 
         String orderString = (String) responseMap.get("order_string");
-
         PayTask aliPay = new PayTask(mContextActivity);
         String aliResult = aliPay.pay(orderString, false);
 
@@ -633,7 +643,7 @@ public class BCPay {
                                   final String billNum,
                                   final Map<String, String> optional, final BCCallback callback) {
         this.reqPaymentAsync(BCReqParams.BCChannelTypes.WX_APP, billTitle, billTotalFee,
-                billNum, null, null, optional, null, callback);
+                billNum, null, null, null, null, optional, null, callback);
     }
 
     /**
@@ -650,7 +660,7 @@ public class BCPay {
                                    final Map<String, String> optional,
                                    final BCCallback callback) {
         this.reqPaymentAsync(BCReqParams.BCChannelTypes.ALI_APP, billTitle, billTotalFee,
-                billNum, null, null, optional, null, callback);
+                billNum, null, null, null, null, optional, null, callback);
     }
 
     /**
@@ -667,7 +677,7 @@ public class BCPay {
                                      final Map<String, String> optional,
                                      final BCCallback callback) {
         this.reqPaymentAsync(BCReqParams.BCChannelTypes.UN_APP, billTitle, billTotalFee,
-                billNum, null, null, optional, null, callback);
+                billNum, null, null, null, null, optional, null, callback);
     }
 
     /**
@@ -684,7 +694,7 @@ public class BCPay {
                                      final Map<String, String> optional,
                                      final BCCallback callback) {
         this.reqPaymentAsync(BCReqParams.BCChannelTypes.BD_APP, billTitle, billTotalFee,
-                billNum, null, null, optional, null, callback);
+                billNum, null, null, null, null, optional, null, callback);
     }
 
     /**
@@ -934,8 +944,7 @@ public class BCPay {
                 //校验并准备公用参数
                 BCPayReqParams parameters;
                 try {
-                    parameters = new BCPayReqParams(BCReqParams.BCChannelTypes.ALI_QRCODE,
-                            BCReqParams.ReqType.QRCODE);
+                    parameters = new BCPayReqParams(BCReqParams.BCChannelTypes.ALI_QRCODE);
                 } catch (BCException e) {
                     callback.done(new BCQRCodeResult(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
                             BCRestfulCommonResult.APP_INNER_FAIL, e.getMessage()));
@@ -1236,6 +1245,16 @@ public class BCPay {
          * 异步回调地址
          */
         public String notifyUrl;
+
+        /**
+         * 部分网页支付类型的同步回调地址
+         */
+        public String returnUrl;
+
+        /**
+         * BC_EXPRESS需要支付的卡号
+         */
+        public String cardNum;
 
         /**
          * 扩展参数，可以传入任意数量的key/value对来补充对业务逻辑的需求，可以为null，

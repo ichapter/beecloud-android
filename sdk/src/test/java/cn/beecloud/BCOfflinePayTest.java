@@ -44,39 +44,6 @@ public class BCOfflinePayTest {
 
     /**
      * #1
-     * 模拟不支持的QRCode请求channel类型
-     * @throws Exception
-     */
-    @Test
-    public void testReqQRCodeAsyncChannelInvalid() throws Exception {
-        pay.reqQRCodeAsync(BCReqParams.BCChannelTypes.ALI_APP,
-                "billtitle",
-                1,
-                "billnum",
-                null,
-                Boolean.FALSE,
-                333,
-                new BCCallback() {
-                    @Override
-                    public void done(BCResult result) {
-                        Assert.assertTrue(result instanceof BCQRCodeResult);
-
-                        BCQRCodeResult bcqrCodeResult = (BCQRCodeResult) result;
-
-                        Assert.assertEquals(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
-                                bcqrCodeResult.getResultCode());
-                        Assert.assertEquals("非法二维码生成渠道", bcqrCodeResult.getErrDetail());
-
-                        latch.countDown();
-                    }
-                });
-
-        //最多等待2s
-        latch.await(2000, TimeUnit.MILLISECONDS);
-    }
-
-    /**
-     * #2
      * 模拟参数不合理
      * @throws Exception
      */
@@ -125,7 +92,7 @@ public class BCOfflinePayTest {
     }
 
     /**
-     * #3
+     * #2
      * 模拟网络400等异常
      * @throws Exception
      */
@@ -164,7 +131,7 @@ public class BCOfflinePayTest {
     }
 
     /**
-     * #4
+     * #3
      * 模拟网络正常，参数异常
      * @throws Exception
      */
@@ -203,7 +170,7 @@ public class BCOfflinePayTest {
     }
 
     /**
-     * #5
+     * #4
      * 模拟全部正常情况
      * @throws Exception
      */
@@ -255,7 +222,7 @@ public class BCOfflinePayTest {
     }
 
     /**
-     * #6
+     * #5
      * 模拟PayParams方式发起的请求
      * @throws Exception
      */
@@ -300,7 +267,7 @@ public class BCOfflinePayTest {
     }
 
     /**
-     * #7
+     * #6
      * 模拟测试模式，应该提示暂不支持
      * @throws Exception
      */
@@ -512,9 +479,9 @@ public class BCOfflinePayTest {
 
                         Assert.assertEquals(BCPayResult.RESULT_FAIL,
                                 payResult.getResult());
-                        Assert.assertEquals((Integer) BCPayResult.APP_INTERNAL_NETWORK_ERR_CODE,
+                        Assert.assertEquals((Integer) BCPayResult.APP_INTERNAL_EXCEPTION_ERR_CODE,
                                 payResult.getErrCode());
-                        Assert.assertEquals(BCPayResult.FAIL_NETWORK_ISSUE,
+                        Assert.assertEquals(BCPayResult.FAIL_EXCEPTION,
                                 payResult.getErrMsg());
                         //System.out.println(payResult.getDetailInfo());
 

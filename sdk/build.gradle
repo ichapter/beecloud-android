@@ -10,8 +10,8 @@ android {
     defaultConfig {
         minSdkVersion 10 //PayPal要求min至小10
         targetSdkVersion 22
-        versionCode 26
-        versionName "2.6.0"
+        versionCode 27
+        versionName "2.7.0"
     }
 
     //对于import module方式，compileOptions可以直接删掉
@@ -39,6 +39,7 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
 
     compile 'com.google.code.gson:gson:2.7'
+    compile 'com.google.zxing:core:3.3.0'
     /*  以下标识
     //wechat，已经包含微信支付和分享，不要重复引入jar
     libs/libammsdk.jar
@@ -53,9 +54,6 @@ dependencies {
     libs/UPPayAssistEx.jar
     libs/UPPayPluginEx.jar
 
-    //QRCode
-    libs/zxing-3.2.0.jar
-
     //baidu
     Cashier_SDK-v4.2.0.jar
     */
@@ -66,12 +64,12 @@ dependencies {
     compile 'com.squareup.okhttp3:okhttp:3.4.1'
 
     testCompile 'junit:junit:4.12'
-    testCompile "org.mockito:mockito-core:1.+"
-    testCompile ('org.powermock:powermock-api-mockito:1.6.3') {
+    testCompile "org.mockito:mockito-core:1.10.8"
+    testCompile ('org.powermock:powermock-api-mockito:1.6.6') {
         exclude module: 'hamcrest-core'
         exclude module: 'objenesis'
     }
-    testCompile ('org.powermock:powermock-module-junit4:1.6.3') {
+    testCompile ('org.powermock:powermock-module-junit4:1.6.6') {
         exclude module: 'hamcrest-core'
         exclude module: 'objenesis'
     }
@@ -90,7 +88,7 @@ task clearJar(type: Delete) {
 
 task makeJar(type:org.gradle.api.tasks.bundling.Jar) {
     //指定生成的jar名
-    baseName 'beecloud-2.6.0'
+    baseName 'beecloud-2.7.0'
     //从哪里打包class文件
     from('build/intermediates/classes/release/cn/beecloud')
     //打包到jar后的目录结构

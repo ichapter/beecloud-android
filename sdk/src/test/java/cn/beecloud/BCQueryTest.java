@@ -990,7 +990,7 @@ public class BCQueryTest {
                         BCBillStatus status = (BCBillStatus) result;
 
                         Assert.assertEquals(BCRestfulCommonResult.APP_INNER_FAIL_NUM, status.getResultCode());
-                        Assert.assertEquals("非法的线下渠道", status.getErrDetail());
+                        Assert.assertEquals("invalid bill number", status.getErrDetail());
 
                         latch.countDown();
                     }

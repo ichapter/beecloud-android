@@ -103,7 +103,7 @@ public class BCQueryReqParams extends BCReqParams {
      * @throws BCException  父类构造有可能抛出异常
      */
     public BCQueryReqParams(BCChannelTypes channel) throws BCException {
-        super(channel, ReqType.QUERY);
+        super(channel);
     }
 
     /**

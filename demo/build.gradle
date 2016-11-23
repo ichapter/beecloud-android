@@ -8,8 +8,8 @@ android {
         applicationId "cn.beecloud.demo"
         minSdkVersion 11
         targetSdkVersion 22
-        versionCode 26
-        versionName "2.6.0"
+        versionCode 27
+        versionName "2.7.0"
     }
 
     buildTypes {
@@ -20,6 +20,7 @@ android {
     }
 
     packagingOptions {  //if no effects, clean project then rebuild
+        // 以下都是用于清理paypal扫描银行卡号的依赖
         exclude 'lib/arm64-v8a/libcardioDecider.so'
         exclude 'lib/arm64-v8a/libcardioRecognizer.so'
         exclude 'lib/arm64-v8a/libcardioRecognizer_tegra2.so'
