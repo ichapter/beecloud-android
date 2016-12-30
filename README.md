@@ -721,7 +721,6 @@ BCValidationUtil.verifyCardFactors(
 -keep class com.dianxinos.** { *; }
 #BC_WX_APP
 -keep class com.switfpass.pay.** { *; }
--keep class com.switfpass.pay.** { *; }
 -dontwarn com.switfpass.pay.**
 
 #Android Studio中包含PayPal依赖，需要添加
