@@ -517,13 +517,13 @@ public class ShoppingCartActivity extends Activity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        //清理当前的activity引用
-        BCPay.clear();
-
         //使用微信的，在initWechatPay的activity结束时detach
         BCPay.detachWechat();
 
         //使用百度支付的，在activity结束时detach
         BCPay.detachBaiduPay();
+
+        //清理当前的activity引用
+        BCPay.clear();
     }
 }
