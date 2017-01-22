@@ -29,6 +29,9 @@ public class BCPayResult implements BCResult {
     private String detailInfo;
     //成功发起支付后返回支付表记录唯一标识
     private String id;
+    //返回网页渠道的重定向链接或者是提交表单
+    private String url;
+    private String html;
 
     public static final int APP_PAY_SUCC_CODE = 0;
     public static final int APP_PAY_CANCEL_CODE = -1;
@@ -124,6 +127,26 @@ public class BCPayResult implements BCResult {
     }
 
     /**
+     * 构造函数
+     * @param result        包含支付成功, 用户取消支付, 支付失败
+     * @param errMsg        支付失败的分类错误信息
+     * @param detailInfo    详细的支付结果信息, 对于错误显示详细的错误信息
+     * @param id            成功发起支付后返回支付表记录唯一标识
+     * @param url           网页类型的支付请求重定向地址
+     * @param html          网页类型的支付请求提交表单
+     */
+    public BCPayResult(String result, Integer errCode, String errMsg, String detailInfo, String id,
+                       String url, String html) {
+        this.result = result;
+        this.errCode = errCode;
+        this.errMsg = errMsg;
+        this.detailInfo = detailInfo;
+        this.id = id;
+        this.url = url;
+        this.html = html;
+    }
+
+    /**
      * @return  支付结果
      */
     public String getResult() {
@@ -156,5 +179,19 @@ public class BCPayResult implements BCResult {
      */
     public String getId() {
         return id;
+    }
+
+    /**
+     * @return 网页类型的支付请求重定向地址
+     */
+    public String getUrl() {
+        return url;
+    }
+
+    /**
+     * @return 网页类型的支付请求提交表单
+     */
+    public String getHtml() {
+        return html;
     }
 }

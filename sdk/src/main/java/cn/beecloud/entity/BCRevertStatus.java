@@ -7,6 +7,7 @@
 package cn.beecloud.entity;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 
 /**
@@ -54,7 +55,14 @@ public class BCRevertStatus extends BCRestfulCommonResult {
     public static BCRevertStatus transJsonToObject(String jsonStr){
         //反序列化json
         Gson res = new Gson();
-
-        return res.fromJson(jsonStr,new TypeToken<BCRevertStatus>() {}.getType() );
+        BCRevertStatus status;
+        try {
+            status = res.fromJson(jsonStr,new TypeToken<BCRevertStatus>() {}.getType() );
+        } catch (JsonSyntaxException ex) {
+            status = new BCRevertStatus(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
+                    BCRestfulCommonResult.APP_INNER_FAIL,
+                    "JsonSyntaxException or Network Error:" + jsonStr);
+        }
+        return status;
     }
 }

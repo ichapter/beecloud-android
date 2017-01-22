@@ -463,23 +463,8 @@ public class BCReqParams {
     /**
      * 初始化参数
      * @param channel   渠道类型
-     * @param reqType   请求类型
      */
-    public BCReqParams(BCChannelTypes channel, ReqType reqType) throws BCException{
-
-        if (reqType == ReqType.PAY && (channel == null ||
-                !BCChannelTypes.isValidAPPPaymentChannelType(channel)))
-            throw new BCException("非法APP支付渠道");
-
-        if (reqType == ReqType.QRCODE && !BCChannelTypes.isValidQRCodeReqChannelType(channel))
-            throw new BCException("非法二维码生成渠道");
-
-        if (reqType == ReqType.OFFLINE_PAY && !BCChannelTypes.isValidOfflinePayChannelType(channel))
-            throw new BCException("非法的线下扫码支付渠道");
-
-        if (reqType == ReqType.OFFLINE && !BCChannelTypes.isValidOfflineChannelType(channel))
-            throw new BCException("非法的线下渠道");
-
+    public BCReqParams(BCChannelTypes channel) throws BCException{
         BCCache mCache = BCCache.getInstance();
 
         if (mCache.appId == null || mCache.secret == null) {

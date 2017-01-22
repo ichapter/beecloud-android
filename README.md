@@ -1,6 +1,6 @@
 ## BeeCloud Android SDK (Open Source)
 
-[![Build Status](https://travis-ci.org/beecloud/beecloud-android.svg)](https://travis-ci.org/beecloud/beecloud-android) ![license](https://img.shields.io/badge/license-MIT-brightgreen.svg) ![version](https://img.shields.io/badge/version-v2.6.0-blue.svg)
+[![Build Status](https://travis-ci.org/beecloud/beecloud-android.svg)](https://travis-ci.org/beecloud/beecloud-android) ![license](https://img.shields.io/badge/license-MIT-brightgreen.svg) ![version](https://img.shields.io/badge/version-v2.7.0-blue.svg)
 
 ## 简介
 
@@ -721,7 +721,6 @@ BCValidationUtil.verifyCardFactors(
 -keep class com.baidu.** { *; }
 -keep class com.dianxinos.** { *; }
 #BC_WX_APP
--keep class com.switfpass.pay.** { *; }
 -keep class com.switfpass.pay.** { *; }
 -dontwarn com.switfpass.pay.**
 

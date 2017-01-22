@@ -614,7 +614,7 @@ public class BCQuery {
                 //校验并准备公用参数
                 BCReqParams parameters;
                 try {
-                    parameters = new BCReqParams(channelType, BCReqParams.ReqType.OFFLINE);
+                    parameters = new BCReqParams(channelType);
                 } catch (BCException e) {
                     callback.done(new BCBillStatus(BCRestfulCommonResult.APP_INNER_FAIL_NUM,
                             BCRestfulCommonResult.APP_INNER_FAIL,

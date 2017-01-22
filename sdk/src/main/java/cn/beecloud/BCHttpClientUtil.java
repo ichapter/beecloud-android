@@ -39,7 +39,7 @@ import okhttp3.internal.platform.Platform;
 class BCHttpClientUtil {
 
     //主机地址
-    private static final String BEECLOUD_HOST = "https://apidynamic.beecloud.cn";
+    private static final String BEECLOUD_HOST = "https://api.beecloud.cn";
 
     private static final String TAG = "BCHttpClientUtil";
 

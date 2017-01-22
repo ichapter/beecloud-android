@@ -106,6 +106,7 @@ public class ShoppingCartActivity extends Activity {
                         Toast.makeText(ShoppingCartActivity.this, "invalid return", Toast.LENGTH_LONG).show();
                     }
 
+                    /*
                     if (bcPayResult.getId() != null) {
                         //你可以把这个id存到你的订单中，下次直接通过这个id查询订单
                         Log.w(TAG, "bill id retrieved : " + bcPayResult.getId());
@@ -113,6 +114,7 @@ public class ShoppingCartActivity extends Activity {
                         //根据ID查询，此处只是演示如何通过id查询订单，并非支付必要部分
                         getBillInfoByID(bcPayResult.getId());
                     }
+                    */
                 }
             });
         }
@@ -373,13 +375,14 @@ public class ShoppingCartActivity extends Activity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        //清理当前的activity引用
-        BCPay.clear();
 
         //使用微信的，在initWechatPay的activity结束时detach
         BCPay.detachWechat();
 
         //使用百度支付的，在activity结束时detach
         BCPay.detachBaiduPay();
+
+        //清理当前的activity引用
+        BCPay.clear();
     }
 }
