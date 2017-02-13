@@ -75,11 +75,6 @@ public class BCWXWapPaymentActivity extends Activity {
                 }
                 return super.shouldOverrideUrlLoading(view, url);
             }
-
-            @Override
-            public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
-                handler.proceed(); // Ignore SSL certificate errors
-            }
         });
 
         url = getIntent().getStringExtra("url");
