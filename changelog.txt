@@ -1,5 +1,8 @@
 BeeCloud Android SDK Changelog
 ==========================
+v2.7.1 2017年2月13日
+取消重写onReceivedSslError
+
 v2.7.0 2016年11月22日
 取消对发起支付请求渠道的限制，比如可以直接请求BC_EXPRESS渠道，是否在安卓端使用PC渠道的决定权由用户决定
 
