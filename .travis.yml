@@ -8,10 +8,10 @@ android:
     # Uncomment the lines below if you want to
     # use the latest revision of Android SDK Tools
     #- platform-tools
-    #- tools
+    - tools
 
     # The BuildTools version used by your project
-    - build-tools-22.0.1
+    - build-tools-25.0.1
 
     # The SDK version used to compile your project
     - android-22
@@ -27,10 +27,15 @@ android:
     - sys-img-armeabi-v7a-android-22
     - sys-img-x86-android-22
 
+licenses:
+    - 'android-sdk-preview-license-.+'
+    - 'android-sdk-license-.+'
+    - 'google-gdk-license-.+'
+
 before_script:
-    - wget https://services.gradle.org/distributions/gradle-2.14.1-bin.zip
-    - unzip gradle-2.14.1-bin.zip
-    - export GRADLE_HOME=$PWD/gradle-2.14.1
+    - wget https://services.gradle.org/distributions/gradle-3.4.1-bin.zip
+    - unzip gradle-3.4.1-bin.zip
+    - export GRADLE_HOME=$PWD/gradle-3.4.1
     - export PATH=$GRADLE_HOME/bin:$PATH
 
 before_install:
@@ -40,5 +45,10 @@ before_install:
 
 install:
   - true
+  - echo y | android update sdk -u -a -t tools
+  - echo y | android update sdk -u -a -t platform-tools
+  - echo y | android update sdk -u -a -t build-tools-25.0.1
+  - echo y | android update sdk -u -a -t extra-google-m2repository
+  - echo y | android update sdk -u -a -t extra-android-m2repository
 
 script: gradle test --stacktrace

@@ -6,12 +6,12 @@ android {
         }
     }
     compileSdkVersion 22
-    buildToolsVersion "22.0.1"
+    buildToolsVersion '25.0.1'
     defaultConfig {
         minSdkVersion 10 //PayPal要求min至小10
         targetSdkVersion 22
-        versionCode 28
-        versionName "2.7.1"
+        versionCode 29
+        versionName "2.8.0"
     }
 
     //对于import module方式，compileOptions可以直接删掉
@@ -88,7 +88,7 @@ task clearJar(type: Delete) {
 
 task makeJar(type:org.gradle.api.tasks.bundling.Jar) {
     //指定生成的jar名
-    baseName 'beecloud-2.7.1'
+    baseName 'beecloud-2.8.0'
     //从哪里打包class文件
     from('build/intermediates/classes/release/cn/beecloud')
     //打包到jar后的目录结构

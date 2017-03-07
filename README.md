@@ -1,6 +1,6 @@
 ## BeeCloud Android SDK (Open Source)
 
-[![Build Status](https://travis-ci.org/beecloud/beecloud-android.svg)](https://travis-ci.org/beecloud/beecloud-android) ![license](https://img.shields.io/badge/license-MIT-brightgreen.svg) ![version](https://img.shields.io/badge/version-v2.7.1-blue.svg)
+[![Build Status](https://travis-ci.org/beecloud/beecloud-android.svg)](https://travis-ci.org/beecloud/beecloud-android) ![license](https://img.shields.io/badge/license-MIT-brightgreen.svg) ![version](https://img.shields.io/badge/version-v2.8.0-blue.svg)
 
 ## 简介
 
@@ -51,6 +51,7 @@ SDK支持以下支付渠道:
 银联需要引入`UPPayAssistEx.jar`，  
 百度钱包支付需要引入`Cashier_SDK-v4.2.0.jar`，  
 `BC_WX_APP`需要引入`libammsdk.jar`和`ecitic_banksdk.jar`，  
+`BC_ALI_APP`需要引入`alipaySdk-xxx.jar`，  
 最后添加`beecloud android sdk`：`beecloud-x.x.x.jar`（如果你添加的是sdk目录下最新的jar，请手动添加其同级目录下依赖的`okhttp-x.x.x.jar`和`okio-x.x.x.jar`）
 
 2.对于微信APP支付，需要注意你的`AndroidManifest.xml`中`package`需要和微信平台创建的移动应用`应用包名`保持一致，否则会遭遇[`一般错误`](http://help.beecloud.cn/hc/kb/article/157111/)  
@@ -180,7 +181,7 @@ BCPay.initPayPal(
 
 通过`BCPay`的实例，以`reqPaymentAsync`方法发起所有支持的支付请求，该方法的调用请参考demo支付示例，BCPay.PayParams参数请参阅[API](https://beecloud.cn/doc/api/beecloud-android/cn/beecloud/BCPay.PayParams.html)。  
 
-参数中channelType可以是`WX_APP`(微信APP)、`ALI_APP`(支付宝APP)、`UN_APP`(银联APP)、`BD_APP`(百度钱包APP)、`PAYPAL_SANDBOX`、`PAYPAL_LIVE`、`BC_APP`(BeePay快捷APP)、`BC_WX_APP`(BeePay微信APP)、`BC_WX_WAP`(BeePay微信WAP)  
+参数中channelType可以是`WX_APP`(微信APP)、`ALI_APP`(支付宝APP)、`UN_APP`(银联APP)、`BD_APP`(百度钱包APP)、`PAYPAL_SANDBOX`、`PAYPAL_LIVE`、`BC_APP`(BeePay快捷APP)、`BC_WX_APP`(BeePay微信APP)、`BC_WX_WAP`(BeePay微信WAP)、`BC_ALI_APP`(BeePay支付宝APP)    
 
 参数依次为
 > payParam        BCPay.PayParams类型  
@@ -695,7 +696,7 @@ BCValidationUtil.verifyCardFactors(
 -libraryjars libs/UPPayAssistEx.jar
 #百度
 -libraryjars libs/Cashier_SDK-v4.2.0.jar
-#BC_WX_APP额外需要的
+#BC\_WX\_APP额外需要的
 -libraryjars libs/ecitic_banksdk.jar
 
 #以下是Android Studio和Eclipse都必须的
@@ -709,7 +710,7 @@ BCValidationUtil.verifyCardFactors(
 #保留类签名声明
 -keepattributes Signature
 #BeeCloud
--keep class cn.beecloud.** { *; }
+-keep class cn.beecloud.** { *; }  
 -keep class com.google.** { *; }
 #支付宝
 -keep class com.alipay.** { *; } 
