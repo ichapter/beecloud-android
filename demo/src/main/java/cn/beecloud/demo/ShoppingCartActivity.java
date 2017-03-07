@@ -233,13 +233,15 @@ public class ShoppingCartActivity extends Activity {
         Integer[] payIcons = new Integer[]{R.drawable.wechat, R.drawable.alipay,
                 R.drawable.unionpay, R.drawable.beecloud_logo, R.drawable.baidupay,
                 R.drawable.paypal, R.drawable.rss, R.drawable.wechat, R.drawable.wechat,
-                R.drawable.scan};
+                R.drawable.alipay,R.drawable.scan};
         final String[] payNames = new String[]{"微信支付", "支付宝支付", "银联在线", "BeeCloud支付",
-                "百度钱包", "PayPal支付", "订阅支付", "微信WAP支付", "BeeCloud微信支付", "二维码支付"};
+                "百度钱包", "PayPal支付", "订阅支付", "微信WAP支付", "BeeCloud微信支付",
+                "BeeCloud支付宝APP支付", "二维码支付"};
         String[] payDescs = new String[]{"使用微信支付，以人民币CNY计费", "使用支付宝支付，以人民币CNY计费",
                 "使用银联在线支付，以人民币CNY计费", "通过BeeCloud快捷支付", "使用百度钱包支付，以人民币CNY计费",
                 "使用PayPal支付，以美元USD计费", "通过订阅计划，自动缴费", "使用微信WAP支付，以人民币CNY计费",
-                "使用BeeCloud专用微信支付，以人民币CNY计费", "通过扫描二维码支付"};
+                "使用BeeCloud专用微信支付，以人民币CNY计费", "使用支付宝ISV渠道支付，以人民币CNY计费",
+                "通过扫描二维码支付"};
         PayMethodListItem adapter = new PayMethodListItem(this, payIcons, payNames, payDescs);
         payMethod.setAdapter(adapter);
 
@@ -287,11 +289,28 @@ public class ShoppingCartActivity extends Activity {
                         mapOptional.put("consumptioncode", "consumptionCode");
                         mapOptional.put("money", "2");
 
+                        /*
                         BCPay.getInstance(ShoppingCartActivity.this).reqAliPaymentAsync(
                                 "安卓支付宝支付测试",
-                                1,
+                                880,
                                 BillUtils.genBillNum(),
                                 mapOptional,
+                                bcCallback);*/
+
+                        BCPay.PayParams payParam = new BCPay.PayParams();
+
+                        payParam.channelType = BCReqParams.BCChannelTypes.ALI_APP;
+
+                        //商品描述, 32个字节内, 汉字以2个字节计
+                        payParam.billTitle = "安卓支付宝测试";
+
+                        //支付金额，以分为单位，必须是正整数
+                        payParam.billTotalFee = 1;
+
+                        //商户自定义订单号
+                        payParam.billNum = BillUtils.genBillNum();
+
+                        BCPay.getInstance(ShoppingCartActivity.this).reqPaymentAsync(payParam,
                                 bcCallback);
 
                         break;
@@ -307,23 +326,20 @@ public class ShoppingCartActivity extends Activity {
                                 bcCallback);*/
 
 
-                        BCPay.PayParams payParam = new BCPay.PayParams();
+                        BCPay.PayParams payParam2 = new BCPay.PayParams();
 
-                        payParam.channelType = BCReqParams.BCChannelTypes.UN_APP;
+                        payParam2.channelType = BCReqParams.BCChannelTypes.UN_APP;
 
                         //商品描述, 32个字节内, 汉字以2个字节计
-                        payParam.billTitle = "安卓银联支付测试";
+                        payParam2.billTitle = "安卓银联支付测试";
 
                         //支付金额，以分为单位，必须是正整数
-                        payParam.billTotalFee = 10;
+                        payParam2.billTotalFee = 2;
 
                         //商户自定义订单号
-                        payParam.billNum = BillUtils.genBillNum();
+                        payParam2.billNum = BillUtils.genBillNum();
 
-                        // 设置本次订单的异步回调地址（慎重设置，以免造成丢单），不设置则使用设置的webhook地址
-                        payParam.notifyUrl = "https://apihz.beecloud.cn/1/pay/webhook/receiver/c5d1cba1-5e3f-4ba0-941d-9b0a371fe719";
-
-                        BCPay.getInstance(ShoppingCartActivity.this).reqPaymentAsync(payParam,
+                        BCPay.getInstance(ShoppingCartActivity.this).reqPaymentAsync(payParam2,
                                 bcCallback);
 
                         break;
@@ -433,6 +449,7 @@ public class ShoppingCartActivity extends Activity {
 
                         //商户自定义订单号
                         payParam.billNum = BillUtils.genBillNum();
+                        payParam.returnUrl = "https://api.beecloud.cn";
 
                         BCPay.getInstance(ShoppingCartActivity.this).reqPaymentAsync(payParam,
                                 bcCallback);
@@ -457,6 +474,23 @@ public class ShoppingCartActivity extends Activity {
                         break;
                     }
                     case 9: {
+                        payParam = new BCPay.PayParams();
+
+                        // BeeCLoud支付宝APP
+                        payParam.channelType = BCReqParams.BCChannelTypes.BC_ALI_APP;
+
+                        //商品描述, 32个字节内, 汉字以2个字节计
+                        payParam.billTitle = "安卓BC_ALI_APP支付测试";
+
+                        //支付金额，以分为单位，必须是正整数
+                        payParam.billTotalFee = 2;
+
+                        //商户自定义订单号
+                        payParam.billNum = BillUtils.genBillNum();
+                        BCPay.getInstance(ShoppingCartActivity.this).reqPaymentAsync(payParam, bcCallback);
+                        break;
+                    }
+                    case 10: {
                         Intent intent = new Intent(ShoppingCartActivity.this, QRCodeEntryActivity.class);
                         startActivity(intent);
                     }

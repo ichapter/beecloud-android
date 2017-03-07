@@ -1,5 +1,8 @@
 BeeCloud Android SDK Changelog
 ==========================
+v2.8.0 2017年3月7日
+添加支付宝ISV渠道，通过BC_ALI_APP发起支付
+
 v2.7.1 2017年2月13日
 取消重写onReceivedSslError
 

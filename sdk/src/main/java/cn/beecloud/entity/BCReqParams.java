@@ -159,6 +159,7 @@ public class BCReqParams {
         BC_APP,
 
         BC_WX_APP,
+        BC_ALI_APP,
 
         /**
          * BeeCloud 微信Wap
