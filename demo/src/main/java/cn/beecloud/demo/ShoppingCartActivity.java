@@ -291,7 +291,7 @@ public class ShoppingCartActivity extends Activity {
 
                         BCPay.getInstance(ShoppingCartActivity.this).reqAliPaymentAsync(
                                 "安卓支付宝支付测试",
-                                880,
+                                1,
                                 BillUtils.genBillNum(),
                                 mapOptional,
                                 bcCallback);
@@ -321,6 +321,9 @@ public class ShoppingCartActivity extends Activity {
 
                         //商户自定义订单号
                         payParam.billNum = BillUtils.genBillNum();
+
+                        // 设置本次订单的异步回调地址（慎重设置，以免造成丢单），不设置则使用APP设置的全局webhook地址
+                        payParam.notifyUrl = "https://apihz.beecloud.cn/1/pay/webhook/receiver/c5d1cba1-5e3f-4ba0-941d-9b0a371fe719";
 
                         BCPay.getInstance(ShoppingCartActivity.this).reqPaymentAsync(payParam,
                                 bcCallback);
@@ -432,7 +435,6 @@ public class ShoppingCartActivity extends Activity {
 
                         //商户自定义订单号
                         payParam.billNum = BillUtils.genBillNum();
-                        payParam.returnUrl = "https://api.beecloud.cn";
 
                         BCPay.getInstance(ShoppingCartActivity.this).reqPaymentAsync(payParam,
                                 bcCallback);
