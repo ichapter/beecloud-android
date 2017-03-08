@@ -10,8 +10,8 @@ android {
     defaultConfig {
         minSdkVersion 10 //PayPal要求min至小10
         targetSdkVersion 22
-        versionCode 29
-        versionName "2.8.0"
+        versionCode 30
+        versionName "2.9.0"
     }
 
     //对于import module方式，compileOptions可以直接删掉
@@ -43,9 +43,6 @@ dependencies {
     /*  以下标识
     //wechat，已经包含微信支付和分享，不要重复引入jar
     libs/libammsdk.jar
-
-    //如果使用到BC_WX_APP
-    libs/ecitic_banksdk.jar
 
     //ali
     libs/alipaySdk-xxx.jar.jar
@@ -88,7 +85,7 @@ task clearJar(type: Delete) {
 
 task makeJar(type:org.gradle.api.tasks.bundling.Jar) {
     //指定生成的jar名
-    baseName 'beecloud-2.8.0'
+    baseName 'beecloud-2.9.0'
     //从哪里打包class文件
     from('build/intermediates/classes/release/cn/beecloud')
     //打包到jar后的目录结构

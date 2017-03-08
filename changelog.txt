@@ -1,5 +1,8 @@
 BeeCloud Android SDK Changelog
 ==========================
+v2.9.0 2017年3月7日
+修改BC_WX_APP直接使用微信官方提供的jar
+
 v2.8.0 2017年3月7日
 添加支付宝ISV渠道，通过BC_ALI_APP发起支付
 

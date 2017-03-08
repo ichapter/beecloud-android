@@ -27,11 +27,6 @@ android:
     - sys-img-armeabi-v7a-android-22
     - sys-img-x86-android-22
 
-licenses:
-    - 'android-sdk-preview-license-.+'
-    - 'android-sdk-license-.+'
-    - 'google-gdk-license-.+'
-
 before_script:
     - wget https://services.gradle.org/distributions/gradle-3.4.1-bin.zip
     - unzip gradle-3.4.1-bin.zip

@@ -1,6 +1,6 @@
 ## BeeCloud Android SDK (Open Source)
 
-[![Build Status](https://travis-ci.org/beecloud/beecloud-android.svg)](https://travis-ci.org/beecloud/beecloud-android) ![license](https://img.shields.io/badge/license-MIT-brightgreen.svg) ![version](https://img.shields.io/badge/version-v2.8.0-blue.svg)
+[![Build Status](https://travis-ci.org/beecloud/beecloud-android.svg)](https://travis-ci.org/beecloud/beecloud-android) ![license](https://img.shields.io/badge/license-MIT-brightgreen.svg) ![version](https://img.shields.io/badge/version-v2.9.0-blue.svg)
 
 ## 简介
 
@@ -50,7 +50,7 @@ SDK支持以下支付渠道:
 支付宝需要引入`alipaySdk-xxx.jar`，  
 银联需要引入`UPPayAssistEx.jar`，  
 百度钱包支付需要引入`Cashier_SDK-v4.2.0.jar`，  
-`BC_WX_APP`需要引入`libammsdk.jar`和`ecitic_banksdk.jar`，  
+`BC_WX_APP`需要引入`libammsdk.jar`，  
 `BC_ALI_APP`需要引入`alipaySdk-xxx.jar`，  
 最后添加`beecloud android sdk`：`beecloud-x.x.x.jar`（如果你添加的是sdk目录下最新的jar，请手动添加其同级目录下依赖的`okhttp-x.x.x.jar`和`okio-x.x.x.jar`）
 
@@ -684,9 +684,9 @@ BCValidationUtil.verifyCardFactors(
 ```
 #第三方库的申明，注意在Android Studio中不需要
 #BeeCloud及依赖jar
--libraryjars libs/beecloud-x.x.x.jar
--libraryjars libs/gson-2.4.jar
--libraryjars libs/zxing-3.2.0.jar
+-libraryjars libs/beecloud-x.x.x.jar  
+-libraryjars libs/gson-2.4.jar  
+-libraryjars libs/zxing-3.2.0.jar  
 #支付宝
 -libraryjars libs/alipaySdk-xxx.jar
 #微信
@@ -695,16 +695,14 @@ BCValidationUtil.verifyCardFactors(
 -libraryjars libs/UPPayAssistEx.jar
 #百度
 -libraryjars libs/Cashier_SDK-v4.2.0.jar
-#BC\_WX\_APP额外需要的
--libraryjars libs/ecitic_banksdk.jar
 
 #以下是Android Studio和Eclipse都必须的
 #BeeCloud
 -dontwarn cn.beecloud.**
 
--dontwarn com.alipay.**
--dontwarn com.baidu.**
--dontwarn com.tencent.**
+-dontwarn com.alipay.**  
+-dontwarn com.baidu.**  
+-dontwarn com.tencent.**  
 
 #保留类签名声明
 -keepattributes Signature
@@ -719,10 +717,7 @@ BCValidationUtil.verifyCardFactors(
 -keep class com.unionpay.** { *; } 
 #百度
 -keep class com.baidu.** { *; }
--keep class com.dianxinos.** { *; }
-#BC_WX_APP
--keep class com.switfpass.pay.** { *; }
--dontwarn com.switfpass.pay.**
+-keep class com.dianxinos.** { *; }  
 
 #Android Studio中包含PayPal依赖，需要添加
 -dontwarn com.paypal.**
