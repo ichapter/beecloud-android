@@ -8,8 +8,8 @@ android {
         applicationId "cn.beecloud.demo"
         minSdkVersion 11
         targetSdkVersion 22
-        versionCode 29
-        versionName "2.8.0"
+        versionCode 30
+        versionName "2.9.0"
     }
 
     buildTypes {
