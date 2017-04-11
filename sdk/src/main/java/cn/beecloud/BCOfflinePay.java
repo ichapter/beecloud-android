@@ -98,7 +98,7 @@ public class BCOfflinePay {
     }
 
     /**
-     * 生成二维码总接口
+     * 生成二维码接口
      *
      * @param channelType     生成扫码的类型  对于支付手机APP端目前只支持WX_NATIVE, ALI_OFFLINE_QRCODE
      *                        @see cn.beecloud.entity.BCReqParams.BCChannelTypes
@@ -111,10 +111,21 @@ public class BCOfflinePay {
      * @param callback        支付完成后的回调函数
      */
     public void reqQRCodeAsync(final BCReqParams.BCChannelTypes channelType,
-                                final String billTitle, final Integer billTotalFee,
-                                final String billNum, final Map<String, String> optional,
-                                final Boolean genQRCode, final Integer qrCodeWidth,
-                                final BCCallback callback) {
+                               final String billTitle, final Integer billTotalFee,
+                               final String billNum, final Map<String, String> optional,
+                               final Boolean genQRCode, final Integer qrCodeWidth,
+                               final BCCallback callback) {
+        reqQRCodeAsync(channelType, billTitle, billTotalFee, billNum,
+                null, optional, genQRCode, qrCodeWidth, callback);
+    }
+
+    // 生成二维码总接口
+    private void reqQRCodeAsync(final BCReqParams.BCChannelTypes channelType,
+                               final String billTitle, final Integer billTotalFee,
+                               final String billNum, final String notifyUrl,
+                               final Map<String, String> optional,
+                               final Boolean genQRCode, final Integer qrCodeWidth,
+                               final BCCallback callback) {
 
         if (callback == null) {
             Log.w(TAG, "请初始化callback");
@@ -148,6 +159,10 @@ public class BCOfflinePay {
                             BCRestfulCommonResult.APP_INNER_FAIL,
                             paramValidRes));
                     return;
+                }
+
+                if (notifyUrl != null) {
+                    parameters.notifyUrl = notifyUrl;
                 }
 
                 String qrCodeReqURL = BCHttpClientUtil.getBillOfflinePayURL();
@@ -243,6 +258,7 @@ public class BCOfflinePay {
                 payParam.billTitle,
                 payParam.billTotalFee,
                 payParam.billNum,
+                payParam.notifyUrl,
                 payParam.optional,
                 payParam.genQRCode,
                 payParam.qrCodeWidth,
@@ -250,7 +266,7 @@ public class BCOfflinePay {
     }
 
     /**
-     * 线下支付总接口
+     * 线下支付接口
      *
      * @param channelType     生成扫码的类型  对于支付手机APP端目前只支持WX_SCAN, ALI_SCAN
      *                        @see cn.beecloud.entity.BCReqParams.BCChannelTypes
@@ -264,10 +280,21 @@ public class BCOfflinePay {
      * @param callback        支付完成后的回调函数
      */
     public void reqOfflinePayAsync(final BCReqParams.BCChannelTypes channelType,
-                               final String billTitle, final Integer billTotalFee,
-                               final String billNum, final Map<String, String> optional,
-                               final String authCode, final String terminalId,
-                               final String storeId, final BCCallback callback) {
+                                   final String billTitle, final Integer billTotalFee,
+                                   final String billNum, final Map<String, String> optional,
+                                   final String authCode, final String terminalId,
+                                   final String storeId, final BCCallback callback) {
+        reqOfflinePayAsync(channelType, billTitle, billTotalFee, billNum, null,
+                optional, authCode, terminalId, storeId, callback);
+    }
+
+    // 线下支付总接口
+    private void reqOfflinePayAsync(final BCReqParams.BCChannelTypes channelType,
+                                    final String billTitle, final Integer billTotalFee,
+                                    final String billNum, final String notifyUrl,
+                                    final Map<String, String> optional,
+                                    final String authCode, final String terminalId,
+                                    final String storeId, final BCCallback callback) {
 
         if (callback == null) {
             Log.w(TAG, "请初始化callback");
@@ -317,6 +344,10 @@ public class BCOfflinePay {
                 }
 
                 parameters.authCode = authCode;
+
+                if (notifyUrl != null) {
+                    parameters.notifyUrl = notifyUrl;
+                }
 
                 if (terminalId != null)
                     parameters.terminalId = terminalId;
@@ -394,6 +425,7 @@ public class BCOfflinePay {
                 payParam.billTitle,
                 payParam.billTotalFee,
                 payParam.billNum,
+                payParam.notifyUrl,
                 payParam.optional,
                 payParam.authCode,
                 payParam.terminalId,
@@ -412,9 +444,9 @@ public class BCOfflinePay {
      * @param callback        支付完成后的回调函数
      */
     public void reqWXNativeQRCodeAsync(final String billTitle, final Integer billTotalFee,
-                                 final String billNum, final Map<String, String> optional,
-                                 final Boolean genQRCode, final Integer qrCodeWidth,
-                                 final BCCallback callback) {
+                                       final String billNum, final Map<String, String> optional,
+                                       final Boolean genQRCode, final Integer qrCodeWidth,
+                                       final BCCallback callback) {
         reqQRCodeAsync(BCReqParams.BCChannelTypes.WX_NATIVE, billTitle, billTotalFee,
                 billNum, optional, genQRCode, qrCodeWidth, callback);
     }
@@ -556,6 +588,8 @@ public class BCOfflinePay {
          * 以扫描用户微信或支付宝授权码方式发起支付时的必要参数
          */
         public String authCode;
+
+        public String notifyUrl;
 
         /**
          * 机具终端编号, 支付宝条码(ALI_SCAN)的选填参数,

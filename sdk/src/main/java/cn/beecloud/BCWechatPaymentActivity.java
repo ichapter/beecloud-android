@@ -63,8 +63,6 @@ public class BCWechatPaymentActivity extends Activity implements IWXAPIEventHand
                             "微信回调入口初始化失败"));
             }
 
-            ex.printStackTrace();
-
             this.finish();
         }
     }
@@ -85,8 +83,6 @@ public class BCWechatPaymentActivity extends Activity implements IWXAPIEventHand
                                 BCPayResult.FAIL_EXCEPTION,
                                 "微信回调入口初始化失败"));
             }
-
-            ex.printStackTrace();
 
             this.finish();
         }
