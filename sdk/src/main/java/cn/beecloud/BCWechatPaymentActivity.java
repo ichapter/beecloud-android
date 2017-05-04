@@ -11,11 +11,11 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.tencent.mm.sdk.modelbase.BaseReq;
-import com.tencent.mm.sdk.modelbase.BaseResp;
-import com.tencent.mm.sdk.openapi.IWXAPI;
-import com.tencent.mm.sdk.openapi.IWXAPIEventHandler;
-import com.tencent.mm.sdk.openapi.WXAPIFactory;
+import com.tencent.mm.opensdk.modelbase.BaseReq;
+import com.tencent.mm.opensdk.modelbase.BaseResp;
+import com.tencent.mm.opensdk.openapi.IWXAPI;
+import com.tencent.mm.opensdk.openapi.IWXAPIEventHandler;
+import com.tencent.mm.opensdk.openapi.WXAPIFactory;
 
 import cn.beecloud.entity.BCPayResult;
 
@@ -151,7 +151,6 @@ public class BCWechatPaymentActivity extends Activity implements IWXAPIEventHand
     @Override
     protected void onDestroy() {
         super.onDestroy();
-
         if (wxAPI != null)
             wxAPI.detach();
     }

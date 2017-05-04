@@ -60,8 +60,7 @@ public class BCPayTest {
     public void testInitWechatPay() throws Exception {
         Object[][] test = new Object[][] {
                 new Object[]{null, null},
-                new Object[]{activity, null},
-                new Object[]{activity, "wxf1aa465362b4c8f1"},
+                new Object[]{activity, null}
         };
 
         for (Object[] objects : test) {
@@ -272,7 +271,7 @@ public class BCPayTest {
                         Assert.assertEquals(BCPayResult.FAIL_EXCEPTION,
                                 payResult.getErrMsg());
                         Assert.assertTrue(payResult.getDetailInfo().startsWith("Error: 微信API为空"));
-                        //System.out.println(payResult.getDetailInfo());
+                        System.out.println(payResult.getDetailInfo());
 
                         Assert.assertEquals("ff5fef0c-93bd-46d2-8500-5ed53502d344",
                                 BCCache.getInstance().billID);

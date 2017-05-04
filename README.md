@@ -1,6 +1,6 @@
 ## BeeCloud Android SDK (Open Source)
 
-[![Build Status](https://travis-ci.org/beecloud/beecloud-android.svg)](https://travis-ci.org/beecloud/beecloud-android) ![license](https://img.shields.io/badge/license-MIT-brightgreen.svg) ![version](https://img.shields.io/badge/version-v2.9.1-blue.svg)
+[![Build Status](https://travis-ci.org/beecloud/beecloud-android.svg)](https://travis-ci.org/beecloud/beecloud-android) ![license](https://img.shields.io/badge/license-MIT-brightgreen.svg) ![version](https://img.shields.io/badge/version-v2.9.2-blue.svg)
 
 ## 简介
 
@@ -43,16 +43,14 @@ SDK支持以下支付渠道:
 引入`sdk model`，在`project`的`settings.gradle`中`include ':sdk'`，并在需要支付的`model`（比如本项目中的`demo`） `build.gradle`中添加依赖`compile project(':sdk')`，需要JDK版本7或以上。
 
 >2. 对于需要以`jar`方式引入的情况  
-添加第三方的支付类，在`beecloud-android\demo_eclipse\libs`目录下  
-`gson-2.4.jar`为必须引入的jar，  
-`zxing-3.2.0.jar`为生成二维码必须引入的jar，  
-微信APP支付需要引入`libammsdk.jar`，  
-支付宝需要引入`alipaySdk-xxx.jar`，  
+添加第三方的支付类，在`beecloud-android\sdk`目录下  
+`gson-x.x.jar`为必须引入的jar，  
+`zxing-x.x.x.jar`为生成二维码必须引入的jar，
+微信支付(`WX_APP`和`BC_WX_APP `)需要引入`wechat-sdk-android-with-mta-x.x.x.jar`，  
+支付宝(`ALI_APP`和`BC_ALI_APP`)需要引入`alipaySdk-xxx.jar`，
 银联需要引入`UPPayAssistEx.jar`，  
-百度钱包支付需要引入`Cashier_SDK-v4.2.0.jar`，  
-`BC_WX_APP`需要引入`libammsdk.jar`，  
-`BC_ALI_APP`需要引入`alipaySdk-xxx.jar`，  
-最后添加`beecloud android sdk`：`beecloud-x.x.x.jar`（如果你添加的是sdk目录下最新的jar，请手动添加其同级目录下依赖的`okhttp-x.x.x.jar`和`okio-x.x.x.jar`）
+百度钱包支付需要引入`Cashier_SDK-v4.2.0.jar`，
+最后添加`beecloud android sdk`：`beecloud-x.x.x.jar`，和其同级目录下依赖的`okhttp-x.x.x.jar`，`okio-x.x.x.jar`
 
 2.对于微信APP支付，需要注意你的`AndroidManifest.xml`中`package`需要和微信平台创建的移动应用`应用包名`保持一致，否则会遭遇[`一般错误`](http://help.beecloud.cn/hc/kb/article/157111/)  
 

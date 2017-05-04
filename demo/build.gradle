@@ -1,5 +1,8 @@
 apply plugin: 'com.android.application'
 
+def keystorePropertiesFile = rootProject.file("keystore.properties");
+def keystoreProperties = new Properties()
+
 android {
     compileSdkVersion 22
     buildToolsVersion '25.0.1'
@@ -8,14 +11,27 @@ android {
         applicationId "cn.beecloud.demo"
         minSdkVersion 11
         targetSdkVersion 22
-        versionCode 31
-        versionName "2.9.1"
+        versionCode 32
+        versionName "2.9.2"
+    }
+
+    signingConfigs {
+        config {
+            keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+            storeFile file(keystoreProperties['storeFile'])
+            storePassword keystoreProperties['storePassword']
+            keyAlias keystoreProperties['keyAlias']
+            keyPassword keystoreProperties['keyPassword']
+        }
     }
 
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            signingConfig signingConfigs.config
         }
     }
 
@@ -47,7 +63,7 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile fileTree(include: ['*.jar'], dir: 'libs')
     compile project(':sdk')
     compile 'com.android.support:appcompat-v7:22.0.0'
 }
