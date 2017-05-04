@@ -1,5 +1,7 @@
 BeeCloud Android SDK Changelog
 ==========================
+v2.9.2 2017年5月4日
+更新微信sdk jar
 
 v2.9.1 2017年4月11日
 线下支付API添加notify URL字段
