@@ -44,15 +44,15 @@ SDK支持以下支付渠道:
 
 >2. 对于需要以`jar`方式引入的情况  
 添加第三方的支付类，在`beecloud-android\sdk`目录下  
-`gson-2.4.jar`为必须引入的jar，  
-`zxing-3.2.0.jar`为生成二维码必须引入的jar，  
+`gson-x.x.jar`为必须引入的jar，  
+`zxing-x.x.x.jar`为生成二维码必须引入的jar，
 微信支付(`WX_APP`和`BC_WX_APP `)需要引入`wechat-sdk-android-with-mta-x.x.x.jar`，  
-支付宝(`ALI_APP`和`BC_ALI_APP`)需要引入`alipaySdk-xxx.jar`，  
+支付宝(`ALI_APP`和`BC_ALI_APP`)需要引入`alipaySdk-xxx.jar`，
 银联需要引入`UPPayAssistEx.jar`，  
 百度钱包支付需要引入`Cashier_SDK-v4.2.0.jar`，
 最后添加`beecloud android sdk`：`beecloud-x.x.x.jar`，和其同级目录下依赖的`okhttp-x.x.x.jar`，`okio-x.x.x.jar`
 
-2.对于微信支付，需要注意你的`AndroidManifest.xml`中`package`需要和微信平台创建的移动应用`应用包名`保持一致，否则会遭遇[`一般错误`](http://help.beecloud.cn/hc/kb/article/157111/)  
+2.对于微信APP支付，需要注意你的`AndroidManifest.xml`中`package`需要和微信平台创建的移动应用`应用包名`保持一致，否则会遭遇[`一般错误`](http://help.beecloud.cn/hc/kb/article/157111/)  
 
 3.对于银联支付需要将银联插件`beecloud-android\demo\src\main\assets\UPPayPluginEx.apk`引入你的工程`assets`目录下
 
@@ -76,7 +76,7 @@ BeeCloud.setSandbox(true);
 BeeCloud.setAppIdAndSecret("c5d1cba1-5e3f-4ba0-941d-9b0a371fe719",
         "4bfdd244-574d-4bf3-b034-0c751ed34fee");
 ```    
->2 如果用到微信支付，在用到微信支付的Activity的onCreate函数里调用以下函数，第二个参数需要换成你自己的微信AppID，例如
+>2 如果用到微信APP支付，在用到微信支付的Activity的onCreate函数里调用以下函数，第二个参数需要换成你自己的微信AppID，例如
 ```java
 BCPay.initWechatPay(ShoppingCartActivity.this, "wxf1aa465362b4c8f1");
 ```    
@@ -117,7 +117,7 @@ BCPay.initPayPal(
     android:screenOrientation="portrait"
     android:theme="@android:style/Theme.Translucent.NoTitleBar" />
 ```
-> 对于微信支付，需要添加
+> 对于微信APP支付，需要添加
 ```java
 <activity
     android:name="cn.beecloud.BCWechatPaymentActivity"
@@ -161,7 +161,8 @@ BCPay.initPayPal(
     android:theme="@android:style/Theme.Translucent.NoTitleBar"
     android:windowSoftInputMode="adjustResize" />
 ```
-> 对于百度钱包，由于需要添加的activity数量众多，请参考demo中的AndroidManifest.xml
+> 对于百度钱包，由于需要添加的activity数量众多，请参考demo中的AndroidManifest.xml  
+
 > 对于微信wap，需要添加
 ```java
 <activity
