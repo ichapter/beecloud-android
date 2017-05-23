@@ -414,10 +414,12 @@ public class BCPay {
         if (wxAPI != null) {
             wxAPI.sendReq(request);
         } else {
-            payCallback.done(new BCPayResult(BCPayResult.RESULT_FAIL,
-                    BCPayResult.APP_INTERNAL_EXCEPTION_ERR_CODE,
-                    BCPayResult.FAIL_EXCEPTION,
-                    "Error: 微信API为空, 请确认已经在需要调起微信支付的Activity中[成功]调用了BCPay.initWechatPay"));
+            if (payCallback != null) {
+                payCallback.done(new BCPayResult(BCPayResult.RESULT_FAIL,
+                        BCPayResult.APP_INTERNAL_EXCEPTION_ERR_CODE,
+                        BCPayResult.FAIL_EXCEPTION,
+                        "Error: 微信API为空, 请确认已经在需要调起微信支付的Activity中[成功]调用了BCPay.initWechatPay"));
+            }
         }
     }
 
@@ -484,8 +486,10 @@ public class BCPay {
                 errDetail = "网络连接出错";
         }
 
-        payCallback.done(new BCPayResult(result, errCode, errMsg,
-                errDetail, BCCache.getInstance().billID));
+        if (payCallback != null) {
+            payCallback.done(new BCPayResult(result, errCode, errMsg,
+                    errDetail, BCCache.getInstance().billID));
+        }
     }
 
     /**
@@ -581,9 +585,11 @@ public class BCPay {
                         break;
                 }
 
-                payCallback.done(new BCPayResult(result, errCode, errMsg,
-                        errDetail + "#result=" + stateCode + "#desc=" + payDesc,
-                        BCCache.getInstance().billID));
+                if (payCallback != null) {
+                    payCallback.done(new BCPayResult(result, errCode, errMsg,
+                            errDetail + "#result=" + stateCode + "#desc=" + payDesc,
+                            BCCache.getInstance().billID));
+                }
             }
 
             public boolean isHideLoadingDialog() {

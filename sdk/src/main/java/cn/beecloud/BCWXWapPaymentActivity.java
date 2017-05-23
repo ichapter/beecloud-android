@@ -126,12 +126,14 @@ public class BCWXWapPaymentActivity extends Activity {
                             if (billResult.getResultCode() == 0 &&
                                     billResult.getBill().getPayResult() != null &&
                                     billResult.getBill().getPayResult()) {
-                                BCPay.payCallback.done(new BCPayResult(
-                                        BCPayResult.RESULT_SUCCESS,
-                                        BCPayResult.APP_PAY_SUCC_CODE,
-                                        BCPayResult.RESULT_SUCCESS,
-                                        "用户支付成功",
-                                        BCCache.getInstance().billID));
+                                if (BCPay.payCallback != null) {
+                                    BCPay.payCallback.done(new BCPayResult(
+                                            BCPayResult.RESULT_SUCCESS,
+                                            BCPayResult.APP_PAY_SUCC_CODE,
+                                            BCPayResult.RESULT_SUCCESS,
+                                            "用户支付成功",
+                                            BCCache.getInstance().billID));
+                                }
 
                                 found = true;
                                 break;
@@ -151,12 +153,14 @@ public class BCWXWapPaymentActivity extends Activity {
 
                 if (!found) {
                     // 如果一直没有查询到支付结果
-                    BCPay.payCallback.done(new BCPayResult(
-                            BCPayResult.RESULT_CANCEL,
-                            BCPayResult.APP_PAY_CANCEL_CODE,
-                            BCPayResult.RESULT_CANCEL,
-                            "用户未支付，或服务器通信延迟，如果用户确认已支付，请注意webhook推送",
-                            BCCache.getInstance().billID));
+                    if (BCPay.payCallback != null) {
+                        BCPay.payCallback.done(new BCPayResult(
+                                BCPayResult.RESULT_CANCEL,
+                                BCPayResult.APP_PAY_CANCEL_CODE,
+                                BCPayResult.RESULT_CANCEL,
+                                "用户未支付，或服务器通信延迟，如果用户确认已支付，请注意webhook推送",
+                                BCCache.getInstance().billID));
+                    }
                 }
 
                 loadingDialog.dismiss();

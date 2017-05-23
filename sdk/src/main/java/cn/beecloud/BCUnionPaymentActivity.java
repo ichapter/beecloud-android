@@ -52,7 +52,7 @@ public class BCUnionPaymentActivity extends Activity {
                             (retPay == -1)? BCPayResult.FAIL_PLUGIN_NOT_INSTALLED:BCPayResult.FAIL_PLUGIN_NEED_UPGRADE,
                          "银联插件问题, 需重新安装或升级"));
                 } else {
-                    Log.e("BCUnionPaymentActivity", "BCPay instance or payCallback NPE");
+                    Log.e("BCUnionPaymentActivity", "BCPay payCallback NPE");
                 }
 
                 this.finish();
@@ -110,6 +110,8 @@ public class BCUnionPaymentActivity extends Activity {
         if (BCPay.payCallback != null) {
             BCPay.payCallback.done(new BCPayResult(result, errCode, errMsg,
                     detailInfo, BCCache.getInstance().billID));
+        } else {
+            Log.e("BCUnionPaymentActivity", "BCPay payCallback NPE");
         }
 
         this.finish();

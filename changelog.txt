@@ -1,5 +1,9 @@
 BeeCloud Android SDK Changelog
 ==========================
+v2.9.3 2017年5月22日
+上传debug keystore
+增加对callback非空判断
+
 v2.9.2 2017年5月4日
 更新微信sdk jar
 
