@@ -225,11 +225,10 @@ public class BCMockPayActivity extends Activity {
                     BCPay.payCallback.done(new BCPayResult(BCPayResult.RESULT_CANCEL,
                             BCPayResult.APP_PAY_CANCEL_CODE, BCPayResult.RESULT_CANCEL,
                             BCPayResult.RESULT_CANCEL, BCCache.getInstance().billID));
-
-                    finish();
                 } else {
                     Log.e(TAG, "Callback should not be null");
                 }
+                finish();
             }
         });
 
@@ -257,11 +256,15 @@ public class BCMockPayActivity extends Activity {
                             try {
                                 responseMap = gson.fromJson(ret, type);
                             } catch (JsonSyntaxException ex) {
-                                BCPay.payCallback.done(new BCPayResult(BCPayResult.RESULT_FAIL,
-                                        BCPayResult.APP_INTERNAL_EXCEPTION_ERR_CODE,
-                                        BCPayResult.FAIL_EXCEPTION,
-                                        "JsonSyntaxException or Network Error:"
-                                                + response.code + " # " + response.content));
+                                if (BCPay.payCallback != null) {
+                                    BCPay.payCallback.done(new BCPayResult(BCPayResult.RESULT_FAIL,
+                                            BCPayResult.APP_INTERNAL_EXCEPTION_ERR_CODE,
+                                            BCPayResult.FAIL_EXCEPTION,
+                                            "JsonSyntaxException or Network Error:"
+                                                    + response.code + " # " + response.content));
+                                } else {
+                                    Log.e(TAG, "Callback should not be null");
+                                }
                                 return;
                             }
 
@@ -276,16 +279,24 @@ public class BCMockPayActivity extends Activity {
                                     Log.e(TAG, "Callback should not be null");
                                 }
                             } else {
-                                BCPay.payCallback.done(new BCPayResult(BCPayResult.RESULT_FAIL,
-                                        resultCode,
-                                        String.valueOf(responseMap.get("result_msg")),
-                                        String.valueOf(responseMap.get("err_detail"))));
+                                if (BCPay.payCallback != null) {
+                                    BCPay.payCallback.done(new BCPayResult(BCPayResult.RESULT_FAIL,
+                                            resultCode,
+                                            String.valueOf(responseMap.get("result_msg")),
+                                            String.valueOf(responseMap.get("err_detail"))));
+                                } else {
+                                    Log.e(TAG, "Callback should not be null");
+                                }
                             }
                         } else {
-                            BCPay.payCallback.done(new BCPayResult(BCPayResult.RESULT_FAIL,
-                                    BCPayResult.APP_INTERNAL_NETWORK_ERR_CODE,
-                                    BCPayResult.FAIL_NETWORK_ISSUE,
-                                    "Network Error:" + response.code + " # " + response.content));
+                            if (BCPay.payCallback != null) {
+                                BCPay.payCallback.done(new BCPayResult(BCPayResult.RESULT_FAIL,
+                                        BCPayResult.APP_INTERNAL_NETWORK_ERR_CODE,
+                                        BCPayResult.FAIL_NETWORK_ISSUE,
+                                        "Network Error:" + response.code + " # " + response.content));
+                            } else {
+                                Log.e(TAG, "Callback should not be null");
+                            }
                         }
 
                         finish();
