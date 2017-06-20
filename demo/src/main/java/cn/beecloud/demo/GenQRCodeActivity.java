@@ -193,9 +193,6 @@ public class GenQRCodeActivity extends Activity {
             payParam.optional = optional;   //扩展参数
             payParam.genQRCode = true;      //是否生成二维码的bitmap
             payParam.qrCodeWidth = 380;                   //二维码的尺寸, 以px为单位, 如果为null则默认为360
-            Map<String, String> analysis2 = new HashMap<String, String>();
-            analysis2.put("eae", "测试的");
-            payParam.analysis = analysis2;
 
             BCOfflinePay.getInstance().reqQRCodeAsync(
                     payParam,
