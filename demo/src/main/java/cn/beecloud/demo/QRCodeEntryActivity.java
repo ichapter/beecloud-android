@@ -25,7 +25,9 @@ import cn.beecloud.async.BCCallback;
 import cn.beecloud.async.BCResult;
 import cn.beecloud.demo.util.BillUtils;
 import cn.beecloud.demo.util.DisplayUtils;
+import cn.beecloud.entity.BCPayResult;
 import cn.beecloud.entity.BCQRCodeResult;
+import cn.beecloud.entity.BCReqParams;
 
 /**
  * 用于展示如何生成二维码支付
@@ -83,17 +85,15 @@ public class QRCodeEntryActivity extends Activity {
                 Map<String, String> mapOptional = new HashMap<String, String>();
 
                 mapOptional.put("testalikey1", "测试value值1");
-                BCPay.getInstance(QRCodeEntryActivity.this).reqAliInlineQRCodeAsync("支付宝内嵌二维码支付测试",   //商品描述
-                        1,                                                  //总金额, 以分为单位, 必须是正整数
-                        BillUtils.genBillNum(),      //流水号
-                        mapOptional,                                        //扩展参数
-                        "https://beecloud.cn/",  //支付成功之后的返回url
-                        "1",                          /* 注： 二维码类型含义
-                                                        * null则支付宝生成默认类型, 不建议
-                                                        * "0": 订单码-简约前置模式, 对应 iframe 宽度不能小于 600px, 高度不能小于 300px
-                                                        * "1": 订单码-前置模式, 对应 iframe 宽度不能小于 300px, 高度不能小于 600px
-                                                        * "3": 订单码-迷你前置模式, 对应 iframe 宽度不能小于 75px, 高度不能小于 75px
-                                                        */
+                BCPay.PayParams payParams = new BCPay.PayParams();
+                payParams.channelType = BCReqParams.BCChannelTypes.ALI_QRCODE;
+                payParams.billTitle = "支付宝内嵌二维码支付测试";
+                payParams.billTotalFee = 1;
+                payParams.billNum = BillUtils.genBillNum();
+                payParams.optional = mapOptional;
+                payParams.returnUrl = "https://beecloud.cn/";
+                payParams.qrPayMode = "1";
+                BCPay.getInstance(QRCodeEntryActivity.this).reqPaymentAsync(payParams,
                         new BCCallback() {     //回调入口
                             @Override
                             public void done(BCResult bcResult) {
@@ -101,12 +101,12 @@ public class QRCodeEntryActivity extends Activity {
                                 //此处关闭loading界面
                                 loadingDialog.dismiss();
 
-                                final BCQRCodeResult bcqrCodeResult = (BCQRCodeResult) bcResult;
+                                final BCPayResult bcPayResult = (BCPayResult) bcResult;
 
                                 //resultCode为0表示请求成功
-                                if (bcqrCodeResult.getResultCode() == 0) {
-                                    aliQRURL = bcqrCodeResult.getQrCodeRawContent();
-                                    aliQRHtml = bcqrCodeResult.getAliQRCodeHtml();
+                                if (bcPayResult.getErrCode() == 0) {
+                                    aliQRURL = bcPayResult.getUrl();
+                                    aliQRHtml = bcPayResult.getHtml();
                                     Log.w(Tag, "ali qrcode url: " + aliQRURL);
                                     Log.w(Tag, "ali qrcode html: " + aliQRHtml);
 
@@ -120,18 +120,9 @@ public class QRCodeEntryActivity extends Activity {
                                         @Override
                                         public void run() {
 
-                                            String toastMsg = "err code:" + bcqrCodeResult.getResultCode() +
-                                                    "; err msg: " + bcqrCodeResult.getResultMsg() +
-                                                    "; err detail: " + bcqrCodeResult.getErrDetail();
-
-                                            /**
-                                             * 你发布的项目中不应该出现如下错误，此处由于支付宝政策原因，
-                                             * 不再提供支付宝支付的测试功能，所以给出提示说明
-                                             */
-                                            if (bcqrCodeResult.getResultMsg().equals("PAY_FACTOR_NOT_SET") &&
-                                                    bcqrCodeResult.getErrDetail().startsWith("支付宝参数")) {
-                                                toastMsg = "支付失败：由于支付宝政策原因，故不再提供支付宝支付的测试功能，给您带来的不便，敬请谅解";
-                                            }
+                                            String toastMsg = "err code:" + bcPayResult.getErrCode() +
+                                                    "; err msg: " + bcPayResult.getErrMsg() +
+                                                    "; err detail: " + bcPayResult.getDetailInfo();
 
                                             Toast.makeText(QRCodeEntryActivity.this, toastMsg, Toast.LENGTH_LONG).show();
                                         }

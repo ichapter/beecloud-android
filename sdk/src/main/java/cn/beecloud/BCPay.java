@@ -219,7 +219,7 @@ public class BCPay {
                                  final String billTitle, final Integer billTotalFee,
                                  final String billNum, final Integer billTimeout,
                                  final String notifyUrl, final String returnUrl,
-                                 final String cardNum,
+                                 final String cardNum, final String qrCodeMode,
                                  final Map<String, String> optional,
                                  final Map<String, String> analysis,
                                  final BCCallback callback) {
@@ -263,6 +263,12 @@ public class BCPay {
                 parameters.notifyUrl = notifyUrl;
                 parameters.returnUrl = returnUrl;
                 parameters.cardNum = cardNum;
+                parameters.qrPayMode = qrCodeMode;
+
+                if (parameters.analysis == null) {
+                    parameters.analysis = new HashMap<>();
+                }
+                parameters.analysis.put("sdk_version", "ANDROID_" + BeeCloud.BEECLOUD_ANDROID_SDK_VERSION);
 
                 String payURL = BCHttpClientUtil.getBillPayURL();
 
@@ -370,8 +376,10 @@ public class BCPay {
      * @param callback        支付完成后的回调函数
      */
     public void reqPaymentAsync(final PayParams payParam, final BCCallback callback) {
-        if (payParam.channelType == null)
+        if (payParam.channelType == null) {
+            Log.e(TAG, "channelType NPE!!!");
             return;
+        }
 
         if (payParam.channelType == BCReqParams.BCChannelTypes.PAYPAL_SANDBOX ||
                 payParam.channelType == BCReqParams.BCChannelTypes.PAYPAL_LIVE) {
@@ -389,6 +397,7 @@ public class BCPay {
                     payParam.notifyUrl,
                     payParam.returnUrl,
                     payParam.cardNum,
+                    payParam.qrPayMode,
                     payParam.optional,
                     payParam.analysis,
                     callback);
@@ -622,7 +631,7 @@ public class BCPay {
                                   final String billNum,
                                   final Map<String, String> optional, final BCCallback callback) {
         this.reqPaymentAsync(BCReqParams.BCChannelTypes.WX_APP, billTitle, billTotalFee,
-                billNum, null, null, null, null, optional, null, callback);
+                billNum, null, null, null, null, null, optional, null, callback);
     }
 
     /**
@@ -639,7 +648,7 @@ public class BCPay {
                                    final Map<String, String> optional,
                                    final BCCallback callback) {
         this.reqPaymentAsync(BCReqParams.BCChannelTypes.ALI_APP, billTitle, billTotalFee,
-                billNum, null, null, null, null, optional, null, callback);
+                billNum, null, null, null, null, null, optional, null, callback);
     }
 
     /**
@@ -656,7 +665,7 @@ public class BCPay {
                                      final Map<String, String> optional,
                                      final BCCallback callback) {
         this.reqPaymentAsync(BCReqParams.BCChannelTypes.UN_APP, billTitle, billTotalFee,
-                billNum, null, null, null, null, optional, null, callback);
+                billNum, null, null, null, null, null, optional, null, callback);
     }
 
     /**
@@ -673,7 +682,7 @@ public class BCPay {
                                      final Map<String, String> optional,
                                      final BCCallback callback) {
         this.reqPaymentAsync(BCReqParams.BCChannelTypes.BD_APP, billTitle, billTotalFee,
-                billNum, null, null, null, null, optional, null, callback);
+                billNum, null, null, null, null, null, optional, null, callback);
     }
 
     /**
@@ -901,6 +910,7 @@ public class BCPay {
      *                        @see BCPayReqParams
      * @param callback        支付完成后的回调函数
      */
+    @Deprecated
     public void reqAliInlineQRCodeAsync(final String billTitle, final Integer billTotalFee,
                                         final String billNum, final Map<String, String> optional,
                                         final String returnUrl,
@@ -1236,14 +1246,21 @@ public class BCPay {
         public String cardNum;
 
         /**
+         * 支付宝内嵌二维码支付(ALI_QRCODE)的必填参数
+         * "0": 订单码-简约前置模式, 对应 iframe 宽度不能小于 600px, 高度不能小于 300px
+         * "1": 订单码-前置模式, 对应 iframe 宽度不能小于 300px, 高度不能小于 600px
+         * "3": 订单码-迷你前置模式, 对应 iframe 宽度不能小于 75px, 高度不能小于 75px
+         */
+        public String qrPayMode;
+
+        /**
          * 扩展参数，可以传入任意数量的key/value对来补充对业务逻辑的需求，可以为null，
          * 对于PayPal请以HashMap实例化
          */
         public Map<String, String> optional;
 
         /**
-         * 扩展参数，用于分析，可以为null
-         * 目前key只有是"category"时才会进行分析
+         * 扩展参数，用于分析
          */
         public Map<String, String> analysis;
     }

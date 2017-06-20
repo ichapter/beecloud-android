@@ -1,5 +1,8 @@
 BeeCloud Android SDK Changelog
 ==========================
+v2.9.4 2017年6月20日
+analysis添加sdk_version
+
 v2.9.3 2017年5月22日
 上传debug keystore
 增加对callback非空判断
