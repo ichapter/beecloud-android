@@ -11,8 +11,8 @@ android {
         applicationId "cn.beecloud.demo"
         minSdkVersion 11
         targetSdkVersion 22
-        versionCode 33
-        versionName "2.9.3"
+        versionCode 34
+        versionName "2.9.4"
     }
 
     signingConfigs {

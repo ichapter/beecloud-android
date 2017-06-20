@@ -22,6 +22,7 @@ import com.google.zxing.common.BitMatrix;
 
 import java.lang.reflect.Type;
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.Map;
 
 import cn.beecloud.async.BCCallback;
@@ -116,14 +117,14 @@ public class BCOfflinePay {
                                final Boolean genQRCode, final Integer qrCodeWidth,
                                final BCCallback callback) {
         reqQRCodeAsync(channelType, billTitle, billTotalFee, billNum,
-                null, optional, genQRCode, qrCodeWidth, callback);
+                null, optional, null, genQRCode, qrCodeWidth, callback);
     }
 
     // 生成二维码总接口
     private void reqQRCodeAsync(final BCReqParams.BCChannelTypes channelType,
                                final String billTitle, final Integer billTotalFee,
                                final String billNum, final String notifyUrl,
-                               final Map<String, String> optional,
+                               final Map<String, String> optional, final Map<String, String> analysis,
                                final Boolean genQRCode, final Integer qrCodeWidth,
                                final BCCallback callback) {
 
@@ -164,6 +165,13 @@ public class BCOfflinePay {
                 if (notifyUrl != null) {
                     parameters.notifyUrl = notifyUrl;
                 }
+
+                if (analysis == null) {
+                    parameters.analysis = new HashMap<>();
+                } else {
+                    parameters.analysis = analysis;
+                }
+                parameters.analysis.put("sdk_version", "ANDROID_" + BeeCloud.BEECLOUD_ANDROID_SDK_VERSION);
 
                 String qrCodeReqURL = BCHttpClientUtil.getBillOfflinePayURL();
                 if (channelType == BCReqParams.BCChannelTypes.BC_NATIVE)
@@ -260,6 +268,7 @@ public class BCOfflinePay {
                 payParam.billNum,
                 payParam.notifyUrl,
                 payParam.optional,
+                payParam.analysis,
                 payParam.genQRCode,
                 payParam.qrCodeWidth,
                 callback);
@@ -285,7 +294,7 @@ public class BCOfflinePay {
                                    final String authCode, final String terminalId,
                                    final String storeId, final BCCallback callback) {
         reqOfflinePayAsync(channelType, billTitle, billTotalFee, billNum, null,
-                optional, authCode, terminalId, storeId, callback);
+                optional, null, authCode, terminalId, storeId, callback);
     }
 
     // 线下支付总接口
@@ -293,6 +302,7 @@ public class BCOfflinePay {
                                     final String billTitle, final Integer billTotalFee,
                                     final String billNum, final String notifyUrl,
                                     final Map<String, String> optional,
+                                    final Map<String, String> analysis,
                                     final String authCode, final String terminalId,
                                     final String storeId, final BCCallback callback) {
 
@@ -354,6 +364,13 @@ public class BCOfflinePay {
 
                 if (storeId != null)
                     parameters.storeId = storeId;
+
+                if (analysis == null) {
+                    parameters.analysis = new HashMap<>();
+                } else {
+                    parameters.analysis = analysis;
+                }
+                parameters.analysis.put("sdk_version", "ANDROID_" + BeeCloud.BEECLOUD_ANDROID_SDK_VERSION);
 
                 String qrCodeReqURL = BCHttpClientUtil.getBillOfflinePayURL();
 
@@ -427,6 +444,7 @@ public class BCOfflinePay {
                 payParam.billNum,
                 payParam.notifyUrl,
                 payParam.optional,
+                payParam.analysis,
                 payParam.authCode,
                 payParam.terminalId,
                 payParam.storeId,
@@ -602,5 +620,10 @@ public class BCOfflinePay {
          * 若系统商接入, storeId(商户的门店编号)必填, terminalId(机具终端编号)选填
          */
         public String storeId;
+
+        /**
+         * 扩展参数，用于分析
+         */
+        public Map<String, String> analysis;
     }
 }
