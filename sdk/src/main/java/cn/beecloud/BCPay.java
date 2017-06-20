@@ -376,8 +376,10 @@ public class BCPay {
      * @param callback        支付完成后的回调函数
      */
     public void reqPaymentAsync(final PayParams payParam, final BCCallback callback) {
-        if (payParam.channelType == null)
+        if (payParam.channelType == null) {
+            Log.e(TAG, "channelType NPE!!!");
             return;
+        }
 
         if (payParam.channelType == BCReqParams.BCChannelTypes.PAYPAL_SANDBOX ||
                 payParam.channelType == BCReqParams.BCChannelTypes.PAYPAL_LIVE) {
