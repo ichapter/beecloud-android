@@ -166,13 +166,6 @@ public class BCOfflinePay {
                     parameters.notifyUrl = notifyUrl;
                 }
 
-                if (analysis == null) {
-                    parameters.analysis = new HashMap<>();
-                } else {
-                    parameters.analysis = analysis;
-                }
-                parameters.analysis.put("sdk_version", "ANDROID_" + BeeCloud.BEECLOUD_ANDROID_SDK_VERSION);
-
                 String qrCodeReqURL = BCHttpClientUtil.getBillOfflinePayURL();
                 if (channelType == BCReqParams.BCChannelTypes.BC_NATIVE)
                     qrCodeReqURL = BCHttpClientUtil.getBillPayURL();
@@ -364,13 +357,6 @@ public class BCOfflinePay {
 
                 if (storeId != null)
                     parameters.storeId = storeId;
-
-                if (analysis == null) {
-                    parameters.analysis = new HashMap<>();
-                } else {
-                    parameters.analysis = analysis;
-                }
-                parameters.analysis.put("sdk_version", "ANDROID_" + BeeCloud.BEECLOUD_ANDROID_SDK_VERSION);
 
                 String qrCodeReqURL = BCHttpClientUtil.getBillOfflinePayURL();
 

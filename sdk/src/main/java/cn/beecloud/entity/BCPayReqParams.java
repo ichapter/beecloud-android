@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import cn.beecloud.BCException;
+import cn.beecloud.BeeCloud;
 
 /**
  * 支付参数类
@@ -144,6 +145,10 @@ public class BCPayReqParams extends BCReqParams {
 
         if (analysis !=null && analysis.size() != 0)
             params.put("analysis", analysis);
+
+        Map<String, String> bcAnalysis = new HashMap<>();
+        bcAnalysis.put("sdk_version", "ANDROID_" + BeeCloud.BEECLOUD_ANDROID_SDK_VERSION);
+        params.put("bc_analysis", bcAnalysis);
 
         if (qrPayMode != null)
             params.put("qr_pay_mode", qrPayMode);
