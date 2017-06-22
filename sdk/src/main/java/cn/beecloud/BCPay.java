@@ -265,11 +265,6 @@ public class BCPay {
                 parameters.cardNum = cardNum;
                 parameters.qrPayMode = qrCodeMode;
 
-                if (parameters.analysis == null) {
-                    parameters.analysis = new HashMap<>();
-                }
-                parameters.analysis.put("sdk_version", "ANDROID_" + BeeCloud.BEECLOUD_ANDROID_SDK_VERSION);
-
                 String payURL = BCHttpClientUtil.getBillPayURL();
 
                 BCHttpClientUtil.Response response = BCHttpClientUtil
