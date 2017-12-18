@@ -674,7 +674,7 @@ public class BCQuery {
                 Map<String, Object> reqMap = new HashMap<>();
                 callback.done(BCHttpClientUtil.queryRestObjects(
                         BCHttpClientUtil.getSubscriptionBanksUrl(), reqMap,
-                        BCSubscriptionBanksResult.class, true));
+                        BCSubscriptionBanksResult.class, false, true));
             }
         });
     }
@@ -700,7 +700,7 @@ public class BCQuery {
                     reqMap = BCHttpClientUtil.objectToMap(criteria);
 
                 callback.done(BCHttpClientUtil.queryRestObjects(BCHttpClientUtil.getPlanUrl(),
-                        reqMap, BCPlanListResult.class, true));
+                        reqMap, BCPlanListResult.class, false, true));
             }
         });
     }
@@ -732,7 +732,7 @@ public class BCQuery {
                     reqMap = BCHttpClientUtil.objectToMap(criteria);
 
                 callback.done(BCHttpClientUtil.queryRestObjects(BCHttpClientUtil.getSubscriptionUrl(),
-                        reqMap, BCSubscriptionListResult.class, true));
+                        reqMap, BCSubscriptionListResult.class, false, true));
             }
         });
     }

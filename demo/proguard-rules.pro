@@ -21,9 +21,6 @@
 -dontwarn com.tencent.**
 -dontwarn com.switfpass.**
 
-#for paypal
--dontwarn com.paypal.**
--dontwarn io.card.payment.**
 -dontwarn okhttp3.**
 -dontwarn okio.**
 
@@ -44,8 +41,6 @@
 #百度
 -keep class com.baidu.** { *; }
 -keep class com.dianxinos.** { *; }
-#PayPal
--keep class com.paypal.** { *; }
 
 -keep interface okhttp3.** { *; }
 -keep interface okio.** { *; }

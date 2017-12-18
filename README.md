@@ -1,6 +1,6 @@
 ## BeeCloud Android SDK (Open Source)
 
-[![Build Status](https://travis-ci.org/beecloud/beecloud-android.svg)](https://travis-ci.org/beecloud/beecloud-android) ![license](https://img.shields.io/badge/license-MIT-brightgreen.svg) ![version](https://img.shields.io/badge/version-v2.9.4-blue.svg)
+[![Build Status](https://travis-ci.org/beecloud/beecloud-android.svg)](https://travis-ci.org/beecloud/beecloud-android) ![license](https://img.shields.io/badge/license-MIT-brightgreen.svg) ![version](https://img.shields.io/badge/version-v2.10.0-blue.svg)
 
 ## 简介
 
@@ -11,7 +11,6 @@ SDK支持以下支付渠道:
  * 微信APP
  * 支付宝APP
  * 银联在线APP
- * PayPal
  * 百度钱包
 
 包含预退款、订阅支付、鉴权和相关的查询功能。
@@ -48,19 +47,18 @@ SDK支持以下支付渠道:
 `zxing-x.x.x.jar`为生成二维码必须引入的jar，  
 微信支付(`WX_APP`和`BC_WX_APP `)需要引入`wechat-sdk-android-with-mta-x.x.x.jar`，  
 支付宝(`ALI_APP`和`BC_ALI_APP`)需要引入`alipaySdk-xxx.jar`，  
-银联需要引入`UPPayAssistEx.jar`，  
+银联需要引入`UPPayAssistEx.jar`、`UPPayPluginExPro.jar`，  
 百度钱包支付需要引入`Cashier_SDK-v4.2.0.jar`，  
 最后添加`beecloud android sdk`：`beecloud-x.x.x.jar`，和其同级目录下依赖的`okhttp-x.x.x.jar`，`okio-x.x.x.jar`
 
 2.对于微信APP支付，需要注意你的`AndroidManifest.xml`中`package`需要和微信平台创建的移动应用`应用包名`保持一致，否则会遭遇[`一般错误`](http://help.beecloud.cn/hc/kb/article/157111/)  
 
-3.对于银联支付需要将银联插件`beecloud-android\demo\src\main\assets\UPPayPluginEx.apk`引入你的工程`assets`目录下
+3.对于银联支付需要将`beecloud-android\sdk\manualres\unionpay\data.bin`引入你的工程`assets`目录下；同时根据需求将同目录下的so文件添加到工程  
 
 4.对于百度钱包支付，需要
 >1. 将`beecloud-android\sdk\manualres\baidupay\res`添加到你的`res`目录下；
 >2. 另外，对于使用`Android Studio`的用户，需要将`beecloud-android\sdk\manualres\baidupay\`目录下的`armeabi`文件夹拷贝到`src\main\jniLibs`目录下，如果没有`jniLibs`目录，请手动创建；对用使用`Eclipse`的用户，需要将`beecloud-android\sdk\manualres\baidupay\`目录下的`armeabi`文件夹拷贝到`libs`目录下。  
-  
-5.对于需要使用PayPal的用户，由于PayPal官方不再提供单独的jar文件，请通过添加model的方式引入依赖。
+
 
 ## 使用方法
 > 具体使用请参考项目中的`demo`
@@ -68,7 +66,8 @@ SDK支持以下支付渠道:
 ### 1.初始化支付参数
 请参考`demo`中的`ShoppingCartActivity.java`  
   
->1 在主activity或者application的onCreate函数中初始化BeeCloud账户中的AppID和secret，并设置是否开启测试模式（如果不设置默认不开启）；注意：如果是测试模式，secret应该填Test Secret，如果是上线版本，应该填App Secret，例如
+>1 在主activity或者application的onCreate函数中初始化BeeCloud账户中的AppID和secret，并设置是否开启测试模式（如果不设置默认不开启）；注意：如果是测试模式，secret应该填Test Secret，如果是上线版本，应该填App Secret，例如  
+
 ```java
 //开启测试模式
 BeeCloud.setSandbox(true);
@@ -76,23 +75,11 @@ BeeCloud.setSandbox(true);
 BeeCloud.setAppIdAndSecret("c5d1cba1-5e3f-4ba0-941d-9b0a371fe719",
         "4bfdd244-574d-4bf3-b034-0c751ed34fee");
 ```    
->2 如果用到微信APP支付，在用到微信支付的Activity的onCreate函数里调用以下函数，第二个参数需要换成你自己的微信AppID，例如
+>2 如果用到微信APP支付，在用到微信支付的Activity的onCreate函数里调用以下函数，第二个参数需要换成你自己的微信AppID，例如  
+
 ```java
 BCPay.initWechatPay(ShoppingCartActivity.this, "wxf1aa465362b4c8f1");
 ```    
->3 如果用到PayPal，在用到PayPal的Activity的onCreate函数里调用函数，例如
-```java
-BCPay.initPayPal(
-    //在PayPal官网申请的APP Client ID
-    "AVT1Ch18aTIlUJIeeCxvC7ZKQYHczGwiWm8jOwhrREc4a5FnbdwlqEB4evlHPXXUA67RAAZqZM0H8TCR", 
-    //在PayPal官网申请的APP Secret   
-    "EL-fkjkEUyxrwZAmrfn46awFXlX-h2nRkyCVhhpeVdlSRuhPJKXx3ZvUTTJqPQuAeomXA8PZ2MkX24vF",  
-    //测试过程中使用BCPay.PAYPAL_PAY_TYPE.SANDBOX，生产环境使用BCPay.PAYPAL_PAY_TYPE.LIVE，不同的环境需要与Client ID和Secret相匹配
-    BCPay.PAYPAL_PAY_TYPE.SANDBOX,  
-    //是否显示收货地址，如果为TRUE，用户地址没有正确配置可能导致不能付款，该选项可以自行考量
-    Boolean.FALSE
-    );
-```
   
 ### 2. 在`AndroidManifest.xml`中添加`permission`
 ```java
@@ -102,35 +89,43 @@ BCPay.initPayPal(
 <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
-<!-- for Baidu -->
+<!-- for union pay -->
 <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+<uses-permission android:name="org.simalliance.openmobileapi.SMARTCARD" />
+<uses-permission android:name="android.permission.NFC" />
+<uses-feature android:name="android.hardware.nfc.hce"/>
+
+<!-- for Baidu -->
 <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 <uses-permission android:name="android.permission.WRITE_SETTINGS" />
 <uses-permission android:name="android.permission.READ_SMS" />
 ```
 
 ### 3. 在`AndroidManifest.xml`中注册`activity`
-> 如果开启测试模式，需要添加（上线版本不需要）
+> 如果开启测试模式，需要添加（上线版本不需要）  
+
 ```java
 <activity
     android:name="cn.beecloud.BCMockPayActivity"
     android:screenOrientation="portrait"
     android:theme="@android:style/Theme.Translucent.NoTitleBar" />
 ```
-> 对于微信APP支付，需要添加
+
+> 对于微信APP支付，需要添加  
+
 ```java
 <activity
     android:name="cn.beecloud.BCWechatPaymentActivity"
     android:launchMode="singleTop"
     android:theme="@android:style/Theme.Translucent.NoTitleBar" />
-```
-```java
+
 <activity-alias
     android:name=".wxapi.WXPayEntryActivity"
     android:exported="true"
     android:targetActivity="cn.beecloud.BCWechatPaymentActivity" />
 ```
-> 对于支付宝，需要添加
+> 对于支付宝，需要添加  
+
 ```java
 <activity
     android:name="com.alipay.sdk.app.H5PayActivity"
@@ -139,7 +134,8 @@ BCPay.initPayPal(
     android:screenOrientation="behind"
     android:windowSoftInputMode="adjustResize|stateHidden" />
 ```
-> 对于银联，需要添加
+> 对于银联，需要添加  
+
 ```java
 <activity
     android:name="cn.beecloud.BCUnionPaymentActivity"
@@ -149,21 +145,28 @@ BCPay.initPayPal(
     android:screenOrientation="portrait"
     android:theme="@android:style/Theme.Translucent.NoTitleBar"
     android:windowSoftInputMode="adjustResize" />
-```
-> 对于PayPal，需要添加
-```java
+    
+<uses-library android:name="org.simalliance.openmobileapi" android:required="false"/>
+
 <activity
-    android:name="cn.beecloud.BCPayPalPaymentActivity"
+    android:name="com.unionpay.uppay.PayActivity"
+    android:label="@string/app_name"
+    android:screenOrientation="portrait"
     android:configChanges="orientation|keyboardHidden"
     android:excludeFromRecents="true"
-    android:launchMode="singleTop"
+    android:windowSoftInputMode="adjustResize"/>
+
+<activity
+    android:name="com.unionpay.UPPayWapActivity"
+    android:configChanges="orientation|keyboardHidden"
     android:screenOrientation="portrait"
-    android:theme="@android:style/Theme.Translucent.NoTitleBar"
-    android:windowSoftInputMode="adjustResize" />
+    android:windowSoftInputMode="adjustResize"/>
 ```
+
 > 对于百度钱包，由于需要添加的activity数量众多，请参考demo中的AndroidManifest.xml  
 
-> 对于微信wap，需要添加
+> 对于微信wap，需要添加  
+
 ```java
 <activity
         android:name="cn.beecloud.BCWXWapPaymentActivity"
@@ -179,7 +182,7 @@ BCPay.initPayPal(
 
 通过`BCPay`的实例，以`reqPaymentAsync`方法发起所有支持的支付请求，该方法的调用请参考demo支付示例，BCPay.PayParams参数请参阅[API](https://beecloud.cn/doc/api/beecloud-android/cn/beecloud/BCPay.PayParams.html)。  
 
-参数中channelType可以是`WX_APP`(微信APP)、`ALI_APP`(支付宝APP)、`UN_APP`(银联APP)、`BD_APP`(百度钱包APP)、`PAYPAL_SANDBOX`、`PAYPAL_LIVE`、`BC_APP`(BeePay快捷APP)、`BC_WX_APP`(BeePay微信APP)、`BC_WX_WAP`(BeePay微信WAP)、`BC_ALI_APP`(BeePay支付宝APP)    
+参数中channelType可以是`WX_APP`(微信APP)、`ALI_APP`(支付宝APP)、`UN_APP`(银联APP)、`BD_APP`(百度钱包APP)、`BC_APP`(BeePay快捷APP)、`BC_WX_APP`(BeePay微信APP)、`BC_WX_WAP`(BeePay微信WAP)、`BC_ALI_APP`(BeePay支付宝APP)    
 
 参数依次为
 > payParam        BCPay.PayParams类型  
@@ -224,40 +227,17 @@ payParam.billTotalFee = 10;
 //商户自定义订单号
 payParam.billNum = "unique bill number";
 
+// 商家自定义的消费者Id，可选参数，传入将分析用户行为，请参照 #商户消费者系统# 上传商户消费者ID
+payParam.buyerId = "merchant-buyer-id";
+
+// 卡券Id，可选参数，请参照 #营销卡券# 分发卡券
+payParams.couponId = "coupon-id";    
+
 //发起支付
 BCPay.getInstance(context).reqPaymentAsync(payParam,
         bcCallback);
 ```
-##### 对于PayPal支付的补充说明
-PayPal回调返回的成功表示手机支付已经完成，但是订单还没有同步到BeeCloud服务器，由于同步过程中sdk需要先向PayPal服务器请求token，该请求过程失败几率相对比较大，所以可能需要多次请求同步，如果依然失败，请保留订单数据用于下次同步，同步接口为`syncPayPalPayment`，例如：
-```java
-//如果是PayPal，detail info里面包含订单的json字符串
-final String syncStr = bcPayResult.getDetailInfo();
 
-BCCache.executorService.execute(new Runnable() {
-    @Override
-    public void run() {
-        BCPayResult syncResult;
-        int i = 0;
-        //由于同步过程中需要向PayPal服务器请求token，请求失败的几率比较高，此处设置了三次循环
-        for (; i < 3; i++) {
-            syncResult = BCPay.getInstance(ShoppingCartActivity.this).syncPayPalPayment(syncStr);
-
-            if (syncResult.getResult().equals(BCPayResult.RESULT_SUCCESS)) {
-                //sync succ
-                break;
-            } else {
-                //sync fail reason: syncResult.getDetailInfo());
-            }
-        }
-
-        //注意，如果一直失败，你需要将该json串保留起来，下次继续同步，否者在你在BeeCloud控制台看不到这笔订单
-        if (i == 3) {
-            //please store the json string to somewhere for later sync: syncStr
-        }
-    }
-});
-```
 
 ### 5.线下支付
 请查看`doc`中的`API`，线下支付类`BCOfflinePay`，参照`demo`中`QRCodeEntryActivity`和其关联的activity；一般用于线下门店通过出示二维码由用户扫描付款，或者通过用户出示的付款码收款。  
@@ -286,7 +266,8 @@ BCCache.executorService.execute(new Runnable() {
 
 在回调函数中将`BCResult`转化成`BCQRCodeResult`之后做后续处理  
 
-**调用：**
+**调用：**  
+
 ```java
 BCOfflinePay.getInstance().reqQRCodeAsync(
         payParam,
@@ -322,7 +303,8 @@ BCOfflinePay.getInstance().reqQRCodeAsync(
 
 在回调函数中将`BCResult`转化成`BCPayResult`之后做后续处理  
 
-**调用：**
+**调用：**  
+
 ```java
 BCOfflinePay.getInstance().reqOfflinePayAsync(
         payParam,
@@ -331,8 +313,9 @@ BCOfflinePay.getInstance().reqOfflinePayAsync(
 
 * **关于订单的撤销**
 
-支持WX_SCAN, ALI_OFFLINE_QRCODE, ALI_SCAN   
-订单撤销后，用户将不能继续支付，这和退款是不同的操作，具体请参考`GenQRCodeActivity`
+支持WX\_SCAN, ALI\_OFFLINE\_QRCODE, ALI\_SCAN   
+订单撤销后，用户将不能继续支付，这和退款是不同的操作，具体请参考`GenQRCodeActivity`  
+
 ```java
 BCOfflinePay.getInstance().reqRevertBillAsync(
     channelType,
@@ -342,7 +325,8 @@ BCOfflinePay.getInstance().reqRevertBillAsync(
 
 * **关于支付宝内嵌二维码**
   
-支付宝内嵌二维码属于线上产品，支付结果会及时反馈，并不需要额外的查询操作，具体可以参考`QRCodeEntryActivity`和`ALIQRCodeActivity`，注意需要通过`BCPay`调用
+支付宝内嵌二维码属于线上产品，支付结果会及时反馈，并不需要额外的查询操作，具体可以参考`QRCodeEntryActivity`和`ALIQRCodeActivity`，注意需要通过`BCPay`调用  
+
 ```java
 BCPay.getInstance(QRCodeEntryActivity.this).reqAliInlineQRCodeAsync(
 		"支付宝内嵌二维码支付测试",   	//商品描述
@@ -433,7 +417,8 @@ BCQuery.getInstance().queryBillsAsync(
 通过构造`BCQuery`的实例，使用`queryRefundsAsync`方法发起退款查询，`channel`指代何种支付方式，为`BCReqParams.BCChannelTypes.ALL`时则查询所有的支付渠道退款订单；在回调函数中将`BCResult`转化成`BCQueryRefundsResult`之后做后续处理
 
 **调用：**  
-同上，首先初始化回调入口BCCallback
+同上，首先初始化回调入口BCCallback  
+
 ```java
 BCQuery.getInstance().queryRefundsAsync(
     BCReqParams.BCChannelTypes.UN,          //渠道
@@ -455,7 +440,8 @@ BCQuery.getInstance().queryRefundsAsync(
 通过构造`BCQuery`的实例，使用`queryBillsCountAsync`方法发起支付订单数目查询，使用`queryRefundsCountAsync`方法发起退款订单数目查询；在回调函数中将`BCResult`转化成`BCQueryCountResult`之后做后续处理
 
 **调用：**  
-以查询支付订单数目为例
+以查询支付订单数目为例  
+
 ```java
 BCQuery.QueryParams params = new BCQuery.QueryParams();
 
@@ -487,7 +473,8 @@ BCQuery.getInstance().queryBillsCountAsync(params, new BCCallback(){...});
 通过构造`BCQuery`的实例，使用`queryRefundStatusAsync`方法发起支付查询，该方法所有参数都必填，`channel`指代何种支付方式，目前由于第三方API的限制仅支持微信、易宝、快钱和百度；在回调函数中将`BCResult`转化成`BCRefundStatus`之后做后续处理
 
 **调用：**  
-同上，首先初始化回调入口BCCallback
+同上，首先初始化回调入口BCCallback  
+
 ```java
 BCQuery.getInstance().queryRefundStatusAsync(
     BCReqParams.BCChannelTypes.WX,     //目前仅支持WX、YEE、KUAIQIAN、BD
@@ -505,7 +492,8 @@ BCQuery.getInstance().queryRefundStatusAsync(
 通过`BCQuery`的实例，以`queryRefundByIDAsync`方法发起退款订单查询，查询结果转化成`BCQueryRefundResult`做后续处理，请参照`demo`中`RefundOrdersActivity`。  
 
 **调用：**  
-同上，首先初始化回调入口BCCallback
+同上，首先初始化回调入口BCCallback  
+
 ```java
 BCQuery.getInstance().queryBillByIDAsync(
                 id,
@@ -521,7 +509,8 @@ BCQuery.getInstance().queryBillByIDAsync(
 通过`BCQuery`的实例，以`queryOfflineBillStatusAsync`方法发起支付订单查询，查询结果转化成`BCBillStatus`做后续处理，请参照`demo`中`ShoppingCartActivity`。   
 
 **调用：**  
-同上，首先初始化回调入口BCCallback
+同上，首先初始化回调入口BCCallback  
+
 ```java
 BCQuery.getInstance().queryOfflineBillStatusAsync(
         channelType,		//渠道类型
@@ -554,7 +543,8 @@ BCQuery.getInstance().queryOfflineBillStatusAsync(
 
 **调用：**  
   
-同上，首先初始化回调入口BCCallback
+同上，首先初始化回调入口BCCallback  
+
 ```java
 // 参照API添加查询计划限制条件
 BCPlanCriteria criteria = new BCPlanCriteria();
@@ -576,7 +566,8 @@ BCQuery.getInstance().queryPlans(criteria,
 
 **调用：**  
   
-同上，首先初始化回调入口BCCallback
+同上，首先初始化回调入口BCCallback  
+
 ```java
 BCQuery.getInstance().subscriptionSupportedBanks(new BCCallback() {...});
 ```
@@ -590,7 +581,8 @@ BCQuery.getInstance().subscriptionSupportedBanks(new BCCallback() {...});
 
 **调用：**  
   
-同上，首先初始化回调入口BCCallback
+同上，首先初始化回调入口BCCallback  
+
 ```java
 BCPay.getInstance(this).sendSmsCode("接收验证码的手机号",new BCCallback() {...});
 ```
@@ -604,7 +596,8 @@ BCPay.getInstance(this).sendSmsCode("接收验证码的手机号",new BCCallback
 
 **调用：**  
   
-同上，首先初始化回调入口BCCallback
+同上，首先初始化回调入口BCCallback  
+
 ```java
 BCSubscription subscription = new BCSubscription();
 subscription.setBuyerId("buyer id");
@@ -629,7 +622,8 @@ BCPay.getInstance(this).subscribe(subscription, smsId, smsCode, null,
 
 **调用：**  
   
-同上，首先初始化回调入口BCCallback
+同上，首先初始化回调入口BCCallback  
+
 ```java
 BCPay.getInstance(this).cancelSubscription("需要取消的订阅id",new BCCallback() {...});
 ```
@@ -643,7 +637,8 @@ BCPay.getInstance(this).cancelSubscription("需要取消的订阅id",new BCCallb
 
 **调用：**  
   
-同上，首先初始化回调入口BCCallback
+同上，首先初始化回调入口BCCallback  
+
 ```java
 // 参照API添加查询订阅限制条件
 BCSubscriptionCriteria criteria = new BCSubscriptionCriteria();
@@ -664,7 +659,8 @@ BCQuery.getInstance().querySubscriptions(criteria,
 
 **调用：**  
   
-同上，首先初始化回调入口BCCallback
+同上，首先初始化回调入口BCCallback  
+
 ```java
 // 二要素鉴权
 BCValidationUtil.verifyCardFactors(
@@ -672,6 +668,29 @@ BCValidationUtil.verifyCardFactors(
     "身份证号码",
     new BCCallback() { ... });
 ```
+
+###  10. 商户消费者系统
+该功能支持商户上传自定义的消费者Id，控制台会对消费者行为进行分析  
+在初始化`BeeCloud.setAppIdAndSecret`之后，`new BCMerchantBuyerService()`，调用以下函数，所有函数都是同步返回结果：  
+
+* 单个消费者注册接口调用 `addMerchantBuyer`  
+* 消费者批量导入接口调用 `batchAddMerchantBuyers`  
+* 商家消费者批量查询接口调用 `getMerchantBuyers`  
+
+
+###  11. 营销卡券系统
+提供商家营销功能，商家通过接口给顾客发券，顾客付款时自动抵扣  
+
+在初始化`BeeCloud.setAppIdAndSecret`之后，`new BCSalesService()`，调用以下函数，所有函数都是同步返回结果：  
+
+* 创建卡券模板，即定义满减规则等，在控制台操作
+* 根据Id查询卡券模板 `queryCouponTemplate`
+* 根据条件查询卡券模板 `queryCouponTemplates`
+* 根据Id查询卡券 `queryCoupon`
+* 根据条件查询卡券 `queryCoupons`
+* 发放卡券 `createCoupon`    
+
+
   
 ## Demo
 考虑到个人的开发习惯，本项目提供了`Android Studio`和`Eclipse ADT`两种工程的`demo`，为了使demo顺利运行，请注意以下细节
@@ -679,60 +698,68 @@ BCValidationUtil.verifyCardFactors(
 >2. 对于使用`Eclipse ADT`的开发人员，`Import Project`的时候选择`beecloud-android`下的`demo_eclipse`，该`demo`下面已经添加所有需要的`jar`。
 
 ## ProGuard
-请根据自己引进的jar做增删
+请根据自己引进的jar做增删  
+
 ```
-#第三方库的申明，注意在Android Studio中不需要
-#BeeCloud及依赖jar
+# 第三方库的申明，注意在Android Studio中不需要 
+
+# BeeCloud及依赖jar  
 -libraryjars libs/beecloud-x.x.x.jar  
 -libraryjars libs/gson-2.4.jar  
 -libraryjars libs/zxing-3.2.0.jar  
-#支付宝
--libraryjars libs/alipaySdk-xxx.jar
-#微信
--libraryjars libs/libammsdk.jar
-#银联
--libraryjars libs/UPPayAssistEx.jar
-#百度
--libraryjars libs/Cashier_SDK-v4.2.0.jar
 
-#以下是Android Studio和Eclipse都必须的
-#BeeCloud
--dontwarn cn.beecloud.**
+# 支付宝  
+-libraryjars libs/alipaySdk-xxx.jar  
 
+# 微信  
+-libraryjars libs/libammsdk.jar  
+
+# 银联  
+-libraryjars libs/UPPayAssistEx.jar  
+-libraryjars libs/UPPayPluginExPro.jar  
+
+# 百度  
+-libraryjars libs/Cashier_SDK-v4.2.0.jar  
+
+
+# 以下是Android Studio和Eclipse都必须的
+
+# BeeCloud  
+-dontwarn cn.beecloud.**  
 -dontwarn com.alipay.**  
 -dontwarn com.baidu.**  
 -dontwarn com.tencent.**  
 
-#保留类签名声明
--keepattributes Signature
-#BeeCloud
+# 保留类签名声明  
+-keepattributes Signature  
+
+# BeeCloud  
 -keep class cn.beecloud.** { *; }  
--keep class com.google.** { *; }
-#支付宝
--keep class com.alipay.** { *; } 
-#微信
--keep class com.tencent.** { *; } 
-#银联
--keep class com.unionpay.** { *; } 
-#百度
--keep class com.baidu.** { *; }
+-keep class com.google.** { *; }  
+
+# 支付宝  
+-keep class com.alipay.** { *; }   
+
+# 微信  
+-keep class com.tencent.** { *; }  
+
+# 银联  
+-keep class com.unionpay.** { *; }  
+
+# 百度  
+-keep class com.baidu.** { *; }  
 -keep class com.dianxinos.** { *; }  
 
-#Android Studio中包含PayPal依赖，需要添加
--dontwarn com.paypal.**
--dontwarn io.card.payment.**
--dontwarn okhttp3.**
--dontwarn okio.**
+-dontwarn okhttp3.**  
+-dontwarn okio.**  
 
--keep class com.paypal.** { *; }
--keep class io.card.payment.** { *; }
+-keep interface okhttp3.** { *; }  
+-keep interface okio.** { *; }  
 
--keep interface okhttp3.** { *; }
--keep interface okio.** { *; }
-
--keep class okhttp3.** { *; }
--keep class okio.** { *; }
+-keep class okhttp3.** { *; }  
+-keep class okio.** { *; }  
 ```
+
 
 ## 常见问题
 请查看[帮助中心](http://help.beecloud.cn/hc/)

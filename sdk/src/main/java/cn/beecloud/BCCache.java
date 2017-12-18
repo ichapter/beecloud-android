@@ -47,16 +47,6 @@ public class BCCache {
     public String wxAppId;
 
     /**
-     * PayPal
-     */
-    public String paypalClientID;
-    public String paypalSecret;
-    public BCPay.PAYPAL_PAY_TYPE paypalPayType;
-    public Boolean retrieveShippingAddresses;
-    public static final String BC_PAYPAL_SHARED_PREFERENCE_NAME = "BC_CACHE_PAYPAL_SHARED_PREFERENCE";
-    public static final String BC_PAYPAL_UNSYNCED_STR_CACHE = "BC_CACHE_PAYPAL_UNSYNCED";
-
-    /**
      * 网络请求timeout时间
      * 以毫秒为单位
      */
@@ -91,103 +81,6 @@ public class BCCache {
         }
 
         return instance;
-    }
-
-    /**
-     * to retrieve paypal not synced records
-     */
-    public List<String> getUnSyncedPayPalRecords(Context context) {
-        if (context == null) {
-            Log.e("BCCache", "param context NPE");
-            return null;
-        }
-
-        String cacheStr =
-                context.getSharedPreferences(BC_PAYPAL_SHARED_PREFERENCE_NAME, 0)
-                        .getString(BC_PAYPAL_UNSYNCED_STR_CACHE, null);
-
-        if (cacheStr != null)
-            return new ArrayList<String>(Arrays.asList(cacheStr.split(separator)));
-        else
-            return null;
-    }
-
-    /**
-     * clear un-synced cache
-     */
-    public void clearUnSyncedPayPalRecords(Context context) {
-        if (context == null) {
-            Log.e("BCCache", "param context NPE");
-            return;
-        }
-
-        final SharedPreferences prefs =
-                context.getSharedPreferences(BC_PAYPAL_SHARED_PREFERENCE_NAME, 0);
-        SharedPreferences.Editor spEditor = prefs.edit();
-        spEditor.clear();
-        spEditor.apply();
-    }
-
-    /**
-     * remove synced record
-     */
-    public void removeSyncedPalPalRecords(Context context, List<String> rmRecords) {
-        if (context == null) {
-            Log.e("BCCache", "param context NPE");
-            return;
-        }
-
-        final SharedPreferences prefs =
-                context.getSharedPreferences(BC_PAYPAL_SHARED_PREFERENCE_NAME, 0);
-
-        String records = prefs.getString(BC_PAYPAL_UNSYNCED_STR_CACHE, null);
-
-        if (records == null)
-            return;
-
-        List<String> oldRecords = Arrays.asList(records.split(separator));
-
-        List<String> leftRecords = new ArrayList<String>();
-        if (oldRecords.size() != 0)
-            leftRecords.addAll(oldRecords);
-
-        leftRecords.removeAll(rmRecords);
-
-        if (leftRecords.size() == 0) {
-            clearUnSyncedPayPalRecords(context);
-        } else {
-            SharedPreferences.Editor spEditor = prefs.edit();
-            spEditor.putString(BC_PAYPAL_UNSYNCED_STR_CACHE, joinStrings(leftRecords));
-            spEditor.apply();
-        }
-    }
-
-    /**
-     * to store paypal not synced records
-     */
-    public void storeUnSyncedPayPalRecords(Context context, String newRecord) {
-        if (context == null) {
-            Log.e("BCCache", "param context NPE");
-            return;
-        }
-
-        final SharedPreferences prefs =
-                context.getSharedPreferences(BC_PAYPAL_SHARED_PREFERENCE_NAME, 0);
-
-        String cachedStr = prefs.getString(BC_PAYPAL_UNSYNCED_STR_CACHE, null);
-
-        SharedPreferences.Editor spEditor = prefs.edit();
-
-        if (cachedStr == null) {
-            spEditor.putString(BC_PAYPAL_UNSYNCED_STR_CACHE, newRecord);
-        } else {
-            List<String> totalRec = new ArrayList<String>(Arrays.asList(cachedStr.split(separator)));
-            totalRec.add(newRecord);
-
-            spEditor.putString(BC_PAYPAL_UNSYNCED_STR_CACHE, joinStrings(totalRec));
-        }
-
-        spEditor.apply();
     }
 
     private String joinStrings(List<String> strings){

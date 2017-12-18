@@ -16,6 +16,7 @@ import android.widget.TextView;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import cn.beecloud.entity.BCBillOrder;
 import cn.beecloud.entity.BCReqParams;
@@ -130,7 +131,8 @@ public class BillListAdapter extends BaseAdapter {
         viewHolder.txtBillId.setText(String.format("订单唯一标识符: %s", bcBillOrder.getId()));
         viewHolder.txtBillNum.setText(String.format("订单号: %s", bcBillOrder.getBillNum()));
         viewHolder.txtTradeNum.setText(String.format("渠道商的订单号: %s", bcBillOrder.getTradeNum()));
-        viewHolder.txtTotalFee.setText(String.format("订单金额/元: %.2f", (bcBillOrder.getTotalFee()/100.0)));
+        viewHolder.txtTotalFee.setText(String.format(Locale.CHINA,
+                "实付金额/元: %.2f", (bcBillOrder.getTotalFee()/100.0)));
         viewHolder.txtChannel.setText(String.format("支付渠道: %s",
                 BCReqParams.BCChannelTypes.getTranslatedChannelName(bcBillOrder.getChannel())));
         viewHolder.txtSubChannel.setText(String.format("子渠道: %s",
@@ -146,6 +148,9 @@ public class BillListAdapter extends BaseAdapter {
         Log.w(TAG, "订单是否已经被撤销(一般用于线下渠道): " + bcBillOrder.getRevertResult());
         Log.w(TAG, "渠道返回的详细信息(需要通过QueryParams发起query请求，并且设置needDetail为true)，按需处理: "
                 + bcBillOrder.getMessageDetail());
+        Log.w(TAG, "订单金额：" + bcBillOrder.getBillFee());
+        Log.w(TAG, "优惠金额：" + bcBillOrder.getDiscount());
+        Log.w(TAG, "卡券ID：" + bcBillOrder.getCouponId());
 
         return convertView;
     }
