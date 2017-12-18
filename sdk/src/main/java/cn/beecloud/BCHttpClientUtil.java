@@ -39,7 +39,7 @@ import okhttp3.internal.platform.Platform;
 class BCHttpClientUtil {
 
     //主机地址
-    private static final String BEECLOUD_HOST = "https://api.beecloud.cn";
+    public static final String BEECLOUD_HOST = "https://api.beecloud.cn";
 
     private static final String TAG = "BCHttpClientUtil";
 
@@ -88,10 +88,7 @@ class BCHttpClientUtil {
     private static final String PLAN_URL = "plan";
     private static final String SUBSCRIPTION_URL = "subscription";
 
-    private final static String PAYPAL_LIVE_BASE_URL = "https://api.paypal.com/v1/";
-    private final static String PAYPAL_SANDBOX_BASE_URL = "https://api.sandbox.paypal.com/v1/";
-
-    private final static String PAYPAL_ACCESS_TOKEN_URL = "oauth2/token";
+    private final static Gson GSON = new Gson();
 
     /**
      * 随机获取主机, 并加入API版本号
@@ -182,13 +179,6 @@ class BCHttpClientUtil {
      */
     public static String getRefundStatusURL() {
         return getRootHost() + REFUND_STATUS_QUERY_URL;
-    }
-
-    public static String getPayPalAccessTokenUrl() {
-        if (BCCache.getInstance().paypalPayType == BCPay.PAYPAL_PAY_TYPE.LIVE)
-            return PAYPAL_LIVE_BASE_URL + PAYPAL_ACCESS_TOKEN_URL;
-        else
-            return PAYPAL_SANDBOX_BASE_URL + PAYPAL_ACCESS_TOKEN_URL;
     }
 
     /**
@@ -333,56 +323,6 @@ class BCHttpClientUtil {
         return httpPost(url, param);
     }
 
-    /**
-     * @return paypal token
-     */
-    public static Response getPayPalAccessToken() {
-        Response response = new Response();
-
-        BCTLSSocketFactory socketFactory = null;
-        try {
-            socketFactory = new BCTLSSocketFactory();
-        } catch (KeyManagementException | NoSuchAlgorithmException e) {
-            e.printStackTrace();
-            Log.w(TAG, e.getMessage() == null ? " " : e.getMessage());
-            response.code = -1;
-            response.content = e.getMessage();
-        }
-
-        if (socketFactory == null)
-            return response;
-
-        X509TrustManager trustManager = Platform.get().trustManager(socketFactory);
-
-        if (trustManager == null) {
-            response.code = -1;
-            return response;
-        }
-
-        //PayPal needs TLS v1.2
-        OkHttpClient client =
-                new OkHttpClient.Builder()
-                        .connectTimeout(BCCache.getInstance().connectTimeout, TimeUnit.MILLISECONDS)
-                        .sslSocketFactory(socketFactory, trustManager).build();
-
-        FormBody.Builder form = new FormBody.Builder();
-        form.add("grant_type", "client_credentials");
-        RequestBody body = form.build();
-
-        Request request = new Request.Builder()
-                .url(getPayPalAccessTokenUrl())
-                .header("Accept", "application/json")
-                .header("Content-Type", "application/x-www-form-urlencoded")
-                .header("Authorization", BCSecurityUtil.getB64Auth(
-                        BCCache.getInstance().paypalClientID, BCCache.getInstance().paypalSecret))
-                .post(body)
-                .build();
-
-        proceedRequest(client, request, response);
-
-        return response;
-    }
-
     // 所有super class包含的非空字段
     static Map<String, Object> objectToMap(Object object) {
         Map<String, Object> map = new HashMap<>();
@@ -436,6 +376,24 @@ class BCHttpClientUtil {
             return sb.substring(0, sb.length() - 1);
     }
 
+    // para={} 模式
+    static String map2ParaEncodeString(Map<String, Object> map) {
+        if (map == null) {
+            return "";
+        }
+
+        String paramStr = GSON.toJson(map);
+
+        try {
+            paramStr = URLEncoder.encode(paramStr, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            Log.e("BCHttpClientUtil", "UnsupportedEncodingException");
+            paramStr = "";
+        }
+
+        return "para=" + paramStr;
+    }
+
     static BCRestfulCommonResult setCommonResult(Class<? extends BCRestfulCommonResult> className, Integer code, String errMsg, String detail) {
         BCRestfulCommonResult object = null;
         try {
@@ -449,7 +407,7 @@ class BCHttpClientUtil {
     }
 
     //===================== BeeCloud Rest Object CURD =====================
-    private static BCRestfulCommonResult dealWithResult(Response response,
+    static BCRestfulCommonResult dealWithResult(Response response,
                                                 Class<? extends BCRestfulCommonResult> classType) {
         if (response.content == null || response.content.length() == 0) {
             return setCommonResult(classType, BCRestfulCommonResult.APP_INNER_FAIL_NUM,
@@ -507,16 +465,49 @@ class BCHttpClientUtil {
         return dealWithResult(response, classType);
     }
 
+    static BCRestfulCommonResult queryRestObjectById(String url, String id,
+                                                  Class<? extends BCRestfulCommonResult> classType,
+                                                  boolean paraQueryMode, boolean testModeNotSupport) {
+        if (testModeNotSupport && BCCache.getInstance().isTestMode) {
+            return setCommonResult(classType, BCRestfulCommonResult.APP_INNER_FAIL_NUM,
+                    BCRestfulCommonResult.APP_INNER_FAIL, "该功能暂不支持测试模式");
+        }
+
+        Map<String, Object> reqParam = new HashMap<>();
+        BCHttpClientUtil.attachAppSign(reqParam);
+
+        String queryStr;
+        if (paraQueryMode) {
+            queryStr = BCHttpClientUtil.map2ParaEncodeString(reqParam);
+        } else {
+            queryStr = BCHttpClientUtil.map2UrlQueryString(reqParam);
+        }
+
+        String reqURL = url + "/" + id + "?" + queryStr;
+        BCHttpClientUtil.Response response = BCHttpClientUtil
+                .httpGet(reqURL);
+
+        return dealWithResult(response, classType);
+    }
+
     static BCRestfulCommonResult queryRestObjects(String url, Map<String, Object> reqParam,
                                                   Class<? extends BCRestfulCommonResult> classType,
-                                                  boolean testModeNotSupport) {
+                                                  boolean paraQueryMode, boolean testModeNotSupport) {
         if (testModeNotSupport && BCCache.getInstance().isTestMode) {
             return setCommonResult(classType, BCRestfulCommonResult.APP_INNER_FAIL_NUM,
                     BCRestfulCommonResult.APP_INNER_FAIL, "该功能暂不支持测试模式");
         }
 
         BCHttpClientUtil.attachAppSign(reqParam);
-        String reqURL = url + "?" + BCHttpClientUtil.map2UrlQueryString(reqParam);
+
+        String queryStr;
+        if (paraQueryMode) {
+            queryStr = BCHttpClientUtil.map2ParaEncodeString(reqParam);
+        } else {
+            queryStr = BCHttpClientUtil.map2UrlQueryString(reqParam);
+        }
+
+        String reqURL = url + "?" + queryStr;
         BCHttpClientUtil.Response response = BCHttpClientUtil
                 .httpGet(reqURL);
 

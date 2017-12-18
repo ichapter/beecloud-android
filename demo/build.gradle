@@ -4,15 +4,18 @@ def keystorePropertiesFile = rootProject.file("keystore.properties");
 def keystoreProperties = new Properties()
 
 android {
-    compileSdkVersion 22
-    buildToolsVersion '25.0.1'
+    compileSdkVersion 23
 
     defaultConfig {
         applicationId "cn.beecloud.demo"
-        minSdkVersion 11
-        targetSdkVersion 22
-        versionCode 34
-        versionName "2.9.4"
+        minSdkVersion 14
+        targetSdkVersion 23
+        versionCode 39
+        versionName "2.10.0"
+    }
+
+    dexOptions {
+        javaMaxHeapSize "4g" // 2g should be also OK
     }
 
     signingConfigs {
@@ -34,36 +37,10 @@ android {
             signingConfig signingConfigs.config
         }
     }
-
-    packagingOptions {  //if no effects, clean project then rebuild
-        // 以下都是用于清理paypal扫描银行卡号的依赖
-        exclude 'lib/arm64-v8a/libcardioDecider.so'
-        exclude 'lib/arm64-v8a/libcardioRecognizer.so'
-        exclude 'lib/arm64-v8a/libcardioRecognizer_tegra2.so'
-        exclude 'lib/arm64-v8a/libopencv_core.so'
-        exclude 'lib/arm64-v8a/libopencv_imgproc.so'
-        exclude 'lib/armeabi/libcardioDecider.so'
-        exclude 'lib/armeabi-v7a/libcardioDecider.so'
-        exclude 'lib/armeabi-v7a/libcardioRecognizer.so'
-        exclude 'lib/armeabi-v7a/libcardioRecognizer_tegra2.so'
-        exclude 'lib/armeabi-v7a/libopencv_core.so'
-        exclude 'lib/armeabi-v7a/libopencv_imgproc.so'
-        exclude 'lib/mips/libcardioDecider.so'
-        exclude 'lib/x86/libcardioDecider.so'
-        exclude 'lib/x86/libcardioRecognizer.so'
-        exclude 'lib/x86/libcardioRecognizer_tegra2.so'
-        exclude 'lib/x86/libopencv_core.so'
-        exclude 'lib/x86/libopencv_imgproc.so'
-        exclude 'lib/x86_64/libcardioDecider.so'
-        exclude 'lib/x86_64/libcardioRecognizer.so'
-        exclude 'lib/x86_64/libcardioRecognizer_tegra2.so'
-        exclude 'lib/x86_64/libopencv_core.so'
-        exclude 'lib/x86_64/libopencv_imgproc.so'
-    }
 }
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     compile project(':sdk')
-    compile 'com.android.support:appcompat-v7:22.0.0'
+    implementation 'com.android.support:appcompat-v7:23.4.0'
 }

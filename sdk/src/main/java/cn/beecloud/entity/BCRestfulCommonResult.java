@@ -13,7 +13,7 @@ import cn.beecloud.async.BCResult;
  *
  * @see cn.beecloud.async.BCResult
  */
-public abstract class BCRestfulCommonResult implements BCResult {
+public class BCRestfulCommonResult implements BCResult {
     /**
      * APP内部错误编号
      */

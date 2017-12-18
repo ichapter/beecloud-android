@@ -204,6 +204,9 @@ public class PayViaAuthCodeActivity extends Activity {
                 payParam.authCode = authCode;   //付款码
                 payParam.terminalId = "fake-terminalId";    //若机具商接入terminalId(机具终端编号)必填
 
+                // 商家自定义的消费者Id，传入将分析用户行为
+                payParam.buyerId = "merchant-buyer-id";
+
                 BCOfflinePay.getInstance().reqOfflinePayAsync(
                         payParam,
                         callback);

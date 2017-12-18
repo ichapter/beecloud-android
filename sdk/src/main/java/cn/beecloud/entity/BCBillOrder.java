@@ -16,6 +16,15 @@ public class BCBillOrder extends BCOrder{
      * 请忽略命名规则
      */
 
+    // 订单金额（原始的订单金额），单位为分
+    private int bill_fee;
+
+    // 优惠金额，单位为分
+    private int discount;
+
+    // 卡券ID，没有用到返回null
+    private String coupon_id;
+
     //渠道返回的交易号，未支付成功时，是不含该参数的
     private String trade_no;
 
@@ -62,5 +71,26 @@ public class BCBillOrder extends BCOrder{
      */
     public Boolean getRefundResult() {
         return refund_result;
+    }
+
+    /**
+     * @return 订单金额（原始的订单金额），单位为分
+     */
+    public int getBillFee() {
+        return bill_fee;
+    }
+
+    /**
+     * @return 优惠金额，单位为分
+     */
+    public int getDiscount() {
+        return discount;
+    }
+
+    /**
+     * @return 卡券ID，没有用到返回null
+     */
+    public String getCouponId() {
+        return coupon_id;
     }
 }

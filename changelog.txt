@@ -1,5 +1,10 @@
 BeeCloud Android SDK Changelog
 ==========================
+v2.10.0 2017年12月18日
+更新银联APP支付
+添加营销卡券系统支持
+添加商户消费者系统支持
+
 v2.9.4 2017年6月20日
 bc_analysis添加sdk_version
 

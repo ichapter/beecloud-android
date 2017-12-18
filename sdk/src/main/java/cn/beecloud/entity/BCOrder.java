@@ -19,7 +19,7 @@ class BCOrder {
     //订单号
     private String bill_no;
 
-    //订单金额, 单位为分
+    // 实付金额（使用优惠券的时候是扣除优惠券优惠金额后客户实际支付的金额），单位为分
     private Integer total_fee;
 
     //渠道类型
@@ -55,7 +55,7 @@ class BCOrder {
     }
 
     /**
-     * @return  订单金额, 单位为分
+     * @return  实付金额（使用优惠券的时候是扣除优惠券优惠金额后客户实际支付的金额），单位为分
      */
     public Integer getTotalFee() {
         return total_fee;

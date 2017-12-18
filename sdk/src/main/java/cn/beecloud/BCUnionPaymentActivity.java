@@ -21,10 +21,6 @@ import cn.beecloud.entity.BCPayResult;
  * 用于银联支付
  */
 public class BCUnionPaymentActivity extends Activity {
-
-    private static final Integer TARGET_VERSION = 53;
-    private static final String UN_APK_PACKAGE = "com.unionpay.uppay";
-
     @Override
     public void onStart(){
         super.onStart();
@@ -32,31 +28,7 @@ public class BCUnionPaymentActivity extends Activity {
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
             String tn= extras.getString("tn");
-            int retPay;
-
-            int curVer = getUNAPKVersion();
-            if (curVer == -1)
-                retPay = -1;
-            else if (curVer < TARGET_VERSION)
-                retPay = 2;
-            else
-                retPay = UPPayAssistEx.startPay(this, null, null, tn, "00");
-
-
-            //插件问题 -1表示没有安装插件，2表示插件需要升级
-            if (retPay==-1 || retPay==2) {
-
-                if (BCPay.payCallback != null) {
-                    BCPay.payCallback.done(new BCPayResult(BCPayResult.RESULT_FAIL,
-                            BCPayResult.APP_INTERNAL_THIRD_CHANNEL_ERR_CODE,
-                            (retPay == -1)? BCPayResult.FAIL_PLUGIN_NOT_INSTALLED:BCPayResult.FAIL_PLUGIN_NEED_UPGRADE,
-                         "银联插件问题, 需重新安装或升级"));
-                } else {
-                    Log.e("BCUnionPaymentActivity", "BCPay payCallback NPE");
-                }
-
-                this.finish();
-            }
+            UPPayAssistEx.startPay(this, null, null, tn, "00");
         } else {
             finish();
         }
@@ -115,20 +87,5 @@ public class BCUnionPaymentActivity extends Activity {
         }
 
         this.finish();
-    }
-
-    private int getUNAPKVersion() {
-        Integer version = -1;
-
-        PackageManager packageManager=getPackageManager();
-        try {
-            PackageInfo Info=packageManager.getPackageInfo(UN_APK_PACKAGE, 0);
-            version = Info.versionCode;
-        } catch (PackageManager.NameNotFoundException e) {
-            Log.e("union payment", e.getMessage()==null ?
-                    "PackageManager.NameNotFoundException":e.getMessage());
-        }
-
-        return version;
     }
 }

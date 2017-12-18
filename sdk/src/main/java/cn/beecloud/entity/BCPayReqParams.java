@@ -32,6 +32,16 @@ public class BCPayReqParams extends BCReqParams {
     public String billNum;
 
     /**
+     * 购买人在商户系统的ID，传入该信息会在dashboard显示用户行为分析
+     */
+    public String buyerId;
+
+    /**
+     * 卡券ID
+     */
+    public String couponId;
+
+    /**
      * 订单标题
      * UTF8编码格式, 32个字节内, 最长支持16个汉字
      */
@@ -130,6 +140,14 @@ public class BCPayReqParams extends BCReqParams {
         params.put("total_fee", totalFee);
         params.put("bill_no", billNum);
         params.put("title", title);
+
+        if (buyerId != null) {
+            params.put("buyer_id", buyerId);
+        }
+
+        if (couponId != null) {
+            params.put("coupon_id", couponId);
+        }
 
         if (accessToken != null)
             params.put("access_token",accessToken);

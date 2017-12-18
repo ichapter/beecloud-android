@@ -282,24 +282,6 @@ public class BCReqParams {
         KUAIQIAN;
 
         /**
-         * 判断是否为有效的app端支付渠道类型
-         *
-         * @param channel 支付渠道类型
-         * @return true表示有效
-         */
-        public static boolean isValidAPPPaymentChannelType(BCChannelTypes channel) {
-            return channel == WX_APP ||
-                    channel == BC_WX_WAP ||
-                    channel == BC_WX_APP ||
-                    channel == ALI_APP ||
-                    channel == UN_APP ||
-                    channel == PAYPAL_SANDBOX ||
-                    channel == PAYPAL_LIVE ||
-                    channel == BD_APP ||
-                    channel == BC_APP;
-        }
-
-        /**
          * 判断是否为有效线下扫码支付渠道类型
          *
          * @param channel 支付渠道类型

@@ -194,6 +194,9 @@ public class GenQRCodeActivity extends Activity {
             payParam.genQRCode = true;      //是否生成二维码的bitmap
             payParam.qrCodeWidth = 380;                   //二维码的尺寸, 以px为单位, 如果为null则默认为360
 
+            // 商家自定义的消费者Id，传入将分析用户行为
+            payParam.buyerId = "merchant-buyer-id";
+
             BCOfflinePay.getInstance().reqQRCodeAsync(
                     payParam,
                     callback

@@ -31,7 +31,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import cn.beecloud.async.BCCallback;
-import cn.beecloud.async.BCPayPalSyncObserver;
 import cn.beecloud.entity.BCObjectIdResult;
 import cn.beecloud.entity.BCPayReqParams;
 import cn.beecloud.entity.BCPayResult;
@@ -59,8 +58,6 @@ public class BCPay {
 
     // IWXAPI 是第三方app和微信通信的openapi接口
     static IWXAPI wxAPI = null;
-
-    static BCPayPalSyncObserver payPalSyncObserver;
     static BaiduPay baiduPay;
 
     private static BCPay instance;
@@ -70,7 +67,8 @@ public class BCPay {
 
     /**
      * 唯一获取BCPay实例的入口
-     * @param context   留存context
+     *
+     * @param context 留存context
      * @return BCPay实例
      */
     public synchronized static BCPay getInstance(Context context) {
@@ -91,7 +89,7 @@ public class BCPay {
      * BCPay.initWechatPay(XXActivity.this);
      * 微信支付只有经过初始化才能成功调起，其他支付渠道无此要求。
      *
-     * @param context      需要在某Activity里初始化微信支付，此参数需要传递该Activity.this，不能为null
+     * @param context 需要在某Activity里初始化微信支付，此参数需要传递该Activity.this，不能为null
      * @return 返回出错信息，如果成功则为null
      */
     public static String initWechatPay(Context context, String wechatAppID) {
@@ -136,7 +134,6 @@ public class BCPay {
     public static void clear() {
         mContextActivity = null;
         payCallback = null;
-        payPalSyncObserver = null;
     }
 
     /**
@@ -159,27 +156,9 @@ public class BCPay {
         }
     }
 
-    public enum PAYPAL_PAY_TYPE {
-        SANDBOX, LIVE
-    }
-
-    /**
-     * 初始化paypal, 仅在需要paypal支付的时候需要调用
-     * @param clientId  PayPal APP Client ID
-     * @param secret    PayPal APP Secret
-     * @param type      paypay pay type, SANDBOX for test before online, LIVE is for online
-     * @param retrieveShippingAddresses set true then it will enable PayPal Shipping Addresses Retrieval, but it sometimes may cause 'shipping address invalid' error during payment
-     */
-    public static void initPayPal(String clientId, String secret, PAYPAL_PAY_TYPE type, Boolean retrieveShippingAddresses) {
-        BCCache instance = BCCache.getInstance();
-        instance.paypalClientID = clientId;
-        instance.paypalSecret = secret;
-        instance.paypalPayType = type;
-        instance.retrieveShippingAddresses = retrieveShippingAddresses;
-    }
-
     /**
      * 判断微信是否支持支付
+     *
      * @return true表示支持
      */
     public static boolean isWXPaySupported() {
@@ -192,6 +171,7 @@ public class BCPay {
 
     /**
      * 判断微信客户端是否安装并被支持
+     *
      * @return true表示支持
      */
     public static boolean isWXAppInstalledAndSupported() {
@@ -205,21 +185,22 @@ public class BCPay {
     /**
      * 支付调用总接口
      *
-     * @param channelType     支付类型  对于支付手机APP端目前只支持WX_APP, ALI_APP, UN_APP, BD_APP
-     *                        @see cn.beecloud.entity.BCReqParams.BCChannelTypes
-     * @param billTitle       商品描述, 32个字节内, 汉字以2个字节计
-     * @param billTotalFee    支付金额，以分为单位，必须是正整数
-     * @param billNum         商户自定义订单号
-     * @param billTimeout     订单超时时间，以秒为单位，可以为null
-     * @param optional        为扩展参数，可以传入任意数量的key/value对来补充对业务逻辑的需求
-     * @param analysis        为扩展参数，用于后期的分析，当前仅支持以category为key的分类分析
-     * @param callback        支付完成后的回调函数
+     * @param channelType  支付类型  对于支付手机APP端目前只支持WX_APP, ALI_APP, UN_APP, BD_APP
+     * @param billTitle    商品描述, 32个字节内, 汉字以2个字节计
+     * @param billTotalFee 支付金额，以分为单位，必须是正整数
+     * @param billNum      商户自定义订单号
+     * @param billTimeout  订单超时时间，以秒为单位，可以为null
+     * @param optional     为扩展参数，可以传入任意数量的key/value对来补充对业务逻辑的需求
+     * @param analysis     为扩展参数，用于后期的分析，当前仅支持以category为key的分类分析
+     * @param callback     支付完成后的回调函数
+     * @see cn.beecloud.entity.BCReqParams.BCChannelTypes
      */
     private void reqPaymentAsync(final BCReqParams.BCChannelTypes channelType,
                                  final String billTitle, final Integer billTotalFee,
                                  final String billNum, final Integer billTimeout,
                                  final String notifyUrl, final String returnUrl,
                                  final String cardNum, final String qrCodeMode,
+                                 final String buyerId, final String couponId,
                                  final Map<String, String> optional,
                                  final Map<String, String> analysis,
                                  final BCCallback callback) {
@@ -264,6 +245,8 @@ public class BCPay {
                 parameters.returnUrl = returnUrl;
                 parameters.cardNum = cardNum;
                 parameters.qrPayMode = qrCodeMode;
+                parameters.buyerId = buyerId;
+                parameters.couponId = couponId;
 
                 String payURL = BCHttpClientUtil.getBillPayURL();
 
@@ -306,11 +289,10 @@ public class BCPay {
                             //针对不同的支付渠道调用不同的API
                             switch (channelType) {
                                 case WX_APP:
-                                case BC_WX_APP:
                                     reqWXPaymentViaAPP(responseMap);
                                     break;
                                 case ALI_APP:
-                                case BC_ALI_APP:
+                                case BC_ALI_APP:    // ISV通道走官方的ALI jar，其他qrcode封装的在另一个工程
                                     reqAliPaymentViaAPP(responseMap);
                                     break;
                                 case UN_APP:
@@ -367,8 +349,8 @@ public class BCPay {
     /**
      * 支付调用总接口
      *
-     * @param payParam        支付参数
-     * @param callback        支付完成后的回调函数
+     * @param payParam 支付参数
+     * @param callback 支付完成后的回调函数
      */
     public void reqPaymentAsync(final PayParams payParam, final BCCallback callback) {
         if (payParam.channelType == null) {
@@ -376,33 +358,26 @@ public class BCPay {
             return;
         }
 
-        if (payParam.channelType == BCReqParams.BCChannelTypes.PAYPAL_SANDBOX ||
-                payParam.channelType == BCReqParams.BCChannelTypes.PAYPAL_LIVE) {
-            reqPayPalPaymentAsync(payParam.billTitle,
-                    payParam.billTotalFee,
-                    payParam.currency,
-                    (HashMap<String, String>) payParam.optional,
-                    callback);
-        } else {
-            reqPaymentAsync(payParam.channelType,
-                    payParam.billTitle,
-                    payParam.billTotalFee,
-                    payParam.billNum,
-                    payParam.billTimeout,
-                    payParam.notifyUrl,
-                    payParam.returnUrl,
-                    payParam.cardNum,
-                    payParam.qrPayMode,
-                    payParam.optional,
-                    payParam.analysis,
-                    callback);
-        }
+        reqPaymentAsync(payParam.channelType,
+                payParam.billTitle,
+                payParam.billTotalFee,
+                payParam.billNum,
+                payParam.billTimeout,
+                payParam.notifyUrl,
+                payParam.returnUrl,
+                payParam.cardNum,
+                payParam.qrPayMode,
+                payParam.buyerId,
+                payParam.couponId,
+                payParam.optional,
+                payParam.analysis,
+                callback);
     }
 
     /**
      * 与服务器交互后下一步进入微信app支付
      *
-     * @param responseMap     服务端返回参数
+     * @param responseMap 服务端返回参数
      */
     private void reqWXPaymentViaAPP(final Map<String, Object> responseMap) {
         //获取到服务器的订单参数后，以下主要代码即可调起微信支付。
@@ -430,7 +405,7 @@ public class BCPay {
     /**
      * 与服务器交互后下一步进入微信wap支付
      *
-     * @param responseMap     服务端返回参数
+     * @param responseMap 服务端返回参数
      */
     private void reqWXWapPaymentViaWebView(final Map<String, Object> responseMap) {
         String payInfo = String.valueOf(responseMap.get("url"));
@@ -443,7 +418,7 @@ public class BCPay {
     /**
      * 与服务器交互后下一步进入支付宝app支付
      *
-     * @param responseMap     服务端返回参数
+     * @param responseMap 服务端返回参数
      */
     private void reqAliPaymentViaAPP(final Map<String, Object> responseMap) {
 
@@ -499,7 +474,7 @@ public class BCPay {
     /**
      * 与服务器交互后下一步进入银联app支付
      *
-     * @param responseMap     服务端返回参数
+     * @param responseMap 服务端返回参数
      */
     private void reqUnionPaymentViaAPP(final Map<String, Object> responseMap) {
 
@@ -514,7 +489,7 @@ public class BCPay {
     /**
      * 与服务器交互后下一步进入百度app支付
      *
-     * @param responseMap     服务端返回参数
+     * @param responseMap 服务端返回参数
      */
     private void reqBaiduPaymentViaAPP(final Map<String, Object> responseMap) {
         String orderInfo = (String) responseMap.get("orderInfo");
@@ -616,294 +591,81 @@ public class BCPay {
      * 如果您申请的是新版本(V3)的微信支付，请使用此接口发起微信支付.
      * 您在BeeCloud控制台需要填写“微信Partner ID”、“微信Partner KEY”、“微信APP ID”.
      *
-     * @param billTitle       商品描述, 32个字节内, 汉字以2个字节计
-     * @param billTotalFee    支付金额，以分为单位，必须是正整数
-     * @param billNum         商户自定义订单号
-     * @param optional        为扩展参数，可以传入任意数量的key/value对来补充对业务逻辑的需求
-     * @param callback        支付完成后的回调函数
+     * @param billTitle    商品描述, 32个字节内, 汉字以2个字节计
+     * @param billTotalFee 支付金额，以分为单位，必须是正整数
+     * @param billNum      商户自定义订单号
+     * @param optional     为扩展参数，可以传入任意数量的key/value对来补充对业务逻辑的需求
+     * @param callback     支付完成后的回调函数
      */
     public void reqWXPaymentAsync(final String billTitle, final Integer billTotalFee,
                                   final String billNum,
                                   final Map<String, String> optional, final BCCallback callback) {
         this.reqPaymentAsync(BCReqParams.BCChannelTypes.WX_APP, billTitle, billTotalFee,
-                billNum, null, null, null, null, null, optional, null, callback);
+                billNum, null, null, null, null, null, null, null, optional, null, callback);
     }
 
     /**
      * 支付宝支付
      *
-     * @param billTitle       商品描述, 32个字节内, 汉字以2个字节计
-     * @param billTotalFee    支付金额，以分为单位，必须是正整数
-     * @param billNum         商户自定义订单号
-     * @param optional        为扩展参数，可以传入任意数量的key/value对来补充对业务逻辑的需求
-     * @param callback        支付完成后的回调函数
+     * @param billTitle    商品描述, 32个字节内, 汉字以2个字节计
+     * @param billTotalFee 支付金额，以分为单位，必须是正整数
+     * @param billNum      商户自定义订单号
+     * @param optional     为扩展参数，可以传入任意数量的key/value对来补充对业务逻辑的需求
+     * @param callback     支付完成后的回调函数
      */
     public void reqAliPaymentAsync(final String billTitle, final Integer billTotalFee,
                                    final String billNum,
                                    final Map<String, String> optional,
                                    final BCCallback callback) {
         this.reqPaymentAsync(BCReqParams.BCChannelTypes.ALI_APP, billTitle, billTotalFee,
-                billNum, null, null, null, null, null, optional, null, callback);
+                billNum, null, null, null, null, null, null, null, optional, null, callback);
     }
 
     /**
      * 银联在线支付
      *
-     * @param billTitle       商品描述, 32个字节内, 汉字以2个字节计
-     * @param billTotalFee    支付金额，以分为单位，必须是正整数
-     * @param billNum         商户自定义订单号
-     * @param optional        为扩展参数，可以传入任意数量的key/value对来补充对业务逻辑的需求
-     * @param callback        支付完成后的回调函数
+     * @param billTitle    商品描述, 32个字节内, 汉字以2个字节计
+     * @param billTotalFee 支付金额，以分为单位，必须是正整数
+     * @param billNum      商户自定义订单号
+     * @param optional     为扩展参数，可以传入任意数量的key/value对来补充对业务逻辑的需求
+     * @param callback     支付完成后的回调函数
      */
     public void reqUnionPaymentAsync(final String billTitle, final Integer billTotalFee,
                                      final String billNum,
                                      final Map<String, String> optional,
                                      final BCCallback callback) {
         this.reqPaymentAsync(BCReqParams.BCChannelTypes.UN_APP, billTitle, billTotalFee,
-                billNum, null, null, null, null, null, optional, null, callback);
+                billNum, null, null, null, null, null, null, null, optional, null, callback);
     }
 
     /**
      * 百度钱包支付
      *
-     * @param billTitle       商品描述, 32个字节内, 汉字以2个字节计
-     * @param billTotalFee    支付金额，以分为单位，必须是正整数
-     * @param billNum         商户自定义订单号
-     * @param optional        为扩展参数，可以传入任意数量的key/value对来补充对业务逻辑的需求
-     * @param callback        支付完成后的回调函数
+     * @param billTitle    商品描述, 32个字节内, 汉字以2个字节计
+     * @param billTotalFee 支付金额，以分为单位，必须是正整数
+     * @param billNum      商户自定义订单号
+     * @param optional     为扩展参数，可以传入任意数量的key/value对来补充对业务逻辑的需求
+     * @param callback     支付完成后的回调函数
      */
     public void reqBaiduPaymentAsync(final String billTitle, final Integer billTotalFee,
                                      final String billNum,
                                      final Map<String, String> optional,
                                      final BCCallback callback) {
         this.reqPaymentAsync(BCReqParams.BCChannelTypes.BD_APP, billTitle, billTotalFee,
-                billNum, null, null, null, null, null, optional, null, callback);
-    }
-
-    /**
-     * PayPal支付
-     *
-     * @param billTitle       商品描述, 32个字节内, 汉字以2个字节计
-     * @param billTotalFee    支付金额，以分为单位，必须是正整数
-     * @param currency        支付货币，如USD
-     * @param optional        为扩展参数HashMap，可以传入任意数量的key/value对来补充对业务逻辑的需求
-     * @param callback        支付完成后的回调函数
-     */
-    public void reqPayPalPaymentAsync(final String billTitle, final Integer billTotalFee,
-                                      final String currency, final HashMap<String, String> optional,
-                                      final BCCallback callback) {
-        if (BCCache.getInstance().isTestMode) {
-            callback.done(new BCPayResult(BCPayResult.RESULT_FAIL,
-                    BCPayResult.APP_INTERNAL_PARAMS_ERR_CODE,
-                    BCPayResult.FAIL_INVALID_PARAMS,
-                    "PayPal支付暂不支持通过BeeCloud.setSandbox设置测试模式，你可以在BCPay.initPayPal中设置其原生的sandbox模式"));
-            return;
-        }
-
-        payCallback = callback;
-
-        if (BCCache.getInstance().paypalClientID == null ||
-                BCCache.getInstance().paypalSecret == null ||
-                BCCache.getInstance().paypalPayType == null) {
-            callback.done(new BCPayResult(BCPayResult.RESULT_FAIL,
-                    BCPayResult.APP_INTERNAL_PARAMS_ERR_CODE,
-                    BCPayResult.FAIL_INVALID_PARAMS,
-                    "使用PayPal支付需要设置client id，PayPal应用secret和PayPal支付类型"));
-            return;
-        }
-
-        Intent intent = new Intent(mContextActivity, BCPayPalPaymentActivity.class);
-        intent.putExtra("billTitle", billTitle);
-        intent.putExtra("billTotalFee", billTotalFee);
-        intent.putExtra("currency", currency);
-        Gson gson = new Gson();
-        intent.putExtra("optional", gson.toJson(optional));
-        mContextActivity.startActivity(intent);
-
-    }
-
-    private String getPayPalAccessToken() {
-
-        BCHttpClientUtil.Response response = BCHttpClientUtil
-                .getPayPalAccessToken();
-
-        String accessToken = null;
-
-        if (response.code == 200) {
-            String ret = response.content;
-
-            //反序列化json
-            Gson res = new Gson();
-
-            Type type = new TypeToken<Map<String, Object>>() {
-            }.getType();
-            Map<String, Object> responseMap = res.fromJson(ret, type);
-
-            //判断后台返回结果
-            accessToken = String.valueOf(responseMap.get("access_token"));
-
-        }
-
-        return accessToken;
-    }
-
-    /**
-     * sync with server to verify the payment
-     *
-     * @return if result equals BCPayResult.RESULT_SUCCESS then it means sync successfully and payment is valid
-     */
-    public BCPayResult syncPayPalPayment(final String billTitle, final Integer billTotalFee, final String billNum,
-                                         final String currency, final String optional) {
-        if (BCCache.getInstance().isTestMode) {
-            return new BCPayResult(BCPayResult.RESULT_FAIL,
-                    BCPayResult.APP_INTERNAL_PARAMS_ERR_CODE,
-                    BCPayResult.FAIL_INVALID_PARAMS,
-                    "PayPal支付暂不支持通过BeeCloud.setSandbox设置测试模式，你可以在BCPay.initPayPal中设置其原生的sandbox模式");
-        }
-
-        //verify params
-        BCPayReqParams parameters;
-        try {
-            parameters = new BCPayReqParams(BCCache.getInstance().paypalPayType == PAYPAL_PAY_TYPE.LIVE ?
-                    BCReqParams.BCChannelTypes.PAYPAL_LIVE : BCReqParams.BCChannelTypes.PAYPAL_SANDBOX);
-        } catch (BCException e) {
-            return new BCPayResult(BCPayResult.RESULT_FAIL,
-                    BCPayResult.APP_INTERNAL_PARAMS_ERR_CODE,
-                    BCPayResult.FAIL_INVALID_PARAMS,
-                    e.getMessage());
-        }
-
-        Map<String, String> optionalMap = null;
-
-        if (optional != null) {
-            Gson gson = new Gson();
-            optionalMap = gson.fromJson(optional, new TypeToken<Map<String, String>>() {
-            }.getType());
-        }
-
-        String paramValidRes = BCValidationUtil.prepareParametersForPay(billTitle, billTotalFee,
-                billNum, optionalMap, parameters);
-
-        if (paramValidRes != null) {
-            return new BCPayResult(BCPayResult.RESULT_FAIL,
-                    BCPayResult.APP_INTERNAL_PARAMS_ERR_CODE,
-                    BCPayResult.FAIL_INVALID_PARAMS,
-                    paramValidRes);
-        }
-
-        String accessToken = getPayPalAccessToken();
-
-        //Log.w("BCPay", accessToken);
-
-        if (accessToken == null) {
-            Log.w(TAG, "fail to retrieve PayPal token");
-            return new BCPayResult(BCPayResult.RESULT_FAIL,
-                    BCPayResult.APP_INTERNAL_NETWORK_ERR_CODE,
-                    BCPayResult.FAIL_NETWORK_ISSUE,
-                    "Can't get access Token");
-        }
-
-        parameters.currency = currency;
-        parameters.accessToken = "Bearer " + accessToken;
-
-        String payURL = BCHttpClientUtil.getBillPayURL();
-
-        BCHttpClientUtil.Response response = BCHttpClientUtil
-                .httpPost(payURL, parameters.transToBillReqMapParams());
-
-        if (response.code == 200 || (response.code >= 400 && response.code < 500)) {
-            String ret = response.content;
-
-            Gson res = new Gson();
-
-            Type type = new TypeToken<Map<String, Object>>() {
-            }.getType();
-            Map<String, Object> responseMap;
-            try {
-                responseMap = res.fromJson(ret, type);
-            } catch (JsonSyntaxException ex) {
-                return new BCPayResult(BCPayResult.RESULT_FAIL,
-                        BCPayResult.APP_INTERNAL_EXCEPTION_ERR_CODE,
-                        BCPayResult.FAIL_EXCEPTION,
-                        "JsonSyntaxException or Network Error:" + response.code + " # " + response.content);
-            }
-
-            //check result
-            Double resultCode = (Double) responseMap.get("result_code");
-            //String errDetail = (String)responseMap.get("err_detail");
-
-            if (resultCode == 0) {
-
-                BCCache.getInstance().billID = String.valueOf(responseMap.get("id"));
-
-                return new BCPayResult(BCPayResult.RESULT_SUCCESS,
-                        BCPayResult.APP_PAY_SUCC_CODE,
-                        BCPayResult.RESULT_SUCCESS,
-                        BCPayResult.RESULT_SUCCESS,
-                        String.valueOf(responseMap.get("id")));
-            /*
-            } else if (resultCode == 7 && errDetail != null && errDetail.startsWith("PAYPAL")) {
-
-                Log.w("BCPay", "not a valid payment: " + errDetail);
-
-                //here RESULT_SUCCESS only means sync success, not means successful pay
-                //for example, you paid 1 USD, but the PayPal server just received 0.1 USD
-                //then it is not a valid payment, it is rare but to prevent fraud
-
-                return BCPayResult.RESULT_SUCCESS;
-            */
-            } else {
-                //return error info from server
-                String serverMsg = String.valueOf(responseMap.get("result_msg"));
-                String serverDetail = String.valueOf(responseMap.get("err_detail"));
-
-                return new BCPayResult(BCPayResult.RESULT_FAIL,
-                        resultCode.intValue(),
-                        serverMsg,
-                        serverDetail);
-            }
-
-        } else {
-            return new BCPayResult(BCPayResult.RESULT_FAIL,
-                    BCPayResult.APP_INTERNAL_NETWORK_ERR_CODE,
-                    BCPayResult.FAIL_NETWORK_ISSUE,
-                    "Network Error");
-        }
-    }
-
-    /**
-     * sync with server to verify the payment
-     *
-     * @return if result equals BCPayResult.RESULT_SUCCESS then it means sync successfully and payment is valid
-     */
-    public BCPayResult syncPayPalPayment(final String syncJson) {
-        Gson gson = new Gson();
-        Map<String, String> syncItem = gson.fromJson(syncJson, new TypeToken<Map<String, String>>() {
-        }.getType());
-
-        Integer billTotalFee;
-        try {
-            billTotalFee = Integer.valueOf(syncItem.get("billTotalFee"));
-        } catch (Exception e) {
-            Log.e(TAG, e.getMessage() == null ? "Exception" : e.getMessage());
-            billTotalFee = -1;
-        }
-
-        return syncPayPalPayment(syncItem.get("billTitle"), billTotalFee,
-                syncItem.get("billNum"), syncItem.get("currency"), syncItem.get("optional"));
+                billNum, null, null, null, null, null, null, null, optional, null, callback);
     }
 
     /**
      * 生成支付宝内嵌支付二维码
      *
-     * @param billTitle       商品描述, 32个字节内, 汉字以2个字节计
-     * @param billTotalFee    支付金额，以分为单位，必须是正整数
-     * @param billNum         商户自定义订单号
-     * @param optional        为扩展参数，可以传入任意数量的key/value对来补充对业务逻辑的需求
-     * @param returnUrl       同步返回页面, 必填
-     * @param qrPayMode       支付宝内嵌二维码类型, 可为null
-     *                        @see BCPayReqParams
-     * @param callback        支付完成后的回调函数
+     * @param billTitle    商品描述, 32个字节内, 汉字以2个字节计
+     * @param billTotalFee 支付金额，以分为单位，必须是正整数
+     * @param billNum      商户自定义订单号
+     * @param optional     为扩展参数，可以传入任意数量的key/value对来补充对业务逻辑的需求
+     * @param returnUrl    同步返回页面, 必填
+     * @param qrPayMode    支付宝内嵌二维码类型, 可为null
+     * @param callback     支付完成后的回调函数
+     * @see BCPayReqParams
      */
     @Deprecated
     public void reqAliInlineQRCodeAsync(final String billTitle, final Integer billTotalFee,
@@ -1018,13 +780,13 @@ public class BCPay {
     /**
      * 生成BeeCloud微信二维码
      *
-     * @param billTitle       商品描述, 32个字节内, 汉字以2个字节计
-     * @param billTotalFee    支付金额，以分为单位，必须是正整数
-     * @param billNum         商户自定义订单号
-     * @param optional        为扩展参数，可以传入任意数量的key/value对来补充对业务逻辑的需求
-     * @param genQRCode       是否生成QRCode Bitmap
-     * @param qrCodeWidth     如果生成, QRCode的宽度, null则使用默认参数
-     * @param callback        支付完成后的回调函数
+     * @param billTitle    商品描述, 32个字节内, 汉字以2个字节计
+     * @param billTotalFee 支付金额，以分为单位，必须是正整数
+     * @param billNum      商户自定义订单号
+     * @param optional     为扩展参数，可以传入任意数量的key/value对来补充对业务逻辑的需求
+     * @param genQRCode    是否生成QRCode Bitmap
+     * @param qrCodeWidth  如果生成, QRCode的宽度, null则使用默认参数
+     * @param callback     支付完成后的回调函数
      */
     public void reqBCNativeAsync(final String billTitle, final Integer billTotalFee,
                                  final String billNum, final Map<String, String> optional,
@@ -1036,8 +798,9 @@ public class BCPay {
 
     /**
      * 发起预退款
-     * @param params 预退款参数
-     * @param callback  回调入口
+     *
+     * @param params   预退款参数
+     * @param callback 回调入口
      */
     public void prefund(final RefundParams params, final BCCallback callback) {
         if (callback == null) {
@@ -1112,8 +875,9 @@ public class BCPay {
 
     /**
      * 发送验证码
-     * @param phone 结束验证码的手机号
-     * @param callback  回调入口
+     *
+     * @param phone    结束验证码的手机号
+     * @param callback 回调入口
      */
     public void sendSmsCode(final String phone, final BCCallback callback) {
         if (callback == null) {
@@ -1135,11 +899,12 @@ public class BCPay {
 
     /**
      * 发起订阅
-     * @param params 订阅参数
-     * @param smsId 通过sendSmsCode获取的验证码标识符
-     * @param smsCode   用户手机收到的验证码
-     * @param couponCode    优惠码，可以为null
-     * @param callback  回调入口
+     *
+     * @param params     订阅参数
+     * @param smsId      通过sendSmsCode获取的验证码标识符
+     * @param smsCode    用户手机收到的验证码
+     * @param couponCode 优惠码，可以为null
+     * @param callback   回调入口
      */
     public void subscribe(final BCSubscription params, final String smsId, final String smsCode,
                           final String couponCode, final BCCallback callback) {
@@ -1165,8 +930,9 @@ public class BCPay {
 
     /**
      * 取消订阅
-     * @param sid   订阅记录的标识符id
-     * @param callback  回调入口
+     *
+     * @param sid      订阅记录的标识符id
+     * @param callback 回调入口
      */
     public void cancelSubscription(final String sid, final BCCallback callback) {
         if (callback == null) {
@@ -1189,14 +955,11 @@ public class BCPay {
      */
     public static class PayParams {
         /**
-         *  只允许
-         *  BCReqParams.BCChannelTypes.WX_APP，
-         *  BCReqParams.BCChannelTypes.ALI_APP，
-         *  BCReqParams.BCChannelTypes.UN_APP，
-         *  BCReqParams.BCChannelTypes.BD_APP，
-         *  BCReqParams.BCChannelTypes.PAYPAL_SANDBOX，
-         *  BCReqParams.BCChannelTypes.PAYPAL_LIVE
-         *
+         * 只允许
+         * BCReqParams.BCChannelTypes.WX_APP，
+         * BCReqParams.BCChannelTypes.ALI_APP，
+         * BCReqParams.BCChannelTypes.UN_APP，
+         * BCReqParams.BCChannelTypes.BD_APP
          */
         public BCReqParams.BCChannelTypes channelType;
 
@@ -1211,14 +974,19 @@ public class BCPay {
         public Integer billTotalFee;
 
         /**
-         * 商户自定义订单号，PayPal不需要该参数
+         * 商户自定义订单号
          */
         public String billNum;
 
         /**
-         * 支付货币，如CNY、USD，目前仅PayPal用到
+         * 消费者在商户系统的ID，传入该信息会在dashboard显示用户行为分析
          */
-        public String currency;
+        public String buyerId;
+
+        /**
+         * 卡券ID，用于营销
+         */
+        public String couponId;
 
         /**
          * 订单超时时间，以秒为单位，建议不小于360, 可以为null
@@ -1249,8 +1017,7 @@ public class BCPay {
         public String qrPayMode;
 
         /**
-         * 扩展参数，可以传入任意数量的key/value对来补充对业务逻辑的需求，可以为null，
-         * 对于PayPal请以HashMap实例化
+         * 扩展参数，可以传入任意数量的key/value对来补充对业务逻辑的需求，可以为null
          */
         public Map<String, String> optional;
 
@@ -1265,14 +1032,14 @@ public class BCPay {
      */
     public static class RefundParams {
         /**
-         *  选填参数
-         *  BCReqParams.BCChannelTypes.WX，
-         *  BCReqParams.BCChannelTypes.ALI，
-         *  BCReqParams.BCChannelTypes.UN，
-         *  BCReqParams.BCChannelTypes.BD，
-         *  BCReqParams.BCChannelTypes.KUAIQIAN，
-         *  BCReqParams.BCChannelTypes.JD，
-         *  BCReqParams.BCChannelTypes.YEE
+         * 选填参数
+         * BCReqParams.BCChannelTypes.WX，
+         * BCReqParams.BCChannelTypes.ALI，
+         * BCReqParams.BCChannelTypes.UN，
+         * BCReqParams.BCChannelTypes.BD，
+         * BCReqParams.BCChannelTypes.KUAIQIAN，
+         * BCReqParams.BCChannelTypes.JD，
+         * BCReqParams.BCChannelTypes.YEE
          */
         public BCReqParams.BCChannelTypes channelType;
 
@@ -1292,8 +1059,7 @@ public class BCPay {
         public Integer refundFee;
 
         /**
-         * 扩展参数，可以传入任意数量的key/value对来补充对业务逻辑的需求，可以为null，
-         * 对于PayPal请以HashMap实例化
+         * 扩展参数，可以传入任意数量的key/value对来补充对业务逻辑的需求，可以为null
          */
         public Map<String, String> optional;
     }
