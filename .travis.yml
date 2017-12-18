@@ -28,9 +28,9 @@ android:
     - sys-img-x86-android-22
 
 before_script:
-    - wget https://services.gradle.org/distributions/gradle-3.4.1-bin.zip
-    - unzip gradle-3.4.1-bin.zip
-    - export GRADLE_HOME=$PWD/gradle-3.4.1
+    - wget https://services.gradle.org/distributions/gradle-4.4-bin.zip
+    - unzip gradle-4.4-bin.zip
+    - export GRADLE_HOME=$PWD/gradle-4.4
     - export PATH=$GRADLE_HOME/bin:$PATH
 
 before_install:
