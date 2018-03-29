@@ -1,17 +1,11 @@
 /**
  * BCCache.java
- *
+ * <p>
  * Created by xuanzhui on 2015/7/27.
  * Copyright (c) 2015 BeeCloud. All rights reserved.
-*/
+ */
 package cn.beecloud;
 
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.util.Log;
-
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -67,7 +61,8 @@ public class BCCache {
 
     /**
      * 唯一获取实例的方法
-     * @return  BCCache实例
+     *
+     * @return BCCache实例
      */
     public synchronized static BCCache getInstance() {
         if (instance == null) {
@@ -83,7 +78,7 @@ public class BCCache {
         return instance;
     }
 
-    private String joinStrings(List<String> strings){
+    private String joinStrings(List<String> strings) {
         if (strings == null || strings.size() == 0)
             return null;
 

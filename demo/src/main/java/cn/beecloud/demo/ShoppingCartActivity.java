@@ -80,9 +80,7 @@ public class ShoppingCartActivity extends Activity {
             } else if (result.equals(BCPayResult.RESULT_CANCEL)) {
                 toastMsg = "用户取消支付";
             } else if (result.equals(BCPayResult.RESULT_FAIL)) {
-                toastMsg = "支付失败, 原因: " + bcPayResult.getErrCode() +
-                        " # " + bcPayResult.getErrMsg() +
-                        " # " + bcPayResult.getDetailInfo();
+                toastMsg = "支付失败, 原因: " + bcPayResult.getErrCode() + " # " + bcPayResult.getErrMsg() + " # " + bcPayResult.getDetailInfo();
 
                 /*
                  * 你发布的项目中不应该出现如下错误，此处由于支付宝政策原因，
@@ -146,9 +144,10 @@ public class ShoppingCartActivity extends Activity {
         setContentView(R.layout.activity_shopping_cart);
 
         // 推荐在主Activity或application里的onCreate函数中初始化BeeCloud.
-//        BeeCloud.setSandbox(true);
-        BeeCloud.setAppIdAndSecret("you app id",
-                "you app secret");
+        // 设置测试模式，如果不设置将默认为正式版本
+        BeeCloud.setSandbox(true);
+        BeeCloud.setAppIdAndSecret(BuildConfig.APP_ID, BuildConfig.APP_SECRET);
+//        BeeCloud.setAppIdAndSecret("you app id", "you app secret");
 
         // 如果用到微信支付，在用到微信支付的Activity的onCreate函数里调用以下函数.
         // 第二个参数需要换成你自己的微信AppID.
@@ -161,7 +160,7 @@ public class ShoppingCartActivity extends Activity {
         Integer[] payIcons = new Integer[]{R.drawable.wechat, R.drawable.alipay,
                 R.drawable.unionpay, R.drawable.beecloud_logo, R.drawable.baidupay,
                 R.drawable.rss, R.drawable.wechat, R.drawable.wechat,
-                R.drawable.alipay,R.drawable.scan};
+                R.drawable.alipay, R.drawable.scan};
         final String[] payNames = new String[]{"微信支付", "支付宝支付", "银联在线", "BeeCloud支付",
                 "百度钱包", "订阅支付", "微信WAP支付", "BeeCloud微信支付",
                 "BeeCloud支付宝APP支付", "二维码支付"};
@@ -193,15 +192,15 @@ public class ShoppingCartActivity extends Activity {
 
                         mapOptional.put("testkey1", "测试value值1");
 
-                        if (BCPay.isWXAppInstalledAndSupported() &&
-                                BCPay.isWXPaySupported()) {
+                        if (BCPay.isWXAppInstalledAndSupported() && BCPay.isWXPaySupported()) {
 
                             BCPay.PayParams payParams = new BCPay.PayParams();
                             payParams.channelType = BCReqParams.BCChannelTypes.WX_APP;
                             payParams.billTitle = "安卓微信支付测试";   //订单标题
                             payParams.billTotalFee = 11;    //订单金额(分)
                             payParams.billNum = BillUtils.genBillNum();  //订单流水号
-                            payParams.couponId = "bbbf835d-f6b0-484f-bb6e-8e6082d4a35f";    // 优惠券ID
+                            payParams.couponId = null;    // 优惠券ID
+//                            payParams.couponId = "bbbf835d-f6b0-484f-bb6e-8e6082d4a35f";    // 优惠券ID
                             payParams.optional = mapOptional;            //扩展参数(可以null)
 
                             BCPay.getInstance(ShoppingCartActivity.this).reqPaymentAsync(
@@ -209,8 +208,7 @@ public class ShoppingCartActivity extends Activity {
                                     bcCallback);            //支付完成后回调入口
 
                         } else {
-                            Toast.makeText(ShoppingCartActivity.this,
-                                    "您尚未安装微信或者安装的微信版本不支持", Toast.LENGTH_LONG).show();
+                            Toast.makeText(ShoppingCartActivity.this, "您尚未安装微信或者安装的微信版本不支持", Toast.LENGTH_LONG).show();
                             loadingDialog.dismiss();
                         }
                         break;

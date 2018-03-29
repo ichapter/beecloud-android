@@ -196,11 +196,16 @@ public class BCPay {
      * @see cn.beecloud.entity.BCReqParams.BCChannelTypes
      */
     private void reqPaymentAsync(final BCReqParams.BCChannelTypes channelType,
-                                 final String billTitle, final Integer billTotalFee,
-                                 final String billNum, final Integer billTimeout,
-                                 final String notifyUrl, final String returnUrl,
-                                 final String cardNum, final String qrCodeMode,
-                                 final String buyerId, final String couponId,
+                                 final String billTitle,
+                                 final Integer billTotalFee,
+                                 final String billNum,
+                                 final Integer billTimeout,
+                                 final String notifyUrl,
+                                 final String returnUrl,
+                                 final String cardNum,
+                                 final String qrCodeMode,
+                                 final String buyerId,
+                                 final String couponId,
                                  final Map<String, String> optional,
                                  final Map<String, String> analysis,
                                  final BCCallback callback) {
@@ -221,21 +226,14 @@ public class BCPay {
                 try {
                     parameters = new BCPayReqParams(channelType);
                 } catch (BCException e) {
-                    callback.done(new BCPayResult(BCPayResult.RESULT_FAIL,
-                            BCPayResult.APP_INTERNAL_EXCEPTION_ERR_CODE,
-                            BCPayResult.FAIL_EXCEPTION,
-                            e.getMessage()));
+                    callback.done(new BCPayResult(BCPayResult.RESULT_FAIL, BCPayResult.APP_INTERNAL_EXCEPTION_ERR_CODE, BCPayResult.FAIL_EXCEPTION, e.getMessage()));
                     return;
                 }
 
-                String paramValidRes = BCValidationUtil.prepareParametersForPay(billTitle, billTotalFee,
-                        billNum, optional, parameters);
+                String paramValidRes = BCValidationUtil.prepareParametersForPay(billTitle, billTotalFee, billNum, optional, parameters);
 
                 if (paramValidRes != null) {
-                    callback.done(new BCPayResult(BCPayResult.RESULT_FAIL,
-                            BCPayResult.APP_INTERNAL_PARAMS_ERR_CODE,
-                            BCPayResult.FAIL_INVALID_PARAMS,
-                            paramValidRes));
+                    callback.done(new BCPayResult(BCPayResult.RESULT_FAIL, BCPayResult.APP_INTERNAL_PARAMS_ERR_CODE, BCPayResult.FAIL_INVALID_PARAMS, paramValidRes));
                     return;
                 }
 
@@ -250,8 +248,7 @@ public class BCPay {
 
                 String payURL = BCHttpClientUtil.getBillPayURL();
 
-                BCHttpClientUtil.Response response = BCHttpClientUtil
-                        .httpPost(payURL, parameters.transToBillReqMapParams());
+                BCHttpClientUtil.Response response = BCHttpClientUtil.httpPost(payURL, parameters.transToBillReqMapParams());
 
                 if (response.code == 200 || (response.code >= 400 && response.code < 500)) {
                     String ret = response.content;

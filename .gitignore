@@ -10,3 +10,4 @@ demo_eclipse/bin/*
 /*.apk
 *.iml
 *.py
+config.gradle
